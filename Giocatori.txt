@@ -1,10 +1,8 @@
 Fnatic:
-
 76561197991348083  flusha	134 partite
 76561198031554200 JW 126 partite
 76561198031651584 KRIMZ 128 partite
 76561197988627193 olofmeister 128 partite
-
 
 mousesports:
 76561197989430253  karrigan							246 partite
@@ -49,4 +47,5 @@ NON-PROs
 76561197987006423 loki 414 partite
 76561198421230610 Setz.Dich 161 partite
 76561198178841609 legwa 123 partite
-
+76561198165416167  Kyösti  207 partite
+76561197961215379  zeik  126 partite
