@@ -1,3 +1,7 @@
+SteamID - InGameName(as of right now) - MatchesPlayed
+
+PRO PLAYERS:
+
 Fnatic:
 76561197991348083  flusha	134 partite
 76561198031554200 JW 126 partite
