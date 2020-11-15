@@ -1,5 +1,8 @@
 # CSDemoParser
-CS:GO Demo Parser based on the official demoinfogo - Cybersecurity Project @ UniPD
+CS:GO Demo Parser based on the official [demoinfogo](https://github.com/ValveSoftware/csgo-demoinfo) - Cybersecurity Project @ UniPD
+
+- [Marco Uderzo](https://github.com/marcouderzo)
+- [Samuel Kostadinov](https://github.com/Neskelogth)
 
 ## How To Use
 
