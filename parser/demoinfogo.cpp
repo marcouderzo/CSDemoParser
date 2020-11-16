@@ -129,7 +129,16 @@ int __cdecl main( int argc, char *argv[] )
 
 	if( DemoFileDump.Open( argv[ nFileArgument ] ) )
 	{
-		freopen("logs/log.txt", "w", stdout); // redirect all stdout to a file
+		std::string file = argv[nFileArgument];
+
+		size_t lastSlash = file.find_last_of('/');
+		file.erase(0,lastSlash);
+
+		size_t lastDot = file.find_last_of('.');
+		file.erase(lastDot, lastDot+3);
+
+		file = "logs/" + file + ".txt";
+		freopen(file.c_str(), "w", stdout); // redirect all stdout to a file
 		DemoFileDump.DoDump();
 		fclose(stdout);
 	}
