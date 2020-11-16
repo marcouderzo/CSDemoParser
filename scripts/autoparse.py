@@ -1,6 +1,8 @@
 import os, subprocess
 
+# Paste your own demo folder
 targetpath = "F:/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/csgo/replays"
+
 hadErrors = False
 failedParsings=[]
 
@@ -8,19 +10,19 @@ for file in os.listdir(targetpath):
     if file.endswith(".dem"):
         print("Parsing " + file)
         targetfile = os.path.join(targetpath, file).replace("\\", "/")
-        cmd = ['demoinfogo', '', targetfile]
-        p = subprocess.Popen(cmd)
-        p.wait()
-        print("Process Returned " + str(p.returncode))
-        if(p.returncode == 1):
-            hadErrors= True
+        p = subprocess.run(["C:/Users/marco/OneDrive/Marco/UniPD/Triennale/CyberSecurity/Progetto/csgo-demoinfo-master/parser/demoinfogo", targetfile], capture_output=True)
+        if(p.returncode != 1):
+            hadErrors = True
             failedParsings.append(file)
+            print("Unexpected exit code ("+ str(p.returncode) +") Match Parsing Failed")
+        else:
+            print("Parsed.")
+        
 
 
-print("Done parsing match pool!")
-print("--------REPORT---------")
+print("--------REPORT--------")
 if(hadErrors):
     print("Could not parse these matches:")
     print(failedParsings)
 else:
-    print("No errors occurred. All matches have been parsed successfully!")            
+    print("Done parsing match pool. No errors occurred.")
