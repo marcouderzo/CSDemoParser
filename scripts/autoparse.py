@@ -1,16 +1,19 @@
 import os, subprocess
 
 # Paste your own demo folder
-targetpath = "F:/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/csgo/replays"
+demospath = "F:/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/csgo/replays"
 
 hadErrors = False
 failedParsings=[]
 
-for file in os.listdir(targetpath):
+os.chdir("..")
+os.chdir("parser")
+
+for file in os.listdir(demospath):
     if file.endswith(".dem"):
         print("Parsing " + file)
-        targetfile = os.path.join(targetpath, file).replace("\\", "/")
-        p = subprocess.run(["C:/Users/marco/OneDrive/Marco/UniPD/Triennale/CyberSecurity/Progetto/csgo-demoinfo-master/parser/demoinfogo", targetfile], capture_output=True)
+        demofile = os.path.join(demospath, file).replace("\\", "/")
+        p = subprocess.run(["demoinfogo", demofile])
         if(p.returncode != 1):
             hadErrors = True
             failedParsings.append(file)
