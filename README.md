@@ -15,3 +15,7 @@ In order to build demoinfogo on Windows, follow these steps:
 3. Open `parser/protobuf-2.5.0/vsprojects/protobuf.sln` in Microsoft Visual Studio 2017. Allow Visual Studio to convert the projects.
 4. Build the *Release* configuration of `libprotobuf`. Building any other projects is not required.
 5. Open `parser/demoinfogo.vcxproj` in Microsoft Visual Studio 2017. Building the Release configuration creates the binary `parser/demoinfogo.exe`
+
+### Using autoparse.py to Automate Demo Parsing
+
+Make sure you edit `demospath` in the source code to match your own demo folder. Then run the script with `python3 autoparse.py`.
