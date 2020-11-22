@@ -2,6 +2,22 @@
 
 This text file is used to keep track of the work being done so far.
 
+## Downloading the Matches
+
+### How?
+
+Downloading the matches directly from Steam (e.g. calling Steam APIs) is not possible as far as we understand, as only CS:GO has the permission to download them. Another website, csgostats.gg, uses the Steam bootstrapper. Once you click on "View Demo" it launches CS:GO, redirects to the match page and downloads the demo. Unfortunately, CAPTCHAs prevent us to automate the download procedure, and going through CS:GO itself would not be very practical anyways.
+
+After further investigation we found a stackoverflow [question](https://stackoverflow.com/questions/61859639/how-to-download-csgo-demo-from-match-sharing-code) about a similar use scenario. Quoting:
+
+"Since 9/17/2019, Valve provided an API that allows players to give access to third-party websites to download their matchs history.
+From this documentation, I have been able to get all my sharing code CSGO-xxxxx-xxxxx..., ready to download the matchs ! But, I didn't find any information about how to download them. In this page and the last one, we can read Third-party websites and applications can use this authentication code to access your match history, your overall performance in those matches, download replays of your matches, and analyze your gameplay. and This page outlines the basics of creating a website or application to access players match history and help with players statistics tracking and gameplay analysis."
+
+### hltv.org
+
+[hltv](https://hltv.org) is an extremely popular website  
+This third-party website allows us to track down a specific player and retrieve all his previous matches. It is noteworthy that hltv.org downloads the match directly exactly like any other download without using any Steam Protocol or API whatsoever, so it looks like it is a much easier alternative. 
+
 ## The Parser: demoinfogo
 
 ### Why we chose it
