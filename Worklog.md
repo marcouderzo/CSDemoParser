@@ -15,7 +15,7 @@ From this documentation, I have been able to get all my sharing code CSGO-xxxxx-
 
 ### hltv.org
 
-[hltv](https://hltv.org) is an extremely popular website  
+[hltv](https://hltv.org) is an extremely popular website used to track Pro CS:GO Competitive Matches.
 This third-party website allows us to track down a specific player and retrieve all his previous matches. It is noteworthy that hltv.org downloads the match directly exactly like any other download without using any Steam Protocol or API whatsoever, so it looks like it is a much easier alternative. 
 
 ## The Parser: demoinfogo
