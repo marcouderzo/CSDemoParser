@@ -12,7 +12,7 @@ So we had to look on third-party websites that already use this method. [csgosta
 
 ### Where are CS:GO matches saved and How are they shared?
 
-Demos are saved on Valve's servers and are downloadable from a link in the form of http://replay131.valve.net/730/xxxxxxxxxxxxxxxxxxxxx_xxxxxxxxx.dem.bz2, where "x" is the MatchID, OutcomeID and TokenID. Those links, as well as the three parameters we just mentioned, are not publically available online, not even on third-party websites. So we needed a way to either get the link from the match list of a player or reconstruct it.
+Demos are saved on Valve's servers and are downloadable from a link in the form of `http://replay131.valve.net/730/xxxxxxxxxxxxxxxxxxxxx_xxxxxxxxx.dem.bz2`, where "x" is the MatchID, OutcomeID and TokenID. Those links, as well as the three parameters we just mentioned, are not publically available online, not even on third-party websites. So we needed a way to either get the link from the match list of a player or reconstruct it.
 [node-csgo](https://github.com/joshuaferrara/node-csgo) is a really powerful plugin for CS:GO, also used by csgostats.gg to get the matches. Note that even csgostats uses the API introduced with the 9/17/2019 CS:GO update.
 What we needed to do was not in the cards for node-csgo, but it is still worth mentioning why. It is possible to retrieve the link in two ways:
 - from the sharecode, using `CSGO.SharecodeDecoder(string code).decode();` That should return the MatchID, OutcomeID and TokenID needed to reconstruct the link.
