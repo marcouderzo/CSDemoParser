@@ -5,22 +5,30 @@ This text file is used to keep track of the work being done so far.
 ## Downloading the Matches
 
 ### Finding Matches
-In order to populate the match pool, we need 50 players and 100 matches for each of them. Using Steam APIs is not possible. 
-Although since 9/17/2019, Valve provided an API that allows players to give access to third-party websites to download their matchs history, not every user can get those informations. Indeed, the [documentation](https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Access_Match_History) states that to do that you would need a Game Authentication Code created by the user, together with one of their match sharing codes. So, unless you make them log-in through the Steam API and ask them to partecipate to the project, this path doesn't lead anywhere.
-So we had to look on third-party websites that already use this method. [csgostats.gg](https://csgostats.gg) is a website where you can find all the matches played, check for specific players (Pros and generic players also), and watch their demos. As you clicked the Watch Demo link, it would launch the Steam Bootstrapper and would start up CS:GO and download the match locally. Unfortunately, csgostats have CAPTCHAS that just make the automation of the procedure very tricky, maybe not even possible.
 
-### Where are matches saved and How are they shared?
-Demos are saved on Valve's servers and are downloadable from a link in the form of http://replay131.valve.net/730/xxxxxxxxxxxxxxxxxxxxx_xxxxxxxxx.dem.bz2, where "x" is the MatchID, OutcomeID and TokenID.
-[node-csgo](https://github.com/joshuaferrara/node-csgo) is a really powerful plugin for CS:GO, also used by csgostats.gg to get the matches.
+In order to populate the match pool, we need 50 players and 100 matches for each of them. Using Steam APIs was not possible. 
+Although since 9/17/2019, Valve provided an [API](https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Access_Match_History) that allows players to give access to third-party websites to download their matchs history, not every user can get those informations. Indeed, the [documentation](https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Access_Match_History) states that to do that you would need a Game Authentication Code created by the user, together with one of their match sharing codes. So, unless you make them log-in through the Steam API and ask them to partecipate to the project, this path doesn't lead anywhere.
+So we had to look on third-party websites that already use this method. [csgostats.gg](https://csgostats.gg) is a website where you can find all the matches played, check for specific players (Pros and generic players also), and watch their demos. As you click the Watch Demo link, it will launch the Steam Bootstrapper and will start up CS:GO and download the match locally. We suppose that is done through the Steam Protocol with: `steam://rungame/730/:steamID:/+csgo_download_match%20CSGO-xxxxx-xxxxx`  Unfortunately, csgostats has CAPTCHAS that just make the automation of the procedure very tricky, maybe not even possible.
+
+### Where are CS:GO matches saved and How are they shared?
+
+Demos are saved on Valve's servers and are downloadable from a link in the form of http://replay131.valve.net/730/xxxxxxxxxxxxxxxxxxxxx_xxxxxxxxx.dem.bz2, where "x" is the MatchID, OutcomeID and TokenID. Those links, as well as the three parameters we just mentioned, are not publically available online, not even on third-party websites. So we needed a way to either get the link from the match list of a player or reconstruct it.
+[node-csgo](https://github.com/joshuaferrara/node-csgo) is a really powerful plugin for CS:GO, also used by csgostats.gg to get the matches. Note that even csgostats uses the API introduced with the 9/17/2019 CS:GO update.
 What we needed to do was not in the cards for node-csgo, but it is still worth mentioning why. It is possible to retrieve the link in two ways:
-- using `requestRecentGames()` : Requests a list of recent games for the currently logged in account. Listen for the `matchList` event for the game coordinator's response, where you will find the link as: `"map":"http://replay124.valve.net/730/003072985384448163905_0699089210.dem.bz2"` . Still, that cannot be done as you would need to make the player log-in.
-- using `CSGO.SharecodeDecoder(string code).decode();` That should return the MatchID, OutcomeID and TokenID needed to reconstruct the link.
-Unfortunately, CS:GO sharecodes are not public and cannot be retrieved in any way unless the player itself gives it to you or allows the third party website to retrieve it through the Steam API.
+- from the sharecode, using `CSGO.SharecodeDecoder(string code).decode();` That should return the MatchID, OutcomeID and TokenID needed to reconstruct the link.
+Unfortunately, CS:GO sharecodes are made not to be public and cannot be retrieved in any way unless the player shares it with you or allows the third party website to retrieve it through the Steam API.
+- directly, using `requestRecentGames()` : Requests a list of recent games for the currently logged in account. Listen for the `matchList` event for the game coordinator's response, where you will find the download link as: `"map":"http://replay124.valve.net/730/003072985384448163905_0699089210.dem.bz2"` . Although very convenient, as you wouldn't need any sharecode, that cannot be a solution because you would need to make the player log-in instead, which is clearly not feasable.
 
 ### Our Choice: hltv.org
 
-[hltv](https://hltv.org) is an extremely popular website used to track Pro CS:GO Competitive Matches.
-This third-party website allows us to track down a specific player and retrieve all his previous matches. It is noteworthy that hltv.org downloads the match directly exactly like any other download without using any Steam Protocol or API whatsoever, so it looks like it is a much easier alternative, if it is also possible to download matches outside the Pro-League or the competitive league.
+So, the only way we could retrieve the matches was through third-party websites only. 
+[hltv](https://hltv.org) is an extremely popular website used to track Pro CS:GO Competitive Matches. It allows us to track down a specific player and retrieve all his previous matches. It is noteworthy that hltv.org downloads the match directly exactly like any other download without using any Steam Protocol or API whatsoever, so it looks like a much easier alternative.
+
+### Web Scraping in Python
+
+Write here.
+
+
 
 ## The Parser: demoinfogo
 
