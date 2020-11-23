@@ -13,7 +13,7 @@ So we had to look on third-party websites that already use this method. [csgosta
 Demos are saved on Valve's servers and are downloadable from a link in the form of http://replay131.valve.net/730/xxxxxxxxxxxxxxxxxxxxx_xxxxxxxxx.dem.bz2, where "x" is the MatchID, OutcomeID and TokenID.
 [node-csgo](https://github.com/joshuaferrara/node-csgo) is a really powerful plugin for CS:GO, also used by csgostats.gg to get the matches.
 What we needed to do was not in the cards for node-csgo, but it is still worth mentioning why. It is possible to retrieve the link in two ways:
-- using `requestRecentGames()` : Requests a list of recent games for the currently logged in account. Listen for the `matchList` event for the game coordinator's response, where you will find the link as:  `"map": "http://replay124.valve.net/730/003072985384448163905_0699089210.dem.bz2"`. Still, that cannot be done as you would need to make the player log-in.
+- using `requestRecentGames()` : Requests a list of recent games for the currently logged in account. Listen for the `matchList` event for the game coordinator's response, where you will find the link as: `"map":"http://replay124.valve.net/730/003072985384448163905_0699089210.dem.bz2"` . Still, that cannot be done as you would need to make the player log-in.
 - using `CSGO.SharecodeDecoder(string code).decode();` That should return the MatchID, OutcomeID and TokenID needed to reconstruct the link.
 Unfortunately, CS:GO sharecodes are not public and cannot be retrieved in any way unless the player itself gives it to you or allows the third party website to retrieve it through the Steam API.
 
