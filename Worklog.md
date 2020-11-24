@@ -34,7 +34,7 @@ Write here.
 
 ### Why we chose it
 
-[demoinfogo](https://github.com/ValveSoftware/csgo-demoinfo) is the official CS:GO opensource parser developed by Valve Software written in C/C++.
+[demoinfogo](https://github.com/ValveSoftware/csgo-demoinfo) is the official CS:GO opensource parser developed by Valve Software written in C/C++. The fact that it comes from Valve itself is a compelling reason to use it, even though it doesn't really come with any documentation on how it works on a deeper level. 
 
 ### Building demoinfogo on Windows
 
@@ -45,6 +45,20 @@ In order to build demoinfogo on Windows, follow these steps:
 3. Open `parser/protobuf-2.5.0/vsprojects/protobuf.sln` in Microsoft Visual Studio 2017. Allow Visual Studio to convert the projects.
 4. Build the *Release* configuration of `libprotobuf`. Building any other projects is not required.
 5. Open `parser/demoinfogo.vcxproj` in Microsoft Visual Studio 2017. Building the Release configuration creates the binary `parser/demoinfogo.exe`
+
+### Reverse Engineering the Parser and Modifying it to suit our needs
+
+Of course demoinfogo parses the whole match and gives too much information, the majority of which is not useful to us.
+First of all, demoinfogo doesn't natively output to a file, it just uses `printf()` functions to print the information to the console, preventing us to log the data and analyze it. This is why we figured out a very easy way of redirecting the output to a file using the [`freopen`](http://www.cplusplus.com/reference/cstdio/freopen/) C++ function. In demoinfogo.cpp you will find:
+
+		freopen(file.c_str(), "w", stdout);
+		DemoFileDump.DoDump();
+		fclose(stdout);
+
+Encapsulating the `DemoFileDump.DoDump()` call between freopen and fclose, without changing anything else in the source code of the parser, enabled us to log every match in a dedicated .txt file.
+
+    
+
 
 ## Automating the Parsing of the Match Pool
 
