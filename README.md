@@ -4,18 +4,9 @@ CS:GO Demo Parser based on the official [demoinfogo](https://github.com/ValveSof
 - [Marco Uderzo](https://github.com/marcouderzo)
 - [Samuel Kostadinov](https://github.com/Neskelogth)
 
-## How To Use
+## What is this project about?
+The goal is to parse CS:GO matches, logging every event and action of a specific player, such as camera movements, player steps and actions performed. The data extracted will be used by the [UniPD SPRITZ Cybersecurity Group](https://spritz.math.unipd.it/) for research purposes, such as determining if an AI can automatically recognize a player based on how he interacts with the game.
 
-### Building demoinfogo on Windows
+### Worklog
 
-In order to build demoinfogo on Windows, follow these steps:
-
-1. Download [protobuf-2.5.0.zip](https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.zip) and extract it into the `parser` folder. This creates the folder `parser/protobuf-2.5.0`.
-2. Download the Protobuf compiler [protoc-2.5.0.zip](https://github.com/google/protobuf/releases/download/v2.5.0/protoc-2.5.0-win32.zip) and extract it into the `parser/protoc-2.5.0-win32` folder.
-3. Open `parser/protobuf-2.5.0/vsprojects/protobuf.sln` in Microsoft Visual Studio 2017. Allow Visual Studio to convert the projects.
-4. Build the *Release* configuration of `libprotobuf`. Building any other projects is not required.
-5. Open `parser/demoinfogo.vcxproj` in Microsoft Visual Studio 2017. Building the Release configuration creates the binary `parser/demoinfogo.exe`
-
-### Using autoparse.py to Automate Demo Parsing
-
-Make sure you edit `demospath` in the source code to match your own demo folder. Then run the script with `python3 autoparse.py`.
+Read the [worklog](https://github.com/marcouderzo/CSDemoParser/blob/main/Worklog.md) to get a better grasp on how the project is going and what we have done so far.
