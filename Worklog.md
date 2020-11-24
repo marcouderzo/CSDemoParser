@@ -56,7 +56,7 @@ In order to build demoinfogo on Windows, follow these steps:
 
 Encapsulating the `DemoFileDump.DoDump()` call between freopen and fclose, without changing anything else in the source code of the parser, enabled us to log every match in a dedicated .txt file.
 
-- Of course demoinfogo parses the whole match and gives too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. Already, `-deathscsv`, `-stringtables`, `-datatables`, `-packetentities`, `-netmessages` are not useful to us. As of right now, `-gameevents`, `-nofootsteps`, `nowarmup` are the only useful optional arguments.
+- Of course demoinfogo parses the whole match and gives too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. Already, `-deathscsv`, `-stringtables`, `-datatables`, `-packetentities`, `-netmessages` are not useful to us. As of right now, `-gameevents`, `-extrainfo`, `nofootsteps`, `nowarmup` are the only useful optional arguments.
 Then we analyzed the log of a parsed match and figured out where the not so useful printf() calls were coming from, in order to remove them and "declutter" the log.
 
 
