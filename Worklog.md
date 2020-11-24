@@ -48,8 +48,7 @@ In order to build demoinfogo on Windows, follow these steps:
 
 ### Reverse Engineering the Parser and Modifying it to suit our needs
 
-Of course demoinfogo parses the whole match and gives too much information, the majority of which is not useful to us.
-First of all, demoinfogo doesn't natively output to a file, it just uses `printf()` functions to print the information to the console, preventing us to log the data and analyze it. This is why we figured out a very easy way of redirecting the output to a file using the [`freopen`](http://www.cplusplus.com/reference/cstdio/freopen/) C++ function. In demoinfogo.cpp you will find:
+- First of all, demoinfogo doesn't natively output to a file, it just uses `printf()` functions to print the information to the console, preventing us to log the data and analyze it. This is why we figured out a very easy way of redirecting the output to a file using the [`freopen`](http://www.cplusplus.com/reference/cstdio/freopen/) C++ function. In demoinfogo.cpp you will find:
 
 		freopen(file.c_str(), "w", stdout);
 		DemoFileDump.DoDump();
@@ -57,7 +56,9 @@ First of all, demoinfogo doesn't natively output to a file, it just uses `printf
 
 Encapsulating the `DemoFileDump.DoDump()` call between freopen and fclose, without changing anything else in the source code of the parser, enabled us to log every match in a dedicated .txt file.
 
-    
+- Of course demoinfogo parses the whole match and gives too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. Already, `-deathscsv`, `-stringtables`, `-datatables`, `-packetentities`, `-netmessages` are not useful to us. As of right now, `-gameevents`, `-nofootsteps`, `nowarmup` are the only useful optional arguments.
+Then we analyzed the log of a parsed match and figured out where the not so useful printf() calls were coming from, in order to remove them and "declutter" the log.
+
 
 
 ## Automating the Parsing of the Match Pool
