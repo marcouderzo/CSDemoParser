@@ -5,7 +5,9 @@ CS:GO Demo Parser based on the official [demoinfogo](https://github.com/ValveSof
 - [Samuel Kostadinov](https://github.com/Neskelogth)
 
 ## What is this project about?
-The goal is to parse CS:GO matches, logging every event and action of a specific player, such as camera movements, player steps and actions performed. The data extracted will be used by the [UniPD SPRITZ Cybersecurity Group](https://spritz.math.unipd.it/) for research purposes, such as determining if an AI can automatically recognize a player based on how he interacts with the game.
+The goal is to automate the retrievement and parsing of a large dataset of CS:GO matches, logging every event and action of a specific player, such as camera movements, player steps and actions performed.
+
+The data extracted will be used by the [UniPD SPRITZ Cybersecurity Group](https://spritz.math.unipd.it/) for research purposes in the fields of cybersecurity and privacy, i.e. determining if an AI can recognize a player based on how he interacts with the videogame.
 
 ### Worklog
 
