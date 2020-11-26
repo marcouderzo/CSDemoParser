@@ -34,7 +34,7 @@ Unfortunately, CS:GO sharecodes are intentionally made not to be publically avai
 So, the only way we could retrieve the matches was through third-party websites. 
 
 [hltv](https://hltv.org) is an extremely popular website used to track Pro CS:GO Competitive Matches. It allows us to track down a specific player and retrieve all his previous matches. 
-It is noteworthy that hltv.org downloads the match directly exactly like any other download without using any Steam Protocol or API whatsoever, so it looks like a much easier alternative.
+It is noteworthy that hltv.org downloads the match directly, exactly like any other download, without using any Steam Protocol or API whatsoever, so it looks like a much easier alternative anyways.
 
 ### Web Scraping in Python
 
@@ -42,7 +42,7 @@ In order to download the matches we wrote a Python script that scrapes the hltv 
 
 Make sure you `pip install selenium` before running the script. 
 
-It basically loads the target player page where all his matches are listed, then select a match scraping the table, opening its "overview" page and then clicking the `More info on match page` button to get to the final page. Finally it downloads the match using the dedicated `GOTV Demo` button.
+It basically loads the target player page where all his matches are listed, then selects a match scraping the table, opening its "overview" page and then clicking the `More info on match page` button to get to the final page. Finally it downloads the match using the dedicated `GOTV Demo` button.
 
 Example: `Player: pashaBiceps`
 ```
