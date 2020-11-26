@@ -21,14 +21,24 @@ Unfortunately, CS:GO sharecodes are made not to be public and cannot be retrieve
 
 ### Our Choice: hltv.org
 
-So, the only way we could retrieve the matches was through third-party websites only. 
+So, the only way we could retrieve the matches was through third-party websites. 
 [hltv](https://hltv.org) is an extremely popular website used to track Pro CS:GO Competitive Matches. It allows us to track down a specific player and retrieve all his previous matches. It is noteworthy that hltv.org downloads the match directly exactly like any other download without using any Steam Protocol or API whatsoever, so it looks like a much easier alternative.
 
 ### Web Scraping in Python
 
-Write here.
+In order to download the matches we wrote a Python script that scrapes the hltv website using Selenium Python API. Make sure you `pip install selenium` before running the script. 
 
+It basically loads the target player page where all his matches are listed, then select a match scraping the table, opening its "overview" page and then clicking the `More info on match page` button to get to the final page. Finally it downloads the match using the dedicated `GOTV Demo` button.
 
+Example: `Player: pashaBiceps`
+```
+	Match List -> https://www.hltv.org/stats/players/matches/317/pashabiceps
+	Match x -> https://www.hltv.org/stats/matches/mapstatsid/90233/heretics-vs-youngsters?contextIds=317&contextTypes=player
+	More Info Page -> https://www.hltv.org/matches/2335421/youngsters-vs-heretics-lootbet-season-3
+	Download Link -> https://www.hltv.org/download/demo/51659
+```
+
+A detailed description on how the script works in depth can be found in the source code file.
 
 ## The Parser: demoinfogo
 
@@ -37,6 +47,8 @@ Write here.
 [demoinfogo](https://github.com/ValveSoftware/csgo-demoinfo) is the official CS:GO opensource parser developed by Valve Software written in C/C++. The fact that it comes from Valve itself is a compelling reason to use it, even though it doesn't really come with any documentation on how it works on a deeper level. 
 
 ### Building demoinfogo on Windows
+
+Demoinfogo requires Visual Studio to build the solution.
 
 In order to build demoinfogo on Windows, follow these steps:
 
@@ -48,7 +60,7 @@ In order to build demoinfogo on Windows, follow these steps:
 
 ### Reverse Engineering the Parser and Modifying it to suit our needs
 
-- First of all, demoinfogo doesn't natively output to a file, it just uses `printf()` functions to print the information to the console, preventing us to log the data and analyze it. This is why we figured out a very easy way of redirecting the output to a file using the [`freopen`](http://www.cplusplus.com/reference/cstdio/freopen/) C++ function. In demoinfogo.cpp you will find:
+First of all, demoinfogo doesn't natively output to a file, it just uses `printf()` functions to print the information to the console, preventing us to log the data and analyze it. This is why we figured out a very easy way of redirecting the output to a file using the [`freopen`](http://www.cplusplus.com/reference/cstdio/freopen/) C++ function. In demoinfogo.cpp you will find:
 
 		freopen(file.c_str(), "w", stdout);
 		DemoFileDump.DoDump();
@@ -56,10 +68,8 @@ In order to build demoinfogo on Windows, follow these steps:
 
 Encapsulating the `DemoFileDump.DoDump()` call between freopen and fclose, without changing anything else in the source code of the parser, enabled us to log every match in a dedicated .txt file.
 
-- Of course demoinfogo parses the whole match and gives too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. Already, `-deathscsv`, `-stringtables`, `-datatables`, `-netmessages` are not useful to us. As of right now, `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities` are the only useful optional arguments.
-Then we analyzed the log of a parsed match and figured out where the not so useful printf() calls were coming from, in order to remove them and "declutter" the log.
-
-
+Of course demoinfogo parses the whole match and gives too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. Already, `-deathscsv`, `-stringtables`, `-datatables`, `-netmessages` are not useful to us. As of right now, calling the parser with `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities` discards a lot of data we don't need.
+Then we analyzed the log of a parsed match and figured out where printf() calls were coming from, in order to understand which ones to keep track of and which one to ignore or ditch altogether.
 
 ## Automating the Parsing of the Match Pool
 
