@@ -1,6 +1,10 @@
-# Worklog
+# Project Worklog
 
 This text file is used to keep track of the work being done so far.
+
+Students Involved in the Project:
+- [Marco Uderzo](https://github.com/marcouderzo)
+- [Samuel Kostadinov](https://github.com/Neskelogth)
 
 ## Downloading the Matches
 
