@@ -47,7 +47,4 @@ https://www.hltv.org/stats/players/matches/7218/krystal
 https://www.hltv.org/stats/players/matches/11110/golden
 https://www.hltv.org/stats/players/matches/9217/taco
 https://www.hltv.org/stats/players/matches/13978/coffee
-
-
-
-
+https://www.hltv.org/stats/players/matches/13228/voltage
