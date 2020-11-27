@@ -84,9 +84,29 @@ Encapsulating the `DemoFileDump.DoDump()` call between freopen and fclose, witho
 
 Of course demoinfogo parses the whole match and gives too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. 
 
-Already, `-deathscsv`, `-stringtables`, `-datatables`, `-netmessages` are not useful to us. As of right now, calling the parser with `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities` discards a lot of data we don't need.
+Already, `-deathscsv`, `-stringtables`, `-datatables`,  are not useful to us. As of right now, calling the parser with `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages` discards a lot of data we don't need.
 
-Then we analyzed the log of a parsed match and figured out where printf() calls were coming from, in order to understand which ones to keep track of and which one to ignore or ditch altogether.
+From the DT_CSPlayer we have found some useful data.
+
+```
+	Table: DT_CSPlayer
+	Field: 0, m_flSimulationTime = 66
+	Field: 1, m_nTickBase = 2567
+	Field: 2, m_vecOrigin = 279.852173, 2411.995361
+	Field: 3, m_vecOrigin[2] = -120.992668
+	Field: 4, m_vecVelocity[0] = 102.868484
+	Field: 5, m_vecVelocity[1] = -54.856739
+	Field: 7, m_vecOrigin = 279.852173, 2411.995361
+	Field: 8, m_vecOrigin[2] = -120.992668
+	Field: 20, m_angEyeAngles[0] = 0.933838
+	Field: 21, m_angEyeAngles[1] =333.088989
+```
+Fields 20-21 contain the angle of the player camera, i.e where he is looking and aiming using the mouse. In detail, it is represented as a Cartesian plane, where `m_angEyeAngles[0]` is the Y coordinate, whereas `m_angEyeAngles[1]` is the X coordinate. 
+
+Fields 2-3 contain the player's position relative to the origin. Precisely, `m_vecOrigin = 279.852173, 2411.995361` contains both the X and Y coordinate, respectively at indexes 0 and 1, whilst `m_vecOrigin[2] = -120.992668` contains the Z position
+
+Fields 4-5 `m_vecVelocity[0]` e `m_vecVelocity[1]` represent the player's velocity relative to his movements in the map. While we wait for other tests, we assume that the two velocities measured are the ones along the X and Z axis, as they would track movements in every direction. Seems like Y axis velocity is missing.
+
 
 ## Automating the Parsing of the Match Pool
 
