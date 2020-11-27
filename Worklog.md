@@ -52,7 +52,7 @@ Example: `Player: pashaBiceps`
 	Download Link -> https://www.hltv.org/download/demo/51659
 ```
 
-A detailed description on how the script works in depth can be found in the source code file.
+Note: As of right now, the script is almost done. The actual download of the file is a bit tricky, as the script gets stucked in the downloading process and after some time Windows throws an `Unexpected parameter` exception and makes the computer crash. We are trying to figure out why this is happening and how to solve it.
 
 ## The Parser: demoinfogo
 
