@@ -103,7 +103,7 @@ From the DT_CSPlayer we have found some useful data.
 ```
 Fields 20-21 contain the angle of the player camera, i.e where he is looking and aiming using the mouse. In detail, it is represented as a Cartesian plane, where `m_angEyeAngles[0]` is the Y coordinate, whereas `m_angEyeAngles[1]` is the X coordinate. 
 
-Fields 2-3 contain the player's position relative to the origin. Precisely, `m_vecOrigin = 279.852173, 2411.995361` contains both the X and Y coordinate, respectively at indexes 0 and 1, whilst `m_vecOrigin[2] = -120.992668` contains the Z position
+Fields 2-3 contain the player's position relative to the origin. Precisely, `m_vecOrigin = 279.852173, 2411.995361` contains both the X and Y coordinates, respectively at indexes 0 and 1, whilst `m_vecOrigin[2] = -120.992668` contains the Z coordinate.
 
 Fields 4-5 `m_vecVelocity[0]` e `m_vecVelocity[1]` represent the player's velocity relative to his movements in the map. While we wait for other tests, we assume that the two velocities measured are the ones along the X and Z axis, as they would track movements in every direction. Seems like Y axis velocity is missing.
 
