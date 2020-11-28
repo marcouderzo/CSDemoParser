@@ -132,6 +132,6 @@ As the match pool is very large, parsing every match manually is just not feasab
 
 So, given the folder where all `.dem` matches are saved, the script will call a shell command for each match, telling demoinfogo to parse it. The `.txt` log file will be saved in `parser/logs` folder.
 
-If any of the subprocesses return an exit code different than `1`, which is the default exit code of demoinfogo, then that means the parsing was not successful, and after finishing to parse all the match pool, you will find the failed match name listed in the report.
+If any of the subprocesses return an exit code different than `1`, (default exit code of demoinfogo), then that means the parsing was not successful. After finishing the parsing of all the match pool, you will find the failed match name listed in the report.
 
 To setup the script, make sure you edit `demospath` in the source code to match your own demo folder. Then run the script with `python3 autoparse.py`.
