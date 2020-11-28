@@ -11,11 +11,11 @@ Students Involved in the Project:
 ### Finding Matches
 
 In order to populate the match pool, we need 50 players and 100 matches for each of them. Using Steam APIs was not possible. 
-Although since 9/17/2019, Valve has provided an [API](https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Access_Match_History) that allows players to give access to third-party websites to download their match history, not every user can get those information. Indeed, the [documentation](https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Access_Match_History) states that to do that you would need a Game Authentication Code created by the user, together with one of their match sharing codes. So, unless you make them log-in through the Steam API and ask them to partecipate to the project, this path doesn't lead anywhere.
+Although since 9/17/2019, Valve has provided an [API](https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Access_Match_History) that allows players to give access to third-party websites to download their match history, not every user can get those information. Indeed, the [documentation](https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Access_Match_History) states that to do it you would need a Game Authentication Code created by the user, together with one of their match sharing codes. So, unless you make them log-in through the Steam API and ask them to partecipate to the project, this path doesn't lead anywhere.
 
-So we had to look on third-party websites that already use this method. [Csgostats.gg](https://csgostats.gg) is a website where you can find all the matches played, check for specific players (Pros and generic players also), and watch their demos. 
+Therefore we had to look on third-party websites that already use this method. [Csgostats.gg](https://csgostats.gg) is a website where you can find all the matches played, check for players and watch their demos. 
 
-As you click the Watch Demo link, it will launch the Steam Bootstrapper and will start up CS:GO and download the match locally. We suppose that is done through the Steam Protocol with: `steam://rungame/730/:steamID:/+csgo_download_match%20CSGO-xxxxx-xxxxx`  Unfortunately, csgostats has CAPTCHAS that just make the automation of the procedure very tricky, maybe not even possible.
+As you click the Watch Demo link, the Steam Bootstrapper will be launched and CS:GO will be started up and the match will be downloaded locally. We suppose it is done through the Steam Protocol with: `steam://rungame/730/:steamID:/+csgo_download_match%20CSGO-xxxxx-xxxxx`  Unfortunately, csgostats has CAPTCHAS that just make the automation of the procedure very tricky, maybe not even possible.
 
 ### Where are CS:GO matches saved and How are they shared?
 
@@ -25,16 +25,16 @@ Demos are saved on Valve's servers and are downloadable from a link in the form 
 What we needed to do was not in the cards for node-csgo, but it is still worth mentioning why. 
 
 It is possible to retrieve the link in two ways:
-- from the sharecode, using `CSGO.SharecodeDecoder(string code).decode();` That should return the MatchID, OutcomeID and TokenID needed to reconstruct the link.
-Unfortunately, CS:GO sharecodes are intentionally made not to be publically available, and cannot be retrieved in any way unless the player shares them with you or allows the third party website to retrieve them through the Steam API.
-- directly, using `requestRecentGames()` : Requests a list of recent games for the currently logged in account. Listen for the `matchList` event for the game coordinator's response, where you will find the download link as: `"map":"http://replay124.valve.net/730/003072985384448163905_0699089210.dem.bz2"` . Although very convenient, as you wouldn't need any sharecode, that cannot be a solution because you would need to make the player log-in instead, which is clearly not feasable.
+- from the sharecode, using `CSGO.SharecodeDecoder(string code).decode();` This call should return the MatchID, OutcomeID and TokenID needed to reconstruct the link.
+Unfortunately, CS:GO sharecodes are intentionally made not to be publically available and cannot be retrieved in any way unless the player shares them with you or allows the third party website to retrieve them through the Steam API.
+- directly, using `requestRecentGames()` : Requests a list of recent games for the currently logged in account. Listen for the `matchList` event for the game coordinator's response, where you will find the download link as: `"map":"http://replay124.valve.net/730/003072985384448163905_0699089210.dem.bz2"` . Although very convenient, as you wouldn't need any sharecode, it cannot be a solution because you would need to make the player log-in instead, which is clearly not feasable.
 
 ### Our Choice: hltv.org
 
 So, the only way we could retrieve the matches was through third-party websites. 
 
 [hltv](https://hltv.org) is an extremely popular website used to track Pro CS:GO Competitive Matches. It allows us to track down a specific player and retrieve all his previous matches. 
-It is noteworthy that hltv.org downloads the match directly, exactly like any other download, without using any Steam Protocol or API whatsoever, so it looks like a much easier alternative anyways.
+It is noteworthy that hltv.org downloads the match directly, exactly like any other download, without using any Steam Protocol or API whatsoever, so it is a much easier alternative.
 
 ### Web Scraping in Python
 
@@ -42,7 +42,7 @@ In order to download the matches we wrote a Python script that scrapes the hltv 
 
 Make sure you `pip install selenium` before running the script. 
 
-It basically loads the target player page where all his matches are listed, then selects a match scraping the table, opening its "overview" page and then clicking the `More info on match page` button to get to the final page. Finally it downloads the match using the dedicated `GOTV Demo` button.
+It basically loads the target player page where all his matches are listed, then it selects a match by scraping the table, opening its "overview" page and clicking the `More info on match page` button to get to the final page. Finally it downloads the match using the dedicated `GOTV Demo` button.
 
 Example: `Player: pashaBiceps`
 ```
@@ -74,19 +74,19 @@ In order to build demoinfogo on Windows, follow these steps:
 
 ### Reverse Engineering the Parser and Modifying it to suit our needs
 
-First of all, demoinfogo doesn't natively output to a file, it just uses `printf()` functions to print the information to the console, preventing us to log the data and analyze it. This is why we figured out a very easy way of redirecting the output to a file using the [`freopen`](http://www.cplusplus.com/reference/cstdio/freopen/) C++ function. In demoinfogo.cpp you will find:
+First of all, demoinfogo doesn't natively output to a file, it just uses `printf()` functions to print the information to the console. This prevented us to log the data and analyze it. This is why we figured out a very easy way of redirecting the output to a file using the [`freopen`](http://www.cplusplus.com/reference/cstdio/freopen/) C++ function. In demoinfogo.cpp you will find:
 
 		freopen(file.c_str(), "w", stdout);
 		DemoFileDump.DoDump();
 		fclose(stdout);
 
-Encapsulating the `DemoFileDump.DoDump()` call between freopen and fclose, without changing anything else in the source code of the parser, enabled us to log every match in a dedicated .txt file.
+Encapsulating the `DemoFileDump.DoDump()` call between freopen and fclose enabled us to log every match in a dedicated .txt file, without changing anything else in the source code.
 
-Of course demoinfogo parses the whole match and gives too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. 
+Of course demoinfogo parses the whole match and logs way too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. 
 
-Already, `-deathscsv`, `-stringtables`, `-datatables`,  are not useful to us. As of right now, calling the parser with `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages` discards a lot of data we don't need.
+Already, `-deathscsv`, `-stringtables`, `-datatables`,  are out the window. Calling the parser with `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages` discards a lot of data we don't need and keeps just the bare minimum.
 
-As you can see in the `/test` folder in this repository, we parsed test demos of matches we played in a private server: every match consists in single actions, like turning the camera right, moving right, combining the two, and so on. This way, knowing exactly what the player did, we could see which parameters changed during the test and from this deduce what the values they held meant. 
+As you can see in the `/test` folder in this repository, we parsed test demos of matches we played in a private server. Every test match consists in single actions, like turning the camera right, moving right, combining the two, and so on. This way we could see which parameters changed and deduce what the values held in them meant. 
 
 We are working on plotting those parameters on a graph to help us in the learning process.
 
@@ -95,7 +95,7 @@ From the `DT_CSPlayer` (Net?) Table we found some useful data about the player. 
 - PlayerPositionX, PlayerPositionY, PlayerPositionZ
 - PlayerVelocityX, PlayerVelocityZ
 
-The following text snippet was extracted from the dump of a parsed test match, showing the table fields during a single tick:
+The following text snippet has been extracted from the dump of a parsed test match, and shows the table fields during a single tick:
 
 ```
 	Table: DT_CSPlayer
@@ -110,15 +110,14 @@ The following text snippet was extracted from the dump of a parsed test match, s
 	Field: 20, m_angEyeAngles[0] = 0.933838
 	Field: 21, m_angEyeAngles[1] =333.088989
 ```
-At first glance, you would think `m_nTickBase = 2567` holds the current tick, but actually it doesn't. Before dumping the table, a net message is sent.
+At first glance, you would think that `m_nTickBase = 2567` holds the current tick, but actually it doesn't. Before dumping the table, a net message is sent.
 ```
 	---- CNETMsg_Tick (12 bytes) -----------------
 	tick: 2564
 ```
-As you can see, `m_nTickBase` is 3 ticks ahead of the tick dumped by the `CNETMsg_Tick` message, which is odd. Being ticks a server-side thing, we would much rather trust the CNET Message over the nTickBase from the PlayerTable. - We will make some tests though to back up our decision.
+As you can see, `m_nTickBase` is 3 ticks ahead of the tick dumped by the `CNETMsg_Tick` message, which is very odd. Being ticks a server-side feature, we decided to trust the CNET Message over the nTickBase from the PlayerTable. - We will make some tests to back up our decision,  though.
 
-
-Fields 20-21 contain the angle of the player camera, i.e. where he is looking and aiming using the mouse. In detail, it is represented as a Cartesian plane, where `m_angEyeAngles[0]` is the Y coordinate, whereas `m_angEyeAngles[1]` is the X coordinate. 
+Fields 20-21 contain the angle of the player camera, i.e. where he is looking and aiming using the mouse. In detail, the mouse position is represented with a Cartesian plane, where `m_angEyeAngles[0]` is the Y coordinate, whereas `m_angEyeAngles[1]` is the X coordinate. 
 
 Fields 2-3 contain the player's position relative to the origin. Precisely, `m_vecOrigin = 279.852173, 2411.995361` contains both the X and Y coordinates, respectively at indexes 0 and 1, whilst `m_vecOrigin[2] = -120.992668` contains the Z coordinate.
 
