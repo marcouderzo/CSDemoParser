@@ -101,7 +101,7 @@ From the DT_CSPlayer we have found some useful data.
 	Field: 20, m_angEyeAngles[0] = 0.933838
 	Field: 21, m_angEyeAngles[1] =333.088989
 ```
-Fields 20-21 contain the angle of the player camera, i.e where he is looking and aiming using the mouse. In detail, it is represented as a Cartesian plane, where `m_angEyeAngles[0]` is the Y coordinate, whereas `m_angEyeAngles[1]` is the X coordinate. 
+Fields 20-21 contain the angle of the player camera, i.e. where he is looking and aiming using the mouse. In detail, it is represented as a Cartesian plane, where `m_angEyeAngles[0]` is the Y coordinate, whereas `m_angEyeAngles[1]` is the X coordinate. 
 
 Fields 2-3 contain the player's position relative to the origin. Precisely, `m_vecOrigin = 279.852173, 2411.995361` contains both the X and Y coordinates, respectively at indexes 0 and 1, whilst `m_vecOrigin[2] = -120.992668` contains the Z coordinate.
 
