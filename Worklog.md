@@ -90,12 +90,12 @@ As you can see in the `/test` folder in this repository, we parsed test demos of
 
 We are working on plotting those parameters on a graph to help us in the learning process.
 
-From the `DT_CSPlayer` Table we found some useful data about the player. In particular:
+From the `DT_CSPlayer` (Net?) Table we found some useful data about the player. In particular:
 - MouseX, MouseY
 - PlayerPositionX, PlayerPositionY, PlayerPositionZ
 - PlayerVelocityX, PlayerVelocityZ
 
-The following code was extracted from the dump of a parsed test match:
+The following text snippet was extracted from the dump of a parsed test match, showing the table fields during a single tick:
 
 ```
 	Table: DT_CSPlayer
@@ -110,6 +110,13 @@ The following code was extracted from the dump of a parsed test match:
 	Field: 20, m_angEyeAngles[0] = 0.933838
 	Field: 21, m_angEyeAngles[1] =333.088989
 ```
+At first glance, you would think `m_nTickBase = 2567` holds the current tick, but actually it doesn't. Before dumping the table, a net message is sent.
+```
+	---- CNETMsg_Tick (12 bytes) -----------------
+	tick: 2564
+```
+As you can see, `m_nTickBase` is 3 ticks ahead of the tick dumped by the `CNETMsg_Tick` message, which is odd. Being ticks a server-side thing, we would much rather trust the CNET Message over the nTickBase from the PlayerTable. - We will make some tests though to back up our decision.
+
 
 Fields 20-21 contain the angle of the player camera, i.e. where he is looking and aiming using the mouse. In detail, it is represented as a Cartesian plane, where `m_angEyeAngles[0]` is the Y coordinate, whereas `m_angEyeAngles[1]` is the X coordinate. 
 
