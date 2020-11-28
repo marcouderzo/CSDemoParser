@@ -105,7 +105,7 @@ Fields 20-21 contain the angle of the player camera, i.e where he is looking and
 
 Fields 2-3 contain the player's position relative to the origin. Precisely, `m_vecOrigin = 279.852173, 2411.995361` contains both the X and Y coordinates, respectively at indexes 0 and 1, whilst `m_vecOrigin[2] = -120.992668` contains the Z coordinate.
 
-Fields 4-5 contain `m_vecVelocity[0]` and `m_vecVelocity[1]`, which represent the player's velocity relative to his movements in the map. While we wait for other tests, we assume that the two velocities measured are the ones along the X and Z axis, as they would track movements in every direction. Seems like Y axis velocity is missing.
+Fields 4-5 contain `m_vecVelocity[0]` and `m_vecVelocity[1]`, which represent the player's velocity relative to his movements in the map. While we wait for other tests, we assume that the two velocities measured are the ones along the X and Z axis, as they would track movements in every direction. Seems like Y axis velocity is missing due to the fact that Y velocity does not really change unless the player jumps or falls from some height, so we guess that the parser doesn't even bother logging it, as it might be handled as an event
 
 
 ## Automating the Parsing of the Match Pool
