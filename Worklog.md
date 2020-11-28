@@ -27,7 +27,7 @@ What we needed to do was not in the cards for node-csgo, but it is still worth m
 It is possible to retrieve the link in two ways:
 - from the sharecode, using `CSGO.SharecodeDecoder(string code).decode();` This call should return the MatchID, OutcomeID and TokenID needed to reconstruct the link.
 Unfortunately, CS:GO sharecodes are intentionally made not to be publically available and cannot be retrieved in any way unless the player shares them with you or allows the third party website to retrieve them through the Steam API.
-- directly, using `requestRecentGames()` : Requests a list of recent games for the currently logged in account. Listen for the `matchList` event for the game coordinator's response, where you will find the download link as: `"map":"http://replay124.valve.net/730/003072985384448163905_0699089210.dem.bz2"` . Although very convenient, as you wouldn't need any sharecode, it cannot be a solution because you would need to make the player log-in instead, which is clearly not feasable.
+- directly, using `requestRecentGames()` : Requests a list of recent games for the currently logged in account. By listening for the `matchList` event for the game coordinator's response you will find the download link as: `"map":"http://replay124.valve.net/730/003072985384448163905_0699089210.dem.bz2"` . Although very convenient, as you wouldn't need any sharecode, it cannot be a solution because you would need to make the player log-in instead, which is clearly not feasable.
 
 ### Our Choice: hltv.org
 
