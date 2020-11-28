@@ -86,7 +86,16 @@ Of course demoinfogo parses the whole match and gives too much information, the 
 
 Already, `-deathscsv`, `-stringtables`, `-datatables`,  are not useful to us. As of right now, calling the parser with `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages` discards a lot of data we don't need.
 
-From the DT_CSPlayer we have found some useful data.
+As you can see in the `/test` folder in this repository, we parsed test demos of matches we played in a private server: every match consists in single actions, like turning the camera right, moving right, combining the two, and so on. This way, knowing exactly what the player did, we could see which parameters changed during the test and from this deduce what the values they held meant. 
+
+We are working on plotting those parameters on a graph to help us in the learning process.
+
+From the `DT_CSPlayer` Table we found some useful data about the player. In particular:
+- MouseX, MouseY
+- PlayerPositionX, PlayerPositionY, PlayerPositionZ
+- PlayerVelocityX, PlayerVelocityZ
+
+The following code was extracted from the dump of a parsed test match:
 
 ```
 	Table: DT_CSPlayer
@@ -101,6 +110,7 @@ From the DT_CSPlayer we have found some useful data.
 	Field: 20, m_angEyeAngles[0] = 0.933838
 	Field: 21, m_angEyeAngles[1] =333.088989
 ```
+
 Fields 20-21 contain the angle of the player camera, i.e. where he is looking and aiming using the mouse. In detail, it is represented as a Cartesian plane, where `m_angEyeAngles[0]` is the Y coordinate, whereas `m_angEyeAngles[1]` is the X coordinate. 
 
 Fields 2-3 contain the player's position relative to the origin. Precisely, `m_vecOrigin = 279.852173, 2411.995361` contains both the X and Y coordinates, respectively at indexes 0 and 1, whilst `m_vecOrigin[2] = -120.992668` contains the Z coordinate.
