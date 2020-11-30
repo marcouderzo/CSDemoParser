@@ -143,6 +143,7 @@ weapon_fire
 
 `userid` is the unique ID the player is given by the server at the start of the match. `position` is the position of the player at the time of the event. 
 
+(Needs testing) `pitch` represents the up/down movement of the mouse, `yaw` represents the right/left one. In CS:GO, if you shoot with an automatic rifle holding down the left mouse button, the gun will naturally recoil with a pattern, which is specific of the gun itself. So, in order to shoot precisely, you need to counteract the recoil pattern with a mirrored mouse movement (spray control). While testing we figured out that if no mouse movement is present, the pitch and yaw parameters don't change. On the other hand, if spray control is performed, the previously mentioned parameters change, reflecting the mouse movements. As far as we understand, this feature could be used as an additional parameter for player recognition, as everyone has a different accuracy of "drawing" the mirrored recoil pattern. 
 
 ## Automating the Parsing of the Match Pool
 
