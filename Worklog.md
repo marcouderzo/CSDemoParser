@@ -75,10 +75,11 @@ In order to build demoinfogo on Windows, follow these steps:
 ### Reverse Engineering the Parser and Modifying it to suit our needs
 
 First of all, demoinfogo doesn't natively output to a file, it just uses `printf()` functions to print the information to the console. This prevented us to log the data and analyze it. This is why we figured out a very easy way of redirecting the output to a file using the [`freopen`](http://www.cplusplus.com/reference/cstdio/freopen/) C++ function. In demoinfogo.cpp you will find:
-
-		freopen(file.c_str(), "w", stdout);
-		DemoFileDump.DoDump();
-		fclose(stdout);
+```
+freopen(file.c_str(), "w", stdout);
+DemoFileDump.DoDump();
+fclose(stdout);
+```
 
 Encapsulating the `DemoFileDump.DoDump()` call between freopen and fclose enabled us to log every match in a dedicated .txt file, without changing anything else in the source code.
 
@@ -98,22 +99,22 @@ From the `DT_CSPlayer` (Net?) Table we found some useful data about the player. 
 The following text snippet has been extracted from the dump of a parsed test match, and shows the table fields during a single tick:
 
 ```
-	Table: DT_CSPlayer
-	Field: 0, m_flSimulationTime = 66
-	Field: 1, m_nTickBase = 2567
-	Field: 2, m_vecOrigin = 279.852173, 2411.995361
-	Field: 3, m_vecOrigin[2] = -120.992668
-	Field: 4, m_vecVelocity[0] = 102.868484
-	Field: 5, m_vecVelocity[1] = -54.856739
-	Field: 7, m_vecOrigin = 279.852173, 2411.995361
-	Field: 8, m_vecOrigin[2] = -120.992668
-	Field: 20, m_angEyeAngles[0] = 0.933838
-	Field: 21, m_angEyeAngles[1] =333.088989
+Table: DT_CSPlayer
+Field: 0, m_flSimulationTime = 66
+Field: 1, m_nTickBase = 2567
+Field: 2, m_vecOrigin = 279.852173, 2411.995361
+Field: 3, m_vecOrigin[2] = -120.992668
+Field: 4, m_vecVelocity[0] = 102.868484
+Field: 5, m_vecVelocity[1] = -54.856739
+Field: 7, m_vecOrigin = 279.852173, 2411.995361
+Field: 8, m_vecOrigin[2] = -120.992668
+Field: 20, m_angEyeAngles[0] = 0.933838
+Field: 21, m_angEyeAngles[1] =333.088989
 ```
 At first glance, you would think that `m_nTickBase = 2567` holds the current tick, but actually it doesn't. Before dumping the table, a net message is sent.
 ```
-	---- CNETMsg_Tick (12 bytes) -----------------
-	tick: 2564
+---- CNETMsg_Tick (12 bytes) -----------------
+tick: 2564
 ```
 As you can see, `m_nTickBase` is 3 ticks ahead of the tick dumped by the `CNETMsg_Tick` message, which is very odd. Being ticks a server-side feature, we decided to trust the CNET Message over the nTickBase from the PlayerTable. - We will make some tests to back up our decision,  though.
 
@@ -153,25 +154,25 @@ Note that grenades and similar items are not logged using the `grenade_thrown` e
 
 The `weapon_reload` event is triggered when a player reloads his gun. 
 ```
-	weapon_reload
-	{
-		  userid: Mark (id:2)
-		  position: 182.250000, 2439.010010, -120.968750
-		  facing: pitch:359.445190, yaw:356.643677
-		  team: CT
-	}
+weapon_reload
+{
+	  userid: Mark (id:2)
+	  position: 182.250000, 2439.010010, -120.968750
+	  facing: pitch:359.445190, yaw:356.643677
+	  team: CT
+}
 ```
 The parameters listed are the same as before.
 
 Last but not least, the `player_jump` event.
 
 ```
-	player_jump
-	{
-		  userid: Mark (id:2)
-		  position: 351.391998, 2352.939941, -120.504387
-		  team: CT
-	}
+player_jump
+{
+	  userid: Mark (id:2)
+	  position: 351.391998, 2352.939941, -120.504387
+	  team: CT
+}
 ```
 
 It is a pretty interesting one, as it can be an interesting parameter to look into when trying to recognize a player. Skilled CS:GO players use a technique called Bunny Hopping to move faster. It is done by jumping repeatedly while changing direction right to left and vice versa, pretty much in a zig-zag. The technique used is pretty much the same, but, exactly like with the spray control, everyone has its own peculiar way of doing it, whether it is timing, synchronization or movement pattern.
