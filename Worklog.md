@@ -130,17 +130,16 @@ Let's now talk about player events.
 A major player event to consider is the `weapon_fire` one.
 
 ```
-	weapon_fire
-	{
-	 	userid: Mark (id:2)
-	  	position: 351.391998, 2352.939941, -120.504387
-     missing -> facing: /value/ yaw: /value/ pitch: /value/
-	  	team: CT
-	 	weapon: weapon_usp_silencer 
-	 	silenced: 1 
-	}
+weapon_fire
+{
+	 userid: Mark (id:2)
+	 position: -390.778503, 2012.119141, -127.329865
+	 facing: pitch:5.311890, yaw:184.411011
+	 team: CT
+	 weapon: weapon_m4a1_silencer 
+	 silenced: 1 
+}
 ```
-Note: `facing`, `pitch`,`yaw` are missing.
 
 `userid` is the unique ID the player is given by the server at the start of the match. `position` is the position of the player at the time of the event. 
 
