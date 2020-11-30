@@ -8,7 +8,11 @@ import re
 
 def download(path, innerLink):
 
-    finalDriver = webdriver.Chrome(path).get(innerLink)
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+
+    finalDriver = webdriver.Chrome(path, options=chrome_options).get(innerLink)
 
     box = finalDriver.find_elements_by_class_name("stream-box")
     link = box[0].find_elements_by_tag_name("a")[0].get_attribute("href")
@@ -25,7 +29,11 @@ def goToDownloadPage(path, link, nextLink):
         parametro nextLink. Una volta trovato va al link e scarica il replay
     """
 
-    innerDriver = webdriver.Chrome(path).get(link)
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+
+    innerDriver = webdriver.Chrome(path, options=chrome_options).get(link)
 
     innerResult = innerDriver.find_elements_by_tag_name("a")
 
@@ -48,7 +56,11 @@ def takePlayerMatches(path, profileLink):
         è possibile che bisogni specificare i percorsi di Firefox e Chrome anche se non dovrebbe essere necessario
      """
 
-    driver = webdriver.Chrome(path).get(profileLink)
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+
+    driver = webdriver.Chrome(path, options=chrome_options).get(profileLink)
 
     # driver.maximize_window()
 
