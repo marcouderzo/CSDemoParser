@@ -1,6 +1,7 @@
 from selenium import webdriver
 import re
-# from unrar import rarfile
+import os
+from pyunpack import Archive
 
 # link: https://www.hltv.org/stats/players/matches/...
 
@@ -115,9 +116,26 @@ path = 'C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe'
 #download('https://www.hltv.org/matches/2335421/youngsters-vs-heretics-lootbet-season-3')
 #takePlayerMatches(path, "https://www.hltv.org/stats/players/matches/317/pashabiceps")
 
+#Prendo tutti i link dal file Players.txt
 f = open("Players.txt")
 
 for x in f:
     takePlayerMatches(path, x)
 
 f.close()
+
+#Faccio l'unrar di tutti i file in un'apposita sottocartella
+pathOfScript = 'G:/Programmazione/Python/downloadAutomatico'
+i = 1
+for entry in os.scandir(pathOfScript):
+    if entry.is_file() and entry.path.endswith('.rar'):
+        pathToExtract = path + '/tmp/' + str(i)
+        i = i + 1
+        Archive(entry.path).extractall(pathToExtract, auto_create_dir = True)
+
+#elimino i file .rar
+
+# for entry in os.scandir(pathOfScript):
+#     if entry.is_file() and entry.path.endswith('.rar'):
+#
+#         os.remove(entry.path)
