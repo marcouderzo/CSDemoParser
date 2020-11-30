@@ -125,6 +125,25 @@ Fields 4-5 contain `m_vecVelocity[0]` and `m_vecVelocity[1]`, which represent th
 
 Actually, every velocity is only logged if it changes, but, compared to Y velocity, X and Z velocities are the ones that change the most. Moreover, they go "hand in hand" in the majority of the times. This is because, statistically speaking, there is a very small chance that the player will move perfectly along one of those axis. 
 
+Let's now talk about player events.
+
+A major player event to consider is the `weapon_fire` one.
+
+```
+	weapon_fire
+	{
+	 	userid: Mark (id:2)
+	  	position: 351.391998, 2352.939941, -120.504387
+     missing -> facing: /value/ yaw: /value/ pitch: /value/
+	  	team: CT
+	 	weapon: weapon_usp_silencer 
+	 	silenced: 1 
+	}
+```
+Note: `facing`, `pitch`,`yaw` are missing.
+
+`userid` is the unique ID the player is given by the server at the start of the match. `position` is the position of the player at the time of the event. 
+
 
 ## Automating the Parsing of the Match Pool
 
