@@ -125,7 +125,11 @@ Fields 4-5 contain `m_vecVelocity[0]` and `m_vecVelocity[1]`, which represent th
 
 Actually, every velocity is only logged if it changes, but, compared to Y velocity, X and Z velocities are the ones that change the most. Moreover, they go "hand in hand" in the majority of the times. This is because, statistically speaking, there is a very small chance that the player will move perfectly along one of those axis. 
 
-Let's now talk about player events.
+Let's now talk about player events. The main ones are:
+- `weapon_fire`
+- `weapon_reload`
+- `player_jump`
+
 
 A major player event to consider is the `weapon_fire` one.
 
@@ -133,7 +137,7 @@ A major player event to consider is the `weapon_fire` one.
 weapon_fire
 {
 	 userid: Mark (id:2)
-	 position: -390.778503, 2012.119141, -127.329865
+	 position: -390.778503, 2017.119141, -127.329865
 	 facing: pitch:5.311890, yaw:184.411011
 	 team: CT
 	 weapon: weapon_m4a1_silencer 
@@ -143,7 +147,34 @@ weapon_fire
 
 `userid` is the unique ID the player is given by the server at the start of the match. `position` is the position of the player at the time of the event. 
 
-(Needs testing) `pitch` represents the up/down movement of the mouse, `yaw` represents the right/left one. In CS:GO, if you shoot with an automatic rifle holding down the left mouse button, the gun will naturally recoil with a pattern, which is specific to the gun itself. So, in order to shoot precisely, you need to counteract the recoil pattern with a mirrored mouse movement (i.e. spray control). While testing we figured out that if no mouse movement is present, the pitch and yaw parameters don't change. On the other hand, if spray control is performed, the previously mentioned parameters change, reflecting the mouse movements. As far as we understand, this feature could be used as an additional parameter for player recognition, as everyone has a different accuracy of "drawing" the mirrored recoil pattern.
+`pitch` represents the up/down movement of the mouse, `yaw` represents the right/left one. In CS:GO, if you shoot with an automatic rifle holding down the left mouse button, the gun will naturally recoil with a pattern, which is specific to the gun itself. So, in order to shoot precisely, you need to counteract the recoil pattern with a mirrored mouse movement (i.e. spray control). While testing we figured out that if no mouse movement is present, the pitch and yaw parameters don't change. On the other hand, if spray control is performed, the previously mentioned parameters change, reflecting the mouse movements. As far as we understand, this feature could be used as an additional parameter for player recognition, as everyone has a different accuracy of "drawing" the mirrored recoil pattern.
+
+Note that grenades and similar items are not logged using the `grenade_thrown` event, as we would have thought. Strangely enough, throwing such items is considered a `weapon_fire` event.
+
+The `weapon_reload` event is triggered when a player reloads his gun. 
+```
+	weapon_reload
+	{
+		  userid: Mark (id:2)
+		  position: 182.250000, 2439.010010, -120.968750
+		  facing: pitch:359.445190, yaw:356.643677
+		  team: CT
+	}
+```
+The parameters listed are the same as before.
+
+Last but not least, the `player_jump` event.
+
+```
+	player_jump
+	{
+		  userid: Mark (id:2)
+		  position: 351.391998, 2352.939941, -120.504387
+		  team: CT
+	}
+```
+
+It is a pretty interesting one, as it can be an interesting parameter to look into when trying to recognize a player. Skilled CS:GO players use a technique called Bunny Hopping to move faster. It is done by jumping repeatedly while changing direction right to left and vice versa, pretty much in a zig-zag. The technique used is pretty much the same, but, exactly like with the spray control, everyone has its own peculiar way of doing it, whether it is timing, synchronization or movement pattern.
 
 ## Automating the Parsing of the Match Pool
 
