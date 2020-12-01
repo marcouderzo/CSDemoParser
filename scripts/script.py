@@ -13,14 +13,16 @@ def download(path, innerLink):
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 
-    finalDriver = webdriver.Chrome(path, options=chrome_options).get(innerLink)
+    finalDriver = webdriver.Chrome(path, options=chrome_options)
+    finalDriver.get(innerLink)
 
     box = finalDriver.find_elements_by_class_name("stream-box")
     link = box[0].find_elements_by_tag_name("a")[0].get_attribute("href")
 
-    downloadingDriver = webdriver.Chrome(path).get(link)
+    downloadingDriver = webdriver.Chrome(path, options=chrome_options)
+    downloadingDriver.get(link)
 
-    downloadingDriver.close()
+    #downloadingDriver.close()
     finalDriver.close()
 
 def goToDownloadPage(path, link, nextLink):
@@ -34,7 +36,8 @@ def goToDownloadPage(path, link, nextLink):
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 
-    innerDriver = webdriver.Chrome(path, options=chrome_options).get(link)
+    innerDriver = webdriver.Chrome(path, options=chrome_options)
+    innerDriver.get(link)
 
     innerResult = innerDriver.find_elements_by_tag_name("a")
 
@@ -61,7 +64,8 @@ def takePlayerMatches(path, profileLink):
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 
-    driver = webdriver.Chrome(path, options=chrome_options).get(profileLink)
+    driver = webdriver.Chrome(path, options=chrome_options)
+    driver.get(profileLink)
 
     # driver.maximize_window()
 
@@ -111,7 +115,7 @@ def takePlayerMatches(path, profileLink):
     driver.close()
 
 
-path = 'C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe'
+path = 'C:/Users/marco/AppData/Local/Google/Chrome/Application/chromedriver.exe'
 
 #download('https://www.hltv.org/matches/2335421/youngsters-vs-heretics-lootbet-season-3')
 #takePlayerMatches(path, "https://www.hltv.org/stats/players/matches/317/pashabiceps")
@@ -120,12 +124,12 @@ path = 'C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe'
 f = open("Players.txt")
 
 for x in f:
-    takePlayerMatches(path, x)
+    takePlayerMatches(path, str(x))
 
 f.close()
 
 #Faccio l'unrar di tutti i file in un'apposita sottocartella
-pathOfScript = 'G:/Programmazione/Python/downloadAutomatico'
+pathOfScript = 'C:/Users/marco/Desktop/pyscript/dl'
 i = 1
 for entry in os.scandir(pathOfScript):
     if entry.is_file() and entry.path.endswith('.rar'):
