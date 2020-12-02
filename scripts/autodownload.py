@@ -1,6 +1,7 @@
 from selenium import webdriver
 import re
 import os
+import time as t
 from pyunpack import Archive
 
 # link: https://www.hltv.org/stats/players/matches/...
@@ -22,7 +23,27 @@ def download(path, innerLink):
     downloadingDriver = webdriver.Chrome(path, options=chrome_options)
     downloadingDriver.get(link)
 
-    #downloadingDriver.close()
+    t.sleep(2)
+
+    dlname=""
+
+    for file in os.listdir("C:/Users/marco/Downloads/"):
+        if file.endswith(".crdownload"):
+            dlname = file
+
+    targetfile = 'C:/Users/marco/Downloads/' + dlname
+    print(targetfile)
+
+    hasDownloaded = False
+
+    while not hasDownloaded:
+        t.sleep(2)
+        if not os.path.exists(targetfile):
+            hasDownloaded = True
+
+
+    downloadingDriver.close()
+
     finalDriver.close()
 
 def goToDownloadPage(path, link, nextLink):
