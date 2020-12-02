@@ -6,6 +6,16 @@ Students Involved in the Project:
 - [Marco Uderzo](https://github.com/marcouderzo)
 - [Samuel Kostadinov](https://github.com/Neskelogth)
 
+
+## Project Requirements
+
+Before you start, make sure the following tools are installed:
+
+- Visual Studio 2017 (or later version) : you will need it in order to compile libprotobuf and the parser itself.
+- Python 3.8.6 (or later version) : you will need it in order to run the python scripts.
+- Selenium (Python Module) : used by the autodownload.py script for scraping the web.
+- Pyunpack (Python Module) : used by the autodownload.py script for unpacking the .rar match archives. 
+
 ## Downloading the Matches
 
 ### Finding Matches
