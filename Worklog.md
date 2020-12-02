@@ -97,7 +97,7 @@ Of course demoinfogo parses the whole match and logs way too much information, t
 
 Already, `-deathscsv`, `-stringtables`, `-datatables`,  are out the window. This discards a lot of data we don't need.
 
-The set of arguments of choice is: `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages`. We don't need footsteps, as they are events that have more to do with sound and surrounding awareness of a player rather than with the player himself. We also decided to skip match warmups, as they are not so much interesting to log. As a side note, if warmups are something you want to include in the log, remove that argument.
+The set of arguments of choice is: `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages`. We don't need footsteps, as they are events that have more to do with sound and surrounding awareness of a player rather than with the player himself. We also decided to skip match warmups, as they are not so much interesting to log. If they are something you want to include in the log, remove that argument.
 
 As you can see in the `/test` folder in this repository, we parsed test demos of matches we played in a private server. Every test match consists in single actions, like turning the camera right, moving right, combining the two, and so on. This way we could see which parameters changed and deduce what the values held in them meant. 
 
