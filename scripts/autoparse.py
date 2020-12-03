@@ -6,8 +6,6 @@ demospath = "F:/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/cs
 hadErrors = False
 failedParsings=[]
 
-parserArgs = "-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages"
-
 os.chdir("..")
 os.chdir("parser")
 
