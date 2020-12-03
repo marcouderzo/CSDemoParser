@@ -93,9 +93,11 @@ fclose(stdout);
 
 Encapsulating the `DemoFileDump.DoDump()` call between freopen and fclose enabled us to log every match in a dedicated .txt file, without changing anything else in the source code.
 
+We made sure that the log file had the same name of the demo. All of this was done by figuring out that the parser tries to open the demo with `DemoFileDump.Open( argv[ nFileArgument ]` (see line 130 of demoinfogo.cpp). Thus, we stored `argv[ nFileArgument ]` into a string variable and erased everything until the last occurence of '/', effectively removing the whole path to the file, and then we removed the file extension. Note that C++ uses backslashes as a line continuation character. The autoparse.py script already replaces them with '/', so you don't have to deal with them. If you decide to call the parser directly from the command line instead, make sure you only use forward slashes in your path.
+
 Of course demoinfogo parses the whole match and logs way too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. 
 
-Already, `-deathscsv`, `-stringtables`, `-datatables`,  are out the window. This discards a lot of data we don't need.
+Already, `-deathscsv`, `-stringtables`, `-datatables`,  are not necessary whatsoever. This discards a lot of data we don't need.
 
 The set of arguments of choice is: `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages`. We don't need footsteps, as they are events that have more to do with sound and surrounding awareness of a player rather than with the player himself. We also decided to skip match warmups, as they are not so much interesting to log. If they are something you want to include in the log, remove that argument.
 
@@ -195,7 +197,7 @@ It is a pretty interesting one, as it can be an interesting parameter to look in
 
 As the match pool is very large, parsing every match manually is just not feasable.
 
-So, given the folder where all `.dem` matches are saved, the script will call a shell command for each match, telling demoinfogo to parse it. The `.txt` log file will be saved in `parser/logs` folder.
+So, given the folder where all `.dem` matches are saved, the script will call a shell command through `subprocess.run()` for each .dem match, telling demoinfogo to parse it. The `.txt` log file will be saved in `parser/logs` folder.
 
 If any of the subprocesses return an exit code different than `1`, (default exit code of demoinfogo), then that means the parsing was not successful. After finishing the parsing of all the match pool, you will find the failed match name listed in the report.
 
