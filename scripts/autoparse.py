@@ -6,6 +6,8 @@ demospath = "F:/SteamLibrary/steamapps/common/Counter-Strike Global Offensive/cs
 hadErrors = False
 failedParsings=[]
 
+parserArgs = "-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages"
+
 os.chdir("..")
 os.chdir("parser")
 
@@ -13,7 +15,7 @@ for file in os.listdir(demospath):
     if file.endswith(".dem"):
         print("Parsing " + file)
         demofile = os.path.join(demospath, file).replace("\\", "/")
-        p = subprocess.run(["demoinfogo", demofile])
+        p = subprocess.run(["demoinfogo", "-gameevents", "-extrainfo", "-nofootsteps", "-nowarmup", "-packetentities", "-netmessages", demofile])
         if(p.returncode != 1):
             hadErrors = True
             failedParsings.append(file)
