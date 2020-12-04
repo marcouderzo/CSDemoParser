@@ -51,8 +51,6 @@ It is noteworthy that hltv.org downloads the match directly, exactly like any ot
 
 In order to download the matches we wrote a Python script that scrapes the hltv website using Selenium Python API. 
 
-Make sure you `pip install selenium` before running the script. 
-
 It basically loads the target player page where all his matches are listed, then it selects a match by scraping the table, opening its "overview" page and clicking the `More info on match page` button to get to the final page. Finally it downloads the match using the dedicated `GOTV Demo` button.
 
 Example: `Player: pashaBiceps`
