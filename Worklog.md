@@ -63,7 +63,7 @@ Example: `Player: pashaBiceps`
 	   ↳ https://www.hltv.org/download/demo/51659
 ```
 
-You can read the documentation on how it works in detail /inprogress/
+You can read the documentation on how it works in detail [here](https://github.com/marcouderzo/CSDemoParser/blob/main/documentation/autodownload%20Script%20Documentation.md)
 
 ## The Parser: demoinfogo
 
@@ -198,4 +198,4 @@ It is a pretty interesting one, as it can be an interesting parameter to look in
 
 As the match pool is very large, parsing every match manually is just not feasable. So, we decided to write a simple script to automate the parsing process.
 
-You can read the documentation on how it works in detail [here](https://github.com/marcouderzo/CSDemoParser/blob/main/Documentazione/autoparse%20Script%20Documentation.md)
+You can read the documentation on how it works in detail [here](https://github.com/marcouderzo/CSDemoParser/blob/main/documentation/autoparse%20Script%20Documentation.md)
