@@ -56,13 +56,11 @@ It basically loads the target player page where all his matches are listed, then
 
 Example: `Player: pashaBiceps`
 ```
-	Match List -> https://www.hltv.org/stats/players/matches/317/pashabiceps
-	Match x -> https://www.hltv.org/stats/matches/mapstatsid/90233/heretics-vs-youngsters?contextIds=317&contextTypes=player
-	More Info Page -> https://www.hltv.org/matches/2335421/youngsters-vs-heretics-lootbet-season-3
-	Download Link -> https://www.hltv.org/download/demo/51659
+	↳ https://www.hltv.org/stats/players/matches/317/pashabiceps
+	 ↳ https://www.hltv.org/stats/matches/mapstatsid/90233/heretics-vs-youngsters?contextIds=317&contextTypes=player
+	  ↳ https://www.hltv.org/matches/2335421/youngsters-vs-heretics-lootbet-season-3
+	   ↳ https://www.hltv.org/download/demo/51659
 ```
-
-Note: As of right now, the script is almost done. The actual download of the file is a bit tricky, as the script gets stucked in the downloading process and after some time Windows throws an `Unexpected parameter` exception and makes the computer crash. We are trying to figure out why this is happening and how to solve it.
 
 ## The Parser: demoinfogo
 
@@ -195,10 +193,6 @@ It is a pretty interesting one, as it can be an interesting parameter to look in
 
 ### autoparse.py
 
-As the match pool is very large, parsing every match manually is just not feasable.
+As the match pool is very large, parsing every match manually is just not feasable. So, we decided to write a simple script to automate the parsing process.
 
-So, given the folder where all `.dem` matches are saved, the script will call a shell command through `subprocess.run()` for each .dem match, telling demoinfogo to parse it. The `.txt` log file will be saved in `parser/logs` folder.
-
-If any of the subprocesses return an exit code different than `1`, (default exit code of demoinfogo), then that means the parsing was not successful. After finishing the parsing of all the match pool, you will find the failed match name listed in the report.
-
-To setup the script, make sure you edit `demospath` in the source code to match your own demo folder. Then run the script with `python3 autoparse.py`.
+You can read the documentation [here](https://github.com/marcouderzo/CSDemoParser/blob/main/Documentazione/autoparse%20Script%20Documentation.md)
