@@ -141,6 +141,8 @@ path = 'C:/Users/marco/AppData/Local/Google/Chrome/Application/chromedriver.exe'
 #download('https://www.hltv.org/matches/2335421/youngsters-vs-heretics-lootbet-season-3')
 #takePlayerMatches(path, "https://www.hltv.org/stats/players/matches/317/pashabiceps")
 
+del = input("Vuoi cancellare i file .rar alla fine dello script?")
+
 #Prendo tutti i link dal file Players.txt
 f = open("Players.txt")
 
@@ -159,8 +161,7 @@ for entry in os.scandir(pathOfScript):
         Archive(entry.path).extractall(pathToExtract, auto_create_dir = True)
 
 #elimino i file .rar
-
-# for entry in os.scandir(pathOfScript):
-#     if entry.is_file() and entry.path.endswith('.rar'):
-#
-#         os.remove(entry.path)
+if del == "Si" or del == "si":
+    for entry in os.scandir(pathOfScript):
+        if entry.is_file() and entry.path.endswith('.rar'):
+            os.remove(entry.path)
