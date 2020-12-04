@@ -1,8 +1,5 @@
 # autoparse.py Script Documentation
 
-## Before you run the script
-
-Make sure you edit `demospath` in the source code to match your own demo folder.
 
 ## How does it work?
 
@@ -16,3 +13,8 @@ Given the folder where all `.dem` matches are saved, the script will call a shel
 The `.txt` log file will be saved in `parser/logs` folder.
 
 If any of the subprocesses return an exit code different than `1`, (default exit code of demoinfogo), then it means the parsing was not successful. After finishing the parsing of all the match pool, you will find the failed match name listed in the report.
+
+
+## Before you run the script
+
+Make sure you edit `demospath` in the source code to match your own demo folder.
