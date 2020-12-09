@@ -194,6 +194,8 @@ player_jump
 
 It is a pretty interesting one, as it can be a parameter to look into when trying to recognize a player. Skilled CS:GO players use a technique called Bunny Hopping to move faster. It is done by jumping repeatedly while changing direction right to left and vice versa, pretty much in a zig-zag. The technique used is pretty much the same, but, exactly like with the spray control, everyone has its own peculiar way of doing it, whether it is timing, synchronization or movement pattern.
 
+Let's talk about aim related events. In CS:GO, only sniper rifles and a couple of automatic rifles allow zooming in and out (i.e. aiming).
+
 The `weapon_zoom` event is fired each time a player zooms in (or out) their weapon. This only fires on sniper rifles.
 
 ```
