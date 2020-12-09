@@ -81,7 +81,7 @@ In order to build demoinfogo on Windows, follow these steps:
 4. Build the *Release* configuration of `libprotobuf`. Building any other projects is not required.
 5. Open `parser/demoinfogo.vcxproj` in Microsoft Visual Studio 2017. Building the Release configuration creates the binary `parser/demoinfogo.exe`
 
-### Reverse Engineering the Parser and Modifying it to suit our needs
+### Understanding the Parser: Tests & Output Analysis
 
 First of all, demoinfogo doesn't natively output to a file, it just uses `printf()` functions to print the information to the console. This prevented us to log the data and analyze it. This is why we figured out a very easy way of redirecting the output to a file using the [`freopen`](http://www.cplusplus.com/reference/cstdio/freopen/) C++ function. In demoinfogo.cpp you will find:
 ```
@@ -246,7 +246,6 @@ descriptors {
 
 
 As of right now, we haven't found any events regarding crouching in the demo descriptors.
-
 
 ## Automating the Parsing of the Match Pool
 
