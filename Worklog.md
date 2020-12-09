@@ -245,7 +245,27 @@ descriptors {
 ```
 
 
-As of right now, we haven't found any events regarding crouching in the demo descriptors.
+As of right now, we haven't found any events regarding crouching in the demo descriptors. What we have found, instead, is that m_vecViewOffset[2] is logged just once in all our tests, but it pops up a bunch of times in the crouch test demo. It turned out that m_vecViewOffset is the position of the eyes from vecOrigin.
+
+```
+Field: 14, m_vecViewOffset[2] = 64.062561
+Field: 14, m_vecViewOffset[2] = 62.936462
+Field: 14, m_vecViewOffset[2] = 59.933529
+Field: 14, m_vecViewOffset[2] = 56.054741
+Field: 14, m_vecViewOffset[2] = 51.800587
+Field: 14, m_vecViewOffset[2] = 48.172043
+Field: 14, m_vecViewOffset[2] = 46.044968
+
+Field: 14, m_vecViewOffset[2] = 47.671555
+Field: 14, m_vecViewOffset[2] = 51.925709
+Field: 14, m_vecViewOffset[2] = 57.055717
+Field: 14, m_vecViewOffset[2] = 61.685238
+Field: 14, m_vecViewOffset[2] = 63.937439
+Field: 14, m_vecViewOffset[2] = 64.062561
+Field: 14, m_vecViewOffset[2] = 64.062561
+```
+
+As you can see, the first chunck seems to be the descending part of the crouch action, from 64.062561 to 46.044968. The second one is the ascending part, from 47.671555 back to 64.062561. So we assume that the 64.062561 value represents the normal state, and 46.044968 represents the crouched state.
 
 ## Automating the Parsing of the Match Pool
 
