@@ -265,9 +265,11 @@ Field: 14, m_vecViewOffset[2] = 64.062561
 Field: 14, m_vecViewOffset[2] = 64.062561
 ```
 
-As you can see, the first chunck seems to be the descending part of the crouch action, from 64.062561 to 46.044968. The second one is the ascending part, from 47.671555 back to 64.062561. So we assume that the 64.062561 value represents the normal state, and 46.044968 represents the crouched state.
+As you can see, the first chunck seems to be the descending part of the crouch action, from 64.062561 to 46.044968. The second one is the ascending part, from 47.671555 back to 64.062561. So we assume that the `64.062561` value represents the standing state, and `46.044968` represents the crouched state.
 
-Event List: http://wiki.sourcepython.com/developing/events/csgo.html
+A Full event list is available [here](http://wiki.sourcepython.com/developing/events/csgo.html)
+
+Learn More about CS:GO Data PreProcessing in [this](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) research paper from Charles University, Prague.
 
 ## Automating the Parsing of the Match Pool
 
