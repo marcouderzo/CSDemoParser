@@ -143,6 +143,10 @@ Let's now talk about player events. The main ones are:
 - `weapon_fire`
 - `weapon_reload`
 - `player_jump`
+- `weapon_zoom`
+- `weapon_zoom_rifle`
+- `item_pickup`
+- `item_equip`
 
 
 A major player event to consider is the `weapon_fire` one.
@@ -177,7 +181,7 @@ weapon_reload
 ```
 The parameters listed are the same as before.
 
-Last but not least, the `player_jump` event.
+Then, the `player_jump` event.
 
 ```
 player_jump
@@ -188,7 +192,59 @@ player_jump
 }
 ```
 
-It is a pretty interesting one, as it can be an interesting parameter to look into when trying to recognize a player. Skilled CS:GO players use a technique called Bunny Hopping to move faster. It is done by jumping repeatedly while changing direction right to left and vice versa, pretty much in a zig-zag. The technique used is pretty much the same, but, exactly like with the spray control, everyone has its own peculiar way of doing it, whether it is timing, synchronization or movement pattern.
+It is a pretty interesting one, as it can be a parameter to look into when trying to recognize a player. Skilled CS:GO players use a technique called Bunny Hopping to move faster. It is done by jumping repeatedly while changing direction right to left and vice versa, pretty much in a zig-zag. The technique used is pretty much the same, but, exactly like with the spray control, everyone has its own peculiar way of doing it, whether it is timing, synchronization or movement pattern.
+
+The `weapon_zoom` event is fired each time a player zooms in (or out) their weapon. This only fires on sniper rifles.
+
+```
+descriptors {
+  eventid: 133
+  name: "weapon_zoom"
+  keys {
+    type: 4
+    name: "userid"
+  }
+```
+
+The `weapon_zoom_rifle` event is fired when a player zooms in with non-sniper rifles.
+
+```
+descriptors {
+  eventid: 136
+  name: "weapon_zoom_rifle"
+  keys {
+    type: 4
+    name: "userid"
+  }
+```
+
+The `item_pickup` event is fired each time a player picks an item up. 
+
+```
+descriptors {
+  eventid: 138
+  name: "item_pickup"
+  keys {
+    type: 4
+    name: "userid"
+  }
+```  
+
+The `item_equip` event is fired each time a player equips a new weapon.
+
+```
+descriptors {
+  eventid: 140
+  name: "item_equip"
+  keys {
+    type: 4
+    name: "userid"
+  }
+```
+
+
+As of right now, we haven't found any events regarding crouching in the demo descriptors.
+
 
 ## Automating the Parsing of the Match Pool
 
