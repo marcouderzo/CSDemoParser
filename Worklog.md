@@ -6,6 +6,8 @@ Students Involved in the Project:
 - [Marco Uderzo](https://github.com/marcouderzo)
 - [Samuel Kostadinov](https://github.com/Neskelogth)
 
+## Important note
+If your pc has the avast software, be sure to turn it off. The parser will not work properly if you leave it turned on.
 
 ## Project Requirements
 
