@@ -269,9 +269,184 @@ Field: 14, m_vecViewOffset[2] = 64.062561
 
 As you can see, the first chunck seems to be the descending part of the crouch action, from 64.062561 to 46.044968. The second one is the ascending part, from 47.671555 back to 64.062561. So we assume that the `64.062561` value represents the standing state, and `46.044968` represents the crouched state.
 
+Let's talk about item_equip and item_pickup events. The item_pickup event is triggered when a player picks up an item from the ground. The item_equip event states the default equipment / equipment at the start of a new round. When a player buys a weapon both item_equip and item_pickup are triggered in this order. When a player buys an item (e.g. grenade), the item_pickup event alone is triggered.
+
+```
+item_equip
+{
+ userid: Mark (id:2)
+  position: 2973.000000, 250.000000, 1613.031250
+  facing: pitch:0.000000, yaw:182.005005
+  team: T
+ item: ump45 
+ defindex: 24 
+ canzoom: 0 
+ hassilencer: 0 
+ issilenced: 0 
+ hastracers: 1 
+ weptype: 2 
+ ispainted: 0 
+tick: 1669 
+}
+
+item_pickup
+{
+ userid: Mark (id:2)
+  position: 2973.000000, 250.000000, 1613.031250
+  facing: pitch:0.000000, yaw:182.005005
+  team: T
+ item: ump45 
+ silent: 1 
+ defindex: 24 
+tick: 1669 
+}
+```
+
+
+The `player_death` event is triggered when a player dies. 
+
+```
+player_death
+{
+ userid: KRIMZ (id:24)
+  position: -1328.922729, 2227.859619, 2.369247
+  facing: pitch:352.699585, yaw:333.061523
+  team: T
+ attacker: mou (id:8)
+  position: -1079.365845, 2109.473633, 60.030960
+  facing: pitch:11.332397, yaw:152.973633
+  team: CT
+ assister: 0 
+ weapon: usp_silencer 
+ weapon_itemid: 7288248617 
+ weapon_fauxitemid: 17293822569121710141 
+ weapon_originalowner_xuid: 76561198012944495 
+ headshot: 1 
+ dominated: 0 
+ revenge: 0 
+ penetrated: 0 
+ noreplay: 0 
+}
+```
+
+The useful data in this event are the userid, position, pitch, yaw of the dead player and the attacker, as well as the weapon used to kill and weather or not it was a headshot.
+
+The bomb_planted event is triggered when a player plants the bomb.
+
+```
+bomb_planted
+{
+ userid: twist (id:4)
+  position: -1360.003052, 2576.968750, 5.403275
+  facing: pitch:15.880737, yaw:33.854370
+  team: T
+ site: 364 
+tick: 7667 
+}
+```
+Position, pitch and yaw are useful in order to know where the player plants the bomb inside the bombsite. 
+
+The bomb_planted event is triggered when a player defuses the bomb.
+
+bomb_defused
+{
+ userid: Hobbit (id:7)
+  position: 991.971619, 2447.164063, 96.031250
+  facing: pitch:39.863892, yaw:92.570801
+  team: CT
+ site: 367 
+tick: 128427 
+}
+```
+
+The round_mvp event is triggered at the end of every round, announcing the Most Valuable Player of the round (most kills, longest time alive...)
+
+```
+round_mvp
+{
+ userid: Hobbit (id:7)
+  position: 991.971619, 2447.164063, 96.031250
+  facing: pitch:39.863892, yaw:92.570801
+  team: CT
+ reason: 3 
+ musickitmvps: 0 
+tick: 128427 
+}
+```
+
+
+
+
+
+
 A Full event list is available [here](http://wiki.sourcepython.com/developing/events/csgo.html)
 
 Learn More about CS:GO Data PreProcessing in [this](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) research paper from Charles University, Prague.
+
+
+
+
+## Modifying the Parser
+
+As the parser outputs using printf, we decided to filter the printf calls, making them trigger only when we wanted to log something useful.
+
+- Ticks
+
+CDemoFileDump::MsgPrintf() funtion.
+
+```
+void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size, const char *fmt, ... )
+{
+	if ( g_bDumpNetMessages )
+	{
+		va_list vlist;
+		const std::string& TypeName = msg.GetTypeName();
+
+		// Print the message type and size
+		if (TypeName == "CNETMsg_Tick")
+			printf("---- %s (%d bytes) -----------------\n", TypeName.c_str(), size);
+
+			va_start(vlist, fmt);
+			if (TypeName == "CNETMsg_Tick")
+				vprintf(fmt, vlist);
+			va_end(vlist);
+	}
+}
+```
+
+The only message useful is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick".
+
+- CSPlayer Table
+
+DecodeProp()
+
+```
+if (pSendProp->var_name() == "m_vecVelocity[0]" ||
+			pSendProp->var_name() == "m_vecVelocity[1]" ||
+			pSendProp->var_name() == "m_vecVelocity[2]" ||
+			pSendProp->var_name() == "m_vecOrigin" ||
+			pSendProp->var_name() == "m_vecOrigin[2]" ||
+			pSendProp->var_name() == "m_angEyeAngles[0]" ||
+			pSendProp->var_name() == "m_angEyeAngles[1]")
+{
+	printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
+	hasToPrint = true;
+}
+
+// other code
+
+if (!bQuiet && hasToPrint)
+{
+	pResult->Print();
+}	
+
+```
+
+
+Same as before, we let printf be called only if the table field is one of the chosen features.
+
+
+		
 
 ## Automating the Parsing of the Match Pool
 
