@@ -272,6 +272,7 @@ As you can see, the first chunck seems to be the descending part of the crouch a
 Let's talk about item_equip and item_pickup events. The item_pickup event is triggered when a player picks up an item from the ground. The item_equip event states the default equipment / equipment at the start of a new round. When a player buys a weapon both item_equip and item_pickup are triggered in this order. When a player buys an item (e.g. grenade), the item_pickup event alone is triggered.
 
 ```
+
 item_equip
 {
  userid: Mark (id:2)
@@ -300,12 +301,14 @@ item_pickup
  defindex: 24 
 tick: 1669 
 }
+
 ```
 
 
 The `player_death` event is triggered when a player dies. 
 
 ```
+
 player_death
 {
  userid: KRIMZ (id:24)
@@ -327,6 +330,7 @@ player_death
  penetrated: 0 
  noreplay: 0 
 }
+
 ```
 
 The useful data in this event are the userid, position, pitch, yaw of the dead player and the attacker, as well as the weapon used to kill and weather or not it was a headshot.
@@ -348,6 +352,7 @@ Position, pitch and yaw are useful in order to know where the player plants the 
 
 The bomb_planted event is triggered when a player defuses the bomb.
 
+```
 bomb_defused
 {
  userid: Hobbit (id:7)
@@ -357,6 +362,7 @@ bomb_defused
  site: 367 
 tick: 128427 
 }
+
 ```
 
 The round_mvp event is triggered at the end of every round, announcing the Most Valuable Player of the round (most kills, longest time alive...)
