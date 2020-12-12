@@ -455,7 +455,7 @@ Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedPro
 
 Same as before, we let printf be called only if the table field is one of the chosen features.
 
-**Player Related Game Events
+**Player Related Game Events**
 
 ```
 void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
