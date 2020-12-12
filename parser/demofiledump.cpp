@@ -22,6 +22,8 @@
 // THE POSSIBILITY OF SUCH DAMAGE.
 //===========================================================================//
 
+#include <fstream>
+
 #include <stdarg.h>
 #include <conio.h>
 #include "demofile.h"
@@ -95,11 +97,13 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 		const std::string& TypeName = msg.GetTypeName();
 
 		// Print the message type and size
-		printf( "---- %s (%d bytes) -----------------\n", TypeName.c_str(), size );
+		if (TypeName == "CNETMsg_Tick")
+			printf("---- %s (%d bytes) -----------------\n", TypeName.c_str(), size);
 
-		va_start( vlist, fmt);
-		vprintf( fmt, vlist );
-		va_end( vlist );
+		va_start(vlist, fmt);
+		if (TypeName == "CNETMsg_Tick")
+			vprintf(fmt, vlist);
+		va_end(vlist);
 	}
 }
 
@@ -107,7 +111,7 @@ template < class T, int msgType >
 void PrintUserMessage( CDemoFileDump& Demo, const void *parseBuffer, int BufferSize )
 {
 	T msg;
-
+	
 	if ( msg.ParseFromArray( parseBuffer, BufferSize ) )
 	{
 		Demo.MsgPrintf( msg, BufferSize, "%s", msg.DebugString().c_str() );   //Entity Delta update: id:1, class:35, serial:363
@@ -195,7 +199,14 @@ void PrintNetMessage( CDemoFileDump& Demo, const void *parseBuffer, int BufferSi
 	{
 		if ( msgType == svc_GameEventList )
 		{
+			//printf("listaeventi");
 			Demo.m_GameEventList.CopyFrom( msg );
+
+			std::ofstream myfile;
+			myfile.open("logs/eventslist.txt");
+			myfile << msg.DebugString().c_str();
+			myfile.close();
+			
 		}
 		Demo.MsgPrintf( msg, BufferSize, "%s", msg.DebugString().c_str() ); //Entity Delta update: id:1, class:35, serial:363
 	}
@@ -355,7 +366,7 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 	{
 		if ( bCSV )
 		{
-			//printf("beforecallingprintf1");
+			printf("beforecallingprintf1");
 			printf( "%s, %s, %d", pField, pPlayerInfo->name, nIndex ); 
 		}
 		else
@@ -505,6 +516,9 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 				{
 					printf( "%s\n{\n", pDescriptor->name().c_str() );
 				}
+				printf(" eventid: ");
+				printf("%ld", msg.eventid());
+				printf("\n");
 				int numKeys = msg.keys().size();
 				for ( int i = 0; i < numKeys; i++ )
 				{
@@ -556,7 +570,7 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 				}
 				if ( g_bDumpGameEvents )
 				{
-					printf("tick: %i \n", s_nCurrentTick); // Added from github issue: events do not have any associated tick
+					//printf("tick: %i \n", s_nCurrentTick); // Added from github issue: events do not have any associated tick. (but tick is not correct)
 					printf( "}\n" );
 				}
 			}
@@ -812,17 +826,17 @@ void RecvTable_ReadInfos( const CSVCMsg_SendTable& msg )
 			if ( ( sendProp.type() == DPT_DataTable ) || ( sendProp.flags() & SPROP_EXCLUDE ) )
 			{
 				printf("[beforePrintProps]");
-				printf( "%d:%06X:%s:%s%s\n", sendProp.type(), sendProp.flags(), sendProp.var_name().c_str(), sendProp.dt_name().c_str(), ( sendProp.flags() & SPROP_EXCLUDE ) ? " exclude" : "" );
+				printf( "%d:%06X:%s:%s%s\n", sendProp.type(), sendProp.flags(), sendProp.var_name().c_str(), sendProp.dt_name().c_str(), ( sendProp.flags() & SPROP_EXCLUDE ) ? " exclude" : "" );  
 			}
 			else if ( sendProp.type() == DPT_Array )
 			{
 				printf("[beforePrintProps1]");
 				printf( "%d:%06X:%s[%d]\n", sendProp.type(), sendProp.flags(), sendProp.var_name().c_str(), sendProp.num_elements() );
 			}
-			else
+			else // 0 values, nothing interesting to be logged.
 			{
-				printf("[beforePrintProps2]");
-				printf( "%d:%06X:%s:%f,%f,%08X%s\n", sendProp.type(), sendProp.flags(), sendProp.var_name().c_str(), sendProp.low_value(), sendProp.high_value(), sendProp.num_bits(), ( sendProp.flags() & SPROP_INSIDEARRAY ) ? " inside array" : "" );
+				//printf("[beforePrintProps2]");
+				//printf( "%d:%06X:%s:%f,%f,%08X%s\n", sendProp.type(), sendProp.flags(), sendProp.var_name().c_str(), sendProp.low_value(), sendProp.high_value(), sendProp.num_bits(), ( sendProp.flags() & SPROP_INSIDEARRAY ) ? " inside array" : "" );
 			}
 		}
 	}
