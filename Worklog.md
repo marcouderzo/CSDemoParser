@@ -454,10 +454,26 @@ Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedPro
 ```
 
 Same as before, we let printf be called only if the table field is one of the chosen features.
-		
 
+**Player Related Game Events
 
+```
+void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
+{
+	//other code
+	
+	if ( g_bDumpGameEvents )
+	{
+		printf( "%s\n{\n", pDescriptor->name().c_str() );
+	}
+	printf(" eventid: ");
+	printf("%ld", msg.eventid());
+	printf("\n");
+	
+	//other code
 
+```
+We made the parser print the event id of the current event.
 
 
 
