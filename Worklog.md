@@ -7,7 +7,8 @@ Students Involved in the Project:
 - [Samuel Kostadinov](https://github.com/Neskelogth)
 
 ## Important note
-If your pc has the avast software, be sure to turn it off. The parser will not work properly if you leave it turned on.
+
+If your pc has Avast Antivirus, make sure to turn it off. The parser will not work properly if you leave it running.
 
 ## Project Requirements
 
@@ -483,12 +484,9 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 ```
 We made the parser print the event id of the current event.
 
-**Cleaning up the output: Useless Printfs **
+**Cleaning up the output: Useless Printfs**
 
-We commented out printfs calls that are unrelated with the player itself.
-
-
-
+We commented out printfs calls that were unrelated with the player itself, in order to still keep them in case of further reuse of the parser.
 
 
 ## Automating the Parsing of the Match Pool
