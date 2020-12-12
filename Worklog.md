@@ -372,15 +372,25 @@ round_mvp
 ```
 Position, pitch and yaw show where the player is when the event is triggered. Reason key is yet to be discovered.
 
+**Finding Event IDs**
+
+In the .proto files, there isn't any event list in the form of `GameEvent1: name="name", event_id=id`. Instead, every demo has a `m_GameEventList`, which is a `CSVCMsg_GameEventList` that inherits from `::google::protobuf::Message`. Dumping the `T msg` that is assigned to `CSVCMsg_GameEventList`, we get a list of all game events, each of them with its own descriptors. A `CSVCMsg_GameEvent` is a class that also inherits from `::google::protobuf::Message`. Inside the `CSVCMsg_GameEvent` class, an useful method can be found: `inline ::google::protobuf::int32 eventid() const`. By calling it when the game event list is dumped, we were able to match the event name and the id and thus make an event list ourselves. 
+
 **More Info**
 
 A Full event list is available [here](http://wiki.sourcepython.com/developing/events/csgo.html)
 
-Learn More about CS:GO Data PreProcessing in [this](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) research paper from Charles University, Prague.
+CS:GO Data PreProcessing [Research Paper](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) from Charles University, Prague.
 
-**Finding Event IDs**
 
-In the .proto files, there isn't any event list in the form of `GameEvent1: name="name", event_id=id`. Instead, every demo has a m_GameEventList, which is a CSVCMsg_GameEventList that inherits from ::google::protobuf::Message. Dumping the T msg that is assigned to CSVCMsg_GameEventList, we get a list of all game events, each of them with its own descriptors. A CSVCMsg_GameEvent is a class that also inherits from ::google::protobuf::Message. Inside the CSVCMsg_GameEvent class, an useful method can be found: inline ::google::protobuf::int32 eventid() const. By calling it when the game event list is dumped, we were able to match the event name and the id and thus make an event list ourselves. 
+
+
+
+
+
+
+
+
 
 ### Modifying the Parser
 
@@ -445,6 +455,13 @@ Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedPro
 
 Same as before, we let printf be called only if the table field is one of the chosen features.
 		
+
+
+
+
+
+
+
 
 ## Automating the Parsing of the Match Pool
 
