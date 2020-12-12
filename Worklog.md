@@ -411,15 +411,23 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 		if (TypeName == "CNETMsg_Tick")
 			printf("---- %s (%d bytes) -----------------\n", TypeName.c_str(), size);
 
-			va_start(vlist, fmt);
-			if (TypeName == "CNETMsg_Tick")
-				vprintf(fmt, vlist);
-			va_end(vlist);
+		va_start(vlist, fmt);
+		if (TypeName == "CNETMsg_Tick")
+		{
+			char res[500];
+			vsprintf(res, fmt, vlist);
+			std::string s = res;
+			auto endOfTickDelimiter = s.find_first_of('h');
+			s.erase(endOfTickDelimiter);
+			printf(s.c_str());
+			
+		}
+		va_end(vlist);
 	}
 }
 ```
 
-The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick".
+The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick". This particular message was originally printed with `vprintf(fmt, vlist)`, and contained other unnecessary information about `host_computationTime`. Having to deal with a function with variable arguments, and being stuck with using a `va_list`, we switched to `vsprintf`, stored the message into a string, and then only kept the tick-related portion of it.
 
 **Handling Tables: Only Keeping Track of DT_CSPlayer**
 
@@ -474,6 +482,10 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 
 ```
 We made the parser print the event id of the current event.
+
+**Cleaning up the output: Useless Printfs **
+
+We commented out printfs calls that are unrelated with the player itself.
 
 
 
