@@ -106,6 +106,8 @@ As you can see in the `/test` folder in this repository, we parsed test demos of
 
 We are working on plotting those parameters on a graph to help us in the learning process.
 
+**Player Data**
+
 From the `DT_CSPlayer` (Net?) Table we found some useful data about the player. In particular:
 - MouseX, MouseY
 - PlayerPositionX, PlayerPositionY, PlayerPositionZ
@@ -141,6 +143,8 @@ Fields 4-5 contain `m_vecVelocity[0]` and `m_vecVelocity[1]`, which represent th
 
 Actually, every velocity is only logged if it changes, but, compared to Y velocity, X and Z velocities are the ones that change the most. Moreover, they go "hand in hand" in the majority of the times. This is because, statistically speaking, there is a very small chance that the player will move perfectly along one of those axis. 
 
+**Player Events**
+
 Let's now talk about player events. The main ones are:
 - `weapon_fire`
 - `weapon_reload`
@@ -150,6 +154,7 @@ Let's now talk about player events. The main ones are:
 - `item_pickup`
 - `item_equip`
 
+**Weapon Fire**
 
 A major player event to consider is the `weapon_fire` one.
 
@@ -171,6 +176,8 @@ weapon_fire
 
 Note that grenades and similar items are not logged using the `grenade_thrown` event, as we would have thought. Strangely enough, throwing such items is considered a `weapon_fire` event.
 
+**Weapon Reload**
+
 The `weapon_reload` event is triggered when a player reloads his gun. 
 ```
 weapon_reload
@@ -182,6 +189,8 @@ weapon_reload
 }
 ```
 The parameters listed are the same as before.
+
+**Player Jump**
 
 Then, the `player_jump` event.
 
@@ -195,6 +204,8 @@ player_jump
 ```
 
 It is a pretty interesting one, as it can be a parameter to look into when trying to recognize a player. Skilled CS:GO players use a technique called Bunny Hopping to move faster. It is done by jumping repeatedly while changing direction right to left and vice versa, pretty much in a zig-zag. The technique used is pretty much the same, but, exactly like with the spray control, everyone has its own peculiar way of doing it, whether it is timing, synchronization or movement pattern.
+
+**Aiming**
 
 Let's talk about aim related events. In CS:GO, only sniper rifles and a couple of automatic rifles allow zooming in and out (i.e. aiming).
 
@@ -222,30 +233,7 @@ descriptors {
   }
 ```
 
-The `item_pickup` event is fired each time a player picks an item up. 
-
-```
-descriptors {
-  eventid: 138
-  name: "item_pickup"
-  keys {
-    type: 4
-    name: "userid"
-  }
-```  
-
-The `item_equip` event is fired each time a player equips a new weapon.
-
-```
-descriptors {
-  eventid: 140
-  name: "item_equip"
-  keys {
-    type: 4
-    name: "userid"
-  }
-```
-
+**Crouching**
 
 As of right now, we haven't found any events regarding crouching in the demo descriptors. What we have found, instead, is that m_vecViewOffset[2] is logged just once in all our tests, but it pops up a bunch of times in the crouch test demo. It turned out that m_vecViewOffset is the position of the eyes from vecOrigin.
 
@@ -269,6 +257,8 @@ Field: 14, m_vecViewOffset[2] = 64.062561
 
 As you can see, the first chunck seems to be the descending part of the crouch action, from 64.062561 to 46.044968. The second one is the ascending part, from 47.671555 back to 64.062561. So we assume that the `64.062561` value represents the standing state, and `46.044968` represents the crouched state.
 
+**Equipment, Buying Weapons & Items, Picking them Up from the Ground**
+
 Let's talk about item_equip and item_pickup events. The item_pickup event is triggered when a player picks up an item from the ground. The item_equip event states the default equipment / equipment at the start of a new round. When a player buys a weapon both item_equip and item_pickup are triggered in this order. When a player buys an item (e.g. grenade), the item_pickup event alone is triggered.
 
 ```
@@ -287,7 +277,6 @@ item_equip
  hastracers: 1 
  weptype: 2 
  ispainted: 0 
-tick: 1669 
 }
 
 item_pickup
@@ -299,11 +288,11 @@ item_pickup
  item: ump45 
  silent: 1 
  defindex: 24 
-tick: 1669 
 }
 
 ```
 
+**Player Death**
 
 The `player_death` event is triggered when a player dies. 
 
@@ -335,6 +324,9 @@ player_death
 
 The useful data in this event are the userid, position, pitch, yaw of the dead player and the attacker, as well as the weapon used to kill and weather or not it was a headshot.
 
+
+**Bomb Planted, Bomb Defused**
+
 The bomb_planted event is triggered when a player plants the bomb.
 
 ```
@@ -345,12 +337,11 @@ bomb_planted
   facing: pitch:15.880737, yaw:33.854370
   team: T
  site: 364 
-tick: 7667 
 }
 ```
 Position, pitch and yaw are useful in order to know where the player plants the bomb inside the bombsite. 
 
-The bomb_planted event is triggered when a player defuses the bomb.
+The `bomb_planted` event is triggered when a player defuses the bomb.
 
 ```
 bomb_defused
@@ -360,10 +351,11 @@ bomb_defused
   facing: pitch:39.863892, yaw:92.570801
   team: CT
  site: 367 
-tick: 128427 
 }
 
 ```
+
+**Round MVP (Most Valuable Player)**
 
 The round_mvp event is triggered at the end of every round, announcing the Most Valuable Player of the round (most kills, longest time alive...)
 
@@ -376,29 +368,26 @@ round_mvp
   team: CT
  reason: 3 
  musickitmvps: 0 
-tick: 128427 
 }
 ```
+Position, pitch and yaw show where the player is when the event is triggered. Reason key is yet to be discovered.
 
-
-
-
-
+**More Info**
 
 A Full event list is available [here](http://wiki.sourcepython.com/developing/events/csgo.html)
 
 Learn More about CS:GO Data PreProcessing in [this](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) research paper from Charles University, Prague.
 
+**Finding Event IDs**
 
+In the .proto files, there isn't any event list in the form of `GameEvent1: name="name", event_id=id`. Instead, every demo has a m_GameEventList, which is a CSVCMsg_GameEventList that inherits from ::google::protobuf::Message. Dumping the T msg that is assigned to CSVCMsg_GameEventList, we get a list of all game events, each of them with its own descriptors. A CSVCMsg_GameEvent is a class that also inherits from ::google::protobuf::Message. Inside the CSVCMsg_GameEvent class, an useful method can be found: inline ::google::protobuf::int32 eventid() const. By calling it when the game event list is dumped, we were able to match the event name and the id and thus make an event list ourselves. 
 
-
-## Modifying the Parser
+### Modifying the Parser
 
 As the parser outputs using printf, we decided to filter the printf calls, making them trigger only when we wanted to log something useful.
 
-- Ticks
 
-CDemoFileDump::MsgPrintf() funtion.
+**Handling Messages**
 
 ```
 void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size, const char *fmt, ... )
@@ -420,38 +409,41 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 }
 ```
 
-The only message useful is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick".
+The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick".
 
-- CSPlayer Table
+**Handling Tables: Only Keeping Track of DT_CSPlayer**
 
-DecodeProp()
 
 ```
-if (pSendProp->var_name() == "m_vecVelocity[0]" ||
-			pSendProp->var_name() == "m_vecVelocity[1]" ||
-			pSendProp->var_name() == "m_vecVelocity[2]" ||
-			pSendProp->var_name() == "m_vecOrigin" ||
-			pSendProp->var_name() == "m_vecOrigin[2]" ||
-			pSendProp->var_name() == "m_angEyeAngles[0]" ||
-			pSendProp->var_name() == "m_angEyeAngles[1]")
+Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet )
 {
-	printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
-	hasToPrint = true;
-}
+	//other code
 
-// other code
+	if (pSendProp->var_name() == "m_vecVelocity[0]" ||
+	    pSendProp->var_name() == "m_vecVelocity[1]" ||
+	    pSendProp->var_name() == "m_vecVelocity[2]" ||
+	    pSendProp->var_name() == "m_vecOrigin" ||
+	    pSendProp->var_name() == "m_vecOrigin[2]" ||
+	    pSendProp->var_name() == "m_angEyeAngles[0]" ||
+	    pSendProp->var_name() == "m_angEyeAngles[1]")
+	{
+		printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
+		hasToPrint = true;
+	}
 
-if (!bQuiet && hasToPrint)
-{
-	pResult->Print();
+	// other code
+
+	if (!bQuiet && hasToPrint)
+	{
+		pResult->Print();
+	}
+	
+	//other code
 }	
 
 ```
 
-
 Same as before, we let printf be called only if the table field is one of the chosen features.
-
-
 		
 
 ## Automating the Parsing of the Match Pool
