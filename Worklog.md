@@ -397,12 +397,36 @@ CS:GO Data PreProcessing [Research Paper](https://www.researchgate.net/publicati
 
 As the parser outputs using printf, we decided to filter the printf calls, making them trigger only when we wanted to log something useful.
 
+**Setting The Parser Arguments**
+
+Calling the parser with arguments can be annoying and makes the shell commands unnecessarily verbose, so we decided to set them in the source code and be done with them.
+
 
 **Cleaning up the output: Useless Printfs**
 
 We commented out printfs calls that were unrelated with the player itself, in order to still keep them in case of further reuse of the parser.
 
+**Global Extern Player Variables**
 
+In order to share the SteamID (xuid), UserID and EntityID between multiple files and not having issues with the Linker, we created a new GlobalPlayerInfo.h file with those variables declared as extern.
+
+Those variables are assigned in DumpStringTable() when the parser finds the PlayerInfo with the matching SteamID.
+
+```
+bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
+{
+	//other code
+	
+	if (playerInfo.xuid == targetPlayerSteamID)
+	{
+		userID = playerInfo.userID;
+		entityID = playerInfo.entityID;
+		printf("TROVATO TARGET PLAYER %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
+	}
+	
+	//other code
+}
+```
 **Handling Messages**
 
 ```
@@ -425,7 +449,9 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 			std::string s = res;
 			auto endOfTickDelimiter = s.find_first_of('h');
 			s.erase(endOfTickDelimiter);
-			printf(s.c_str());
+			s.erase(0, s.find_last_of(':')+1);
+			currentTick = std::stoi(s);
+			printf("------ Tick = %ld ------\n", currentTick);
 			
 		}
 		va_end(vlist);
@@ -433,7 +459,7 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 }
 ```
 
-The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick". This particular message was originally printed with `vprintf(fmt, vlist)`, and contained other unnecessary information about `host_computationTime`. Having to deal with a function with variable arguments, and being stuck with using a `va_list`, we switched to `vsprintf`, stored the message into a string, and then only kept the tick-related portion of it.
+The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick". This particular message was originally printed with `vprintf(fmt, vlist)`, and contained other unnecessary information about `host_computationTime`. Having to deal with a function with variable arguments, and being stuck with using a `va_list`, we switched to `vsprintf`, stored the message into a string, and then only kept the tick-related portion of it. We finally convert the string to an integer and store it in currentTick, which is a member variable of the CDemoFileDump class.
 
 
 
@@ -487,13 +513,34 @@ Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedPro
 
 ```
 
-After modifiying it, we realized it printed the right fields, but of every player in the match. In order to fix it, we would have to pass an additional argument to DecodeProp(), potentially breaking the code somewhere else. Thus, we decided to play it safe and created a new function.
+After modifiying it, we realized it printed the right fields, but of every player in the match. In order to fix it, we would have to pass an additional argument to DecodeProp(), potentially breaking the code somewhere else. Thus, we decided to play it safe and created a new function `Prop_t *DecodePropWithEntity()`, which is basically the same as the original one, but it also takes in an EntityEntry, used to check whether or not the Entity is actually the target player or someone else. 
 
-
-
-**Global Extern Player Variables**
-
-In order to share the SteamID (xuid), UserID and EntityID between multiple files and not having issues with the Linker, we created a new GlobalPlayerInfo.h file with those variables declared as extern.
+```
+Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet, void *pEntity)
+{
+	EntityEntry* Entity = static_cast<EntityEntry*>(pEntity);
+	const CSVCMsg_SendTable::sendprop_t *pSendProp = pFlattenedProp->m_prop;
+	
+	//other code
+	
+	if ((pSendProp->var_name() == "m_vecVelocity[0]" ||
+	pSendProp->var_name() == "m_vecVelocity[1]" ||
+	pSendProp->var_name() == "m_vecVelocity[2]" ||
+	pSendProp->var_name() == "m_vecOrigin" ||
+	pSendProp->var_name() == "m_vecOrigin[2]" ||
+	pSendProp->var_name() == "m_angEyeAngles[0]" ||
+	pSendProp->var_name() == "m_angEyeAngles[1]") && Entity->m_nEntity==entityID)
+	{
+		if (nFieldIndex != 6 && nFieldIndex != 16)
+		{
+			printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
+			hasToPrint = true;
+		}
+	}
+	
+	// other code
+}
+```
 
 **Parsing the chosen Game Events of the Target Player**
 
