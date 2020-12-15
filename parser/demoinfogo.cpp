@@ -24,6 +24,8 @@
 
 #include "demofiledump.h"
 
+#include "GlobalPlayerInfo.h"
+
 // these settings cause it to output nothing
 bool g_bDumpGameEvents = false;
 bool g_bSupressFootstepEvents = true;
@@ -59,7 +61,14 @@ int __cdecl main( int argc, char *argv[] )
 		exit( 0 );
 	}
 
-	int nFileArgument = 1;
+	std::string s = argv[1];
+	targetPlayerSteamID = stoull(s);
+
+	printf(s.c_str());
+
+	int nFileArgument = 2;
+
+	/*
 	if ( argc > 2 )
 	{
 		for ( int i = 1; i < argc; i++ )
@@ -113,19 +122,20 @@ int __cdecl main( int argc, char *argv[] )
 			}
 		}
 	}
-	else
-	{
+	*/
+	//else
+	//{
 		// default is to dump out everything
 		g_bDumpGameEvents = true;
-		g_bSupressFootstepEvents = false;
+		g_bSupressFootstepEvents = true;
 		g_bShowExtraPlayerInfoInGameEvents = true;
 		g_bDumpDeaths = true;
-		g_bSupressWarmupDeaths = false;
+		g_bSupressWarmupDeaths = true;
 		g_bDumpStringTables = true;
-		g_bDumpDataTables = true;
+		g_bDumpDataTables = false;
 		g_bDumpPacketEntities = true;
 		g_bDumpNetMessages = true;
-	}
+	//}
 
 	if( DemoFileDump.Open( argv[ nFileArgument ] ) )
 	{

@@ -130,6 +130,7 @@ protoc-2.5.0-win32\protoc.exe --proto_path=.\protobuf-2.5.0\src --proto_path=. -
     <ClInclude Include="demofilepropdecode.h" />
     <ClInclude Include="generated_proto\cstrike15_usermessages_public.pb.h" />
     <ClInclude Include="generated_proto\netmessages_public.pb.h" />
+    <ClInclude Include="GlobalPlayerInfo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

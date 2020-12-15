@@ -32,6 +32,10 @@
 #include "generated_proto/cstrike15_usermessages_public.pb.h"
 #include "generated_proto/netmessages_public.pb.h"
 
+#include "GlobalPlayerInfo.h"
+
+
+
 // in demofiledump.cpp
 extern const CSVCMsg_SendTable::sendprop_t *GetSendPropByIndex( uint32 uClass, uint32 uIndex );
 
@@ -253,7 +257,7 @@ Prop_t *Array_Decode( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedP
 
 	if ( !bQuiet )
 	{
-		printf( "array with %d elements of %d max\n", nElements, nNumElements );
+		//printf( "array with %d elements of %d max\n", nElements, nNumElements );
 	}
 
 	for ( int i = 0; i < nElements; i++ )
@@ -290,8 +294,11 @@ Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedPro
 			pSendProp->var_name() == "m_angEyeAngles[1]")
 		{
 			//printf("[beforeDecodePropPrint]");
-			printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
-			hasToPrint = true;
+			if (nFieldIndex != 6 && nFieldIndex != 16)
+			{
+				printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
+				hasToPrint = true;
+			}
 		}
 		switch (pSendProp->type())
 		{
@@ -323,5 +330,67 @@ Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedPro
 		{
 			pResult->Print();
 		}
+	return pResult;
+}
+
+Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet, void *pEntity)
+{
+	EntityEntry* Entity = static_cast<EntityEntry*>(pEntity);
+	const CSVCMsg_SendTable::sendprop_t *pSendProp = pFlattenedProp->m_prop;
+
+	bool hasToPrint = false;
+
+	Prop_t *pResult = NULL;
+
+	if (pSendProp->type() != DPT_Array && pSendProp->type() != DPT_DataTable)
+	{
+		pResult = new Prop_t((SendPropType_t)(pSendProp->type()));
+	}
+
+	if ((pSendProp->var_name() == "m_vecVelocity[0]" ||
+		pSendProp->var_name() == "m_vecVelocity[1]" ||
+		pSendProp->var_name() == "m_vecVelocity[2]" ||
+		pSendProp->var_name() == "m_vecOrigin" ||
+		pSendProp->var_name() == "m_vecOrigin[2]" ||
+		pSendProp->var_name() == "m_angEyeAngles[0]" ||
+		pSendProp->var_name() == "m_angEyeAngles[1]") && Entity->m_nEntity==entityID)
+	{
+		//printf("[beforeDecodePropPrint]");
+		if (nFieldIndex != 6 && nFieldIndex != 16)
+		{
+			printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
+			hasToPrint = true;
+		}
+	}
+	switch (pSendProp->type())
+	{
+	case DPT_Int:
+		pResult->m_value.m_int = Int_Decode(entityBitBuffer, pSendProp);
+		break;
+	case DPT_Float:
+		pResult->m_value.m_float = Float_Decode(entityBitBuffer, pSendProp);
+		break;
+	case DPT_Vector:
+		Vector_Decode(entityBitBuffer, pSendProp, pResult->m_value.m_vector);
+		break;
+	case DPT_VectorXY:
+		VectorXY_Decode(entityBitBuffer, pSendProp, pResult->m_value.m_vector);
+		break;
+	case DPT_String:
+		pResult->m_value.m_pString = String_Decode(entityBitBuffer, pSendProp);
+		break;
+	case DPT_Array:
+		pResult = Array_Decode(entityBitBuffer, pFlattenedProp, pSendProp->num_elements(), uClass, nFieldIndex, bQuiet);
+		break;
+	case DPT_DataTable:
+		break;
+	case DPT_Int64:
+		pResult->m_value.m_int64 = Int64_Decode(entityBitBuffer, pSendProp);
+		break;
+	}
+	if (!bQuiet && hasToPrint)
+	{
+		pResult->Print();
+	}
 	return pResult;
 }

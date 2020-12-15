@@ -53,6 +53,8 @@
 
 #define MAX_STRING_TABLES				64
 
+
+
 struct StringTableData_t
 {
 	char	szName[ 64 ];
@@ -237,7 +239,10 @@ public:
 	CDemoFile m_demofile;
 	CSVCMsg_GameEventList m_GameEventList;
 
+	int currentTick;
+
 	int m_nFrameNumber;
+
 };
 
 #endif // DEMOFILEDUMP_H

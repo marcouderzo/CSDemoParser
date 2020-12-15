@@ -37,6 +37,12 @@
 #include "generated_proto/cstrike15_usermessages_public.pb.h"
 #include "generated_proto/netmessages_public.pb.h"
 
+#include "GlobalPlayerInfo.h"
+
+unsigned long long targetPlayerSteamID;
+int userID;
+int entityID;
+
 // file globals
 static int s_nNumStringTables;
 static StringTableData_t s_StringTables[ MAX_STRING_TABLES ];
@@ -46,7 +52,8 @@ static std::vector< ServerClass_t > s_ServerClasses;
 static std::vector< CSVCMsg_SendTable > s_DataTables;
 static std::vector< ExcludeEntry > s_currentExcludes;
 static std::vector< EntityEntry * > s_Entities;
-static std::vector< player_info_t > s_PlayerInfos;
+static std::vector< player_info_t > s_PlayerInfos;   // Vector of players with relative infos
+
 
 extern bool g_bDumpGameEvents;
 extern bool g_bSupressFootstepEvents;
@@ -95,14 +102,22 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 	{
 		va_list vlist;
 		const std::string& TypeName = msg.GetTypeName();
-
 		// Print the message type and size
-		if (TypeName == "CNETMsg_Tick")
-			printf("---- %s (%d bytes) -----------------\n", TypeName.c_str(), size);
+		//if (TypeName == "CNETMsg_Tick")
+			//printf("---- %s (%d bytes) -----------------\n", TypeName.c_str(), size);
 
 		va_start(vlist, fmt);
 		if (TypeName == "CNETMsg_Tick")
-			vprintf(fmt, vlist);
+		{
+			char res[500];
+			vsprintf(res, fmt, vlist);
+			std::string s = res;
+			auto endOfTickDelimiter = s.find_first_of('h');
+			s.erase(endOfTickDelimiter);
+			s.erase(0, s.find_last_of(':')+1);
+			currentTick = std::stoi(s);
+			printf("------ Tick = %ld ------\n", currentTick);	
+		}
 		va_end(vlist);
 	}
 }
@@ -114,7 +129,9 @@ void PrintUserMessage( CDemoFileDump& Demo, const void *parseBuffer, int BufferS
 	
 	if ( msg.ParseFromArray( parseBuffer, BufferSize ) )
 	{
-		Demo.MsgPrintf( msg, BufferSize, "%s", msg.DebugString().c_str() );   //Entity Delta update: id:1, class:35, serial:363
+		printf("[FromPrintUserMessage]\n");
+		//printf(msg.DebugString().c_str());
+		Demo.MsgPrintf( msg, BufferSize, "%s", msg.DebugString().c_str() );
 	}
 }
 
@@ -208,7 +225,7 @@ void PrintNetMessage( CDemoFileDump& Demo, const void *parseBuffer, int BufferSi
 			myfile.close();
 			
 		}
-		Demo.MsgPrintf( msg, BufferSize, "%s", msg.DebugString().c_str() ); //Entity Delta update: id:1, class:35, serial:363
+		Demo.MsgPrintf( msg, BufferSize, "%s", msg.DebugString().c_str() );
 	}
 }
 
@@ -366,7 +383,7 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 	{
 		if ( bCSV )
 		{
-			printf("beforecallingprintf1");
+			//printf("beforecallingprintf1");
 			printf( "%s, %s, %d", pField, pPlayerInfo->name, nIndex ); 
 		}
 		else
@@ -512,9 +529,46 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 					HandlePlayerDeath( msg, pDescriptor );
 				}
 
+				if (msg.eventid() != 169 && //jump
+					msg.eventid() != 129 && //weapon_fire
+					msg.eventid() != 132 && //weapon_reload
+					//msg.eventid() != ? && //grenade_thrown (not found)
+					msg.eventid() != 167 && //bullet_impact
+					msg.eventid() != 134 && //silencer_detach
+					msg.eventid() != 133 && //weapon_zoom
+					msg.eventid() != 136 && //weapon_zoom_rifle
+					msg.eventid() != 138 && //item_pickup 
+					msg.eventid() != 139 && //ammo_pickup
+					msg.eventid() != 140 && //item_equip
+					msg.eventid() != 106 && //bomb_abortplant
+					msg.eventid() != 156 && //flashbang_detonate
+					msg.eventid() != 155 && //hegrenade_detonate
+					msg.eventid() != 157 && //smokegrenade_detonate
+					msg.eventid() != 107 && //bomb_planted
+					msg.eventid() != 104 && //item_purchase
+					msg.eventid() != 172) {	//door_moving
+					return;
+				}
+
+				int NumKeys = msg.keys().size();
+				for (int i = 0; i < NumKeys; i++)
+				{
+					const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys(i);
+					const CSVCMsg_GameEvent::key_t& KeyValue = msg.keys(i);
+					if (Key.name().compare("userid") == 0 || Key.name().compare("attacker") == 0 || Key.name().compare("assister") == 0)
+					{
+						//printf("ABCD %s \n", KeyValue.val_string().c_str());
+						player_info_t *pPlayerInfo = FindPlayerInfo(KeyValue.val_short());
+						if (KeyValue.val_short() != userID)
+							return;
+						printf("Event from TargetPlayer with userid: %d \n", KeyValue.val_short());
+					}
+				}
+
+
 				if ( g_bDumpGameEvents )
 				{
-					printf( "%s\n{\n", pDescriptor->name().c_str() );
+					printf( "%s\n{\n", pDescriptor->name().c_str() ); // Event Name
 				}
 				printf(" eventid: ");
 				printf("%ld", msg.eventid());
@@ -745,8 +799,8 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 		{
 			if ( g_bDumpStringTables )
 			{
-				printf("beforedumpingST");
-				printf( " %d, %s, %d, %s \n", entryIndex, pEntry, nBytes, pUserData );
+				//printf("beforedumpingST");
+				//printf( " %d, %s, %d, %s \n", entryIndex, pEntry, nBytes, pUserData );
 			}
 		}
 
@@ -772,7 +826,7 @@ void PrintNetMessage< CSVCMsg_CreateStringTable, svc_CreateStringTable >( CDemoF
 		bool bIsUserInfo = !strcmp( msg.name().c_str(), "userinfo" );
 		if ( g_bDumpStringTables )
 		{
-			printf( "CreateStringTable:%s:%d:%d:%d:%d:\n", msg.name().c_str(), msg.max_entries(), msg.num_entries(), msg.user_data_size(), msg.user_data_size_bits() ); //not relevant
+			//printf( "CreateStringTable:%s:%d:%d:%d:%d:\n", msg.name().c_str(), msg.max_entries(), msg.num_entries(), msg.user_data_size(), msg.user_data_size_bits() ); //not relevant
 		}
 		CBitRead data( &msg.string_data()[ 0 ], msg.string_data().size() );
 		ParseStringTableUpdate( data,  msg.num_entries(), msg.max_entries(), msg.user_data_size(), msg.user_data_size_bits(), msg.user_data_fixed_size(), bIsUserInfo ); 
@@ -1107,15 +1161,24 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 	CSVCMsg_SendTable *pTable = GetTableByClassID( pEntity->m_uClass );
 	if ( g_bDumpPacketEntities )
 	{
-		printf("[beforePrintNetTables]");		
-		printf("Table: %s\n", pTable->net_table_name().c_str());
+		if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
+		{
+			printf("[beforePrintNetTables]");
+			printf("Table: %s\n", pTable->net_table_name().c_str());
+		}
 	}
+	/*
+	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
+	{
+		printf("Ciaooo ");
+		printf("%d", pEntity->m_nEntity);
+	}*/
 	for ( unsigned int i = 0; i < fieldIndices.size(); i++ )
 	{
 		FlattenedPropEntry *pSendProp = GetSendPropByIndex( pEntity->m_uClass, fieldIndices[ i ] );
 		if ( pSendProp )
 		{
-			Prop_t *pProp = DecodeProp( entityBitBuffer, pSendProp, pEntity->m_uClass, fieldIndices[ i ], !g_bDumpPacketEntities );
+			Prop_t *pProp = DecodePropWithEntity( entityBitBuffer, pSendProp, pEntity->m_uClass, fieldIndices[ i ], !g_bDumpPacketEntities, pEntity);
 			pEntity->AddOrUpdateProp( pSendProp, pProp );
 		}
 		else
@@ -1255,7 +1318,7 @@ void PrintNetMessage< CSVCMsg_PacketEntities, svc_PacketEntities >( CDemoFileDum
 							uint32 uSerialNum = entityBitBuffer.ReadUBitLong( NUM_NETWORKED_EHANDLE_SERIAL_NUMBER_BITS );
 							if ( g_bDumpPacketEntities )
 							{
-								printf( "Entity Enters PVS: id:%d, class:%d, serial:%d\n", nNewEntity, uClass, uSerialNum );
+								//printf( "Entity Enters PVS: id:%d, class:%d, serial:%d\n", nNewEntity, uClass, uSerialNum );
 							}
 							EntityEntry *pEntity = AddEntity( nNewEntity, uClass, uSerialNum );
 							if ( !ReadNewEntity( entityBitBuffer, pEntity ) )
@@ -1299,8 +1362,11 @@ void PrintNetMessage< CSVCMsg_PacketEntities, svc_PacketEntities >( CDemoFileDum
 							{
 								if ( g_bDumpPacketEntities )
 								{
-									printf("[BeforePrintDeltaUpdate]");
-									printf( "Entity Delta update: id:%d, class:%d, serial:%d\n", pEntity->m_nEntity, pEntity->m_uClass, pEntity->m_uSerialNum );
+									if (pEntity->m_nEntity == entityID)
+									{
+										printf("Player %llu , UID %d , EID %d", targetPlayerSteamID, userID, entityID);
+										printf("Entity Delta update: id:%d, class:%d, serial:%d\n", pEntity->m_nEntity, pEntity->m_uClass, pEntity->m_uSerialNum);
+									}
 								}
 								if ( !ReadNewEntity( entityBitBuffer, pEntity ) )
 								{
@@ -1568,7 +1634,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 	{
 		if ( g_bDumpStringTables )
 		{
-			printf( "Clearing player info array.\n" );
+			//printf( "Clearing player info array.\n" );
 		}
 		s_PlayerInfos.clear();
 	}
@@ -1612,6 +1678,13 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 							playerInfo.friendsName, playerInfo.fakeplayer, playerInfo.ishltv, playerInfo.filesDownloaded);
 					}
 					s_PlayerInfos.push_back(playerInfo);
+					
+					if (playerInfo.xuid == targetPlayerSteamID)
+					{
+						userID = playerInfo.userID;
+						entityID = playerInfo.entityID;
+						printf("TROVATO TARGET PLAYER %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
+					}
 				}
 				else 
 				{
@@ -1622,7 +1695,8 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 			{
 				if ( g_bDumpStringTables )
 				{
-					printf( " %d, %s, userdata[%d] \n", i, stringname, userDataSize );
+					//printf("boh");
+					//printf( " %d, %s, userdata[%d] \n", i, stringname, userDataSize );
 				}
 			}
 
@@ -1634,8 +1708,8 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 		{
 			if ( g_bDumpStringTables )
 			{
-				printf("[BeforeDumpST2]");
-				printf( " %d, %s \n", i, stringname );
+				//printf("[BeforeDumpST2]");
+				//printf( " %d, %s \n", i, stringname );
 			}
 		}
 	}
@@ -1698,7 +1772,7 @@ bool DumpStringTables( CBitRead &buf )
 
 		if ( g_bDumpStringTables )
 		{
-			printf( "ReadStringTable:%s:", tablename );
+			//printf( "ReadStringTable:%s:", tablename );
 		}
 
 		bool bIsUserInfo = !strcmp( tablename, "userinfo" );

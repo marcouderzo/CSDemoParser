@@ -103,8 +103,9 @@ struct Prop_t
 				break;
 			case DPT_Vector:
 				{
-					printf("[PrintingVecxyz]");
-					printf( "%f, %f, %f\n", m_value.m_vector.x, m_value.m_vector.y, m_value.m_vector.z );
+					//printf("[PrintingVecxyz]");
+					//printf( "%f, %f, %f\n", m_value.m_vector.x, m_value.m_vector.y, m_value.m_vector.z );
+					printf("\n");
 				}
 				break;
 			case DPT_VectorXY:
@@ -153,5 +154,7 @@ struct Prop_t
 struct FlattenedPropEntry;
 
 Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet );
+
+Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet, void *pEntity);
 
 #endif
