@@ -6,6 +6,18 @@ Students Involved in the Project:
 - [Marco Uderzo](https://github.com/marcouderzo)
 - [Samuel Kostadinov](https://github.com/Neskelogth)
 
+## Checklist
+
+- [x] Create the Download Script
+- [x] Create the AutoParse Script
+- [x] Find out Player Events
+- [x] Find out Player Tables with Camera, Position, Velocity
+- [x] Filter Player Table Output based on Player EntityID
+- [x] Filter Player Events Output based on Player userID
+- [ ] Clean Up Output
+- [ ] Format Parser Output as Required
+
+
 ## Important note
 
 If your pc has Avast Antivirus, make sure to turn it off. The parser will not work properly if you leave it running.
@@ -236,7 +248,7 @@ descriptors {
 
 **Crouching**
 
-As of right now, we haven't found any events regarding crouching in the demo descriptors. What we have found, instead, is that m_vecViewOffset[2] is logged just once in all our tests, but it pops up a bunch of times in the crouch test demo. It turned out that m_vecViewOffset is the position of the eyes from vecOrigin.
+As of right now, we haven't found any events regarding crouching in the demo descriptors. What we have found, instead, is that `m_vecViewOffset[2]` is logged just once in all our tests, but it pops up a bunch of times in the crouch test demo. It turned out that `m_vecViewOffset` is the position of the eyes from `vecOrigin`.
 
 ```
 Field: 14, m_vecViewOffset[2] = 64.062561
@@ -256,11 +268,11 @@ Field: 14, m_vecViewOffset[2] = 64.062561
 Field: 14, m_vecViewOffset[2] = 64.062561
 ```
 
-As you can see, the first chunck seems to be the descending part of the crouch action, from 64.062561 to 46.044968. The second one is the ascending part, from 47.671555 back to 64.062561. So we assume that the `64.062561` value represents the standing state, and `46.044968` represents the crouched state.
+As you can see, the first chunck seems to be the descending part of the crouch action, from `64.062561` to `46.044968`. The second one is the ascending part, from `47.671555` back to `64.062561`. So we assume that the `64.062561` value represents the standing state, and `46.044968` represents the crouched state.
 
 **Equipment, Buying Weapons & Items, Picking them Up from the Ground**
 
-Let's talk about item_equip and item_pickup events. The item_pickup event is triggered when a player picks up an item from the ground. The item_equip event states the default equipment / equipment at the start of a new round. When a player buys a weapon both item_equip and item_pickup are triggered in this order. When a player buys an item (e.g. grenade), the item_pickup event alone is triggered.
+Let's talk about `item_equip` and `item_pickup` events. The `item_pickup` event is triggered when a player picks up an item from the ground. The `item_equip` event states the default equipment / equipment at the start of a new round. When a player buys a weapon both `item_equip` and `item_pickup` are triggered in this order. When a player buys an item (e.g. grenade), the `item_pickup` event alone is triggered.
 
 ```
 
@@ -323,12 +335,12 @@ player_death
 
 ```
 
-The useful data in this event are the userid, position, pitch, yaw of the dead player and the attacker, as well as the weapon used to kill and weather or not it was a headshot.
+The useful data in this event are the `userid`, `position`, `pitch`, `yaw` of the dead player and the attacker, as well as the weapon used to kill and weather or not it was a headshot.
 
 
 **Bomb Planted, Bomb Defused**
 
-The bomb_planted event is triggered when a player plants the bomb.
+The `bomb_planted` event is triggered when a player plants the bomb.
 
 ```
 bomb_planted
@@ -340,7 +352,7 @@ bomb_planted
  site: 364 
 }
 ```
-Position, pitch and yaw are useful in order to know where the player plants the bomb inside the bombsite. 
+`Position`, `pitch` and `yaw` are useful in order to know where the player plants the bomb inside the bombsite. 
 
 The `bomb_planted` event is triggered when a player defuses the bomb.
 
@@ -358,7 +370,7 @@ bomb_defused
 
 **Round MVP (Most Valuable Player)**
 
-The round_mvp event is triggered at the end of every round, announcing the Most Valuable Player of the round (most kills, longest time alive...)
+The `round_mvp` event is triggered at the end of every round, announcing the Most Valuable Player of the round (most kills, longest time alive...)
 
 ```
 round_mvp
@@ -371,7 +383,7 @@ round_mvp
  musickitmvps: 0 
 }
 ```
-Position, pitch and yaw show where the player is when the event is triggered. Reason key is yet to be discovered.
+`Position`, `pitch` and `yaw` show where the player is when the event is triggered. `Reason` key is yet to be discovered.
 
 **Finding Event IDs**
 
@@ -395,7 +407,7 @@ CS:GO Data PreProcessing [Research Paper](https://www.researchgate.net/publicati
 
 ### Modifying the Parser
 
-As the parser outputs using printf, we decided to filter the printf calls, making them trigger only when we wanted to log something useful.
+As the parser outputs using `printf`, we decided to filter the `printf` calls, making them trigger only when we wanted to log something useful.
 
 **Setting The Parser Arguments**
 
@@ -404,13 +416,13 @@ Calling the parser with arguments can be annoying and makes the shell commands u
 
 **Cleaning up the output: Useless Printfs**
 
-We commented out printfs calls that were unrelated with the player itself, in order to still keep them in case of further reuse of the parser.
+We commented out `printfs` calls that were unrelated with the player itself, in order to still keep them in case of further reuse of the parser.
 
 **Global Extern Player Variables**
 
-In order to share the SteamID (xuid), UserID and EntityID between multiple files and not having issues with the Linker, we created a new GlobalPlayerInfo.h file with those variables declared as extern.
+In order to share the SteamID (`xuid`), UserID and EntityID between multiple files and not having issues with the Linker, we created a new `GlobalPlayerInfo.h` file with those variables declared as extern.
 
-Those variables are assigned in DumpStringTable() when the parser finds the PlayerInfo with the matching SteamID.
+Those variables are assigned in `DumpStringTable()` when the parser finds the `PlayerInfo` with the matching `SteamID`.
 
 ```
 bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
@@ -428,6 +440,8 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 }
 ```
 **Handling Messages**
+
+The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick". This particular message was originally printed with `vprintf(fmt, vlist)`, and contained other unnecessary information about `host_computationTime`. Having to deal with a function with variable arguments, and being stuck with using a `va_list`, we switched to `vsprintf`, stored the message into a string, and then only kept the tick-related portion of it. We finally convert the string to an integer and store it in currentTick, which is a member variable of the CDemoFileDump class.
 
 ```
 void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size, const char *fmt, ... )
@@ -459,14 +473,10 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 }
 ```
 
-The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick". This particular message was originally printed with `vprintf(fmt, vlist)`, and contained other unnecessary information about `host_computationTime`. Having to deal with a function with variable arguments, and being stuck with using a `va_list`, we switched to `vsprintf`, stored the message into a string, and then only kept the tick-related portion of it. We finally convert the string to an integer and store it in currentTick, which is a member variable of the CDemoFileDump class.
-
-
-
 **Handling Tables: Only Keeping Track of the Target Player's DT_CSPlayer Table**
 
-The `ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )` function reads the Table Name and then for each field of the table itself, it will call DecodeProp() to print it. 
-First of all, we modified ReadNewEntity() to only print the table name if it is related to the target player.
+The `ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )` function reads the Table Name and then for each field of the table itself, it will call `DecodeProp()` to print it. 
+First of all, we modified `ReadNewEntity()` to only print the table name if it is related to the target player.
 
 ```
 bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
@@ -482,7 +492,7 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 	//other code
 }
 ```
-Then, it was time to modify DecodeProp().
+Then, it was time to modify `DecodeProp().`
 
 ```
 Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet )
@@ -513,7 +523,7 @@ Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedPro
 
 ```
 
-After modifiying it, we realized it printed the right fields, but of every player in the match. In order to fix it, we would have to pass an additional argument to DecodeProp(), potentially breaking the code somewhere else. Thus, we decided to play it safe and created a new function `Prop_t *DecodePropWithEntity()`, which is basically the same as the original one, but it also takes in an EntityEntry, used to check whether or not the Entity is actually the target player or someone else. 
+After modifiying it, we realized it printed the right fields, but of every player in the match. In order to fix it, we would have to pass an additional argument to `DecodeProp()`, potentially breaking the code somewhere else. Thus, we decided to play it safe and created a new function `Prop_t *DecodePropWithEntity()`, which is basically the same as the original one, but it also takes in an `EntityEntry`, used to check whether or not the Entity is actually the target player or someone else. 
 
 ```
 Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet, void *pEntity)
@@ -544,7 +554,7 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 
 **Parsing the chosen Game Events of the Target Player**
 
-In ParseGameEvent(),  the CSVCMsg_GameEvent msg has its own eventid() method, which obviously returns the eventID. We check if the eventID is actually the one we want, else we return. Then we search in the msg keys the userID of the player, and if it is actually an event from the target player, we let the parser print it, else we return.
+In `ParseGameEvent()`,  the `CSVCMsg_GameEvent msg` has its own `eventid()` method, which obviously returns the `eventID`. We check if the `eventID` is actually the one we want, else we return. Then we search in the `msg` keys the userID of the player, and if it is actually an event from the target player, we let the parser print it, else we return.
 
 ```
 void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
