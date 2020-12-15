@@ -398,6 +398,11 @@ CS:GO Data PreProcessing [Research Paper](https://www.researchgate.net/publicati
 As the parser outputs using printf, we decided to filter the printf calls, making them trigger only when we wanted to log something useful.
 
 
+**Cleaning up the output: Useless Printfs**
+
+We commented out printfs calls that were unrelated with the player itself, in order to still keep them in case of further reuse of the parser.
+
+
 **Handling Messages**
 
 ```
@@ -430,8 +435,28 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 
 The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick". This particular message was originally printed with `vprintf(fmt, vlist)`, and contained other unnecessary information about `host_computationTime`. Having to deal with a function with variable arguments, and being stuck with using a `va_list`, we switched to `vsprintf`, stored the message into a string, and then only kept the tick-related portion of it.
 
-**Handling Tables: Only Keeping Track of DT_CSPlayer**
 
+
+**Handling Tables: Only Keeping Track of the Target Player's DT_CSPlayer Table**
+
+The `ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )` function reads the Table Name and then for each field of the table itself, it will call DecodeProp() to print it. 
+First of all, we modified ReadNewEntity() to only print the table name if it is related to the target player.
+
+```
+bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
+{
+	//other code
+	
+	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
+	{
+		printf("[beforePrintNetTables]");
+		printf("Table: %s\n", pTable->net_table_name().c_str());
+	}
+	
+	//other code
+}
+```
+Then, it was time to modify DecodeProp().
 
 ```
 Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet )
@@ -462,31 +487,9 @@ Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedPro
 
 ```
 
-Same as before, we let printf be called only if the table field is one of the chosen features.
+After modifiying it, we realized it printed the right fields, but of every player in the match. In order to fix it, we would have to pass an additional argument to DecodeProp(), potentially breaking the code somewhere else. Thus, we decided to play it safe and created a new function.
 
-**Player Related Game Events**
 
-```
-void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
-{
-	//other code
-	
-	if ( g_bDumpGameEvents )
-	{
-		printf( "%s\n{\n", pDescriptor->name().c_str() );
-	}
-	printf(" eventid: ");
-	printf("%ld", msg.eventid());
-	printf("\n");
-	
-	//other code
-
-```
-We made the parser print the event id of the current event.
-
-**Cleaning up the output: Useless Printfs**
-
-We commented out printfs calls that were unrelated with the player itself, in order to still keep them in case of further reuse of the parser.
 
 **Global Extern Player Variables**
 
