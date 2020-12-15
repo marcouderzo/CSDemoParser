@@ -25,7 +25,7 @@ Students Involved in the Project:
 **Parser Modifications**
 - [x] Filter Player Table Output based on Player EntityID
 - [x] Filter Player Events Output based on Player userID
-- [ ] Clean Up Output
+- [x] Clean Up Output
 - [ ] Format Parser Output as Required
 
 
