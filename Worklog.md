@@ -17,6 +17,8 @@ Students Involved in the Project:
 
 **Parser Understanding**
 - [x] General Understanding of demoinfogo
+- [x] Find out a Complete Event List
+- [x] Create *Ad-hoc* Demos for Testing
 - [x] Find out Player Tables with Camera, Position, Velocity
 - [x] Find out Player Events
 
