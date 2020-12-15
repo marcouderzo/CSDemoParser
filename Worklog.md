@@ -99,7 +99,7 @@ We made sure that the log file had the same name of the demo. All of this was do
 
 Of course demoinfogo parses the whole match and logs way too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. 
 
-Already, `-deathscsv`, `-stringtables`, `-datatables`,  are not necessary whatsoever. This discards a lot of data we don't need.
+**Update: See Parser Modifications** Already, `-deathscsv`, `-stringtables`, `-datatables`,  are not necessary whatsoever. This discards a lot of data we don't need.
 
 The set of arguments of choice is: `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages`. We don't need footsteps, as they are events that have more to do with sound and surrounding awareness of a player rather than with the player himself. We also decided to skip match warmups, as they are not so much interesting to log. If they are something you want to include in the log, remove that argument.
 
@@ -487,6 +487,60 @@ We made the parser print the event id of the current event.
 **Cleaning up the output: Useless Printfs**
 
 We commented out printfs calls that were unrelated with the player itself, in order to still keep them in case of further reuse of the parser.
+
+**Global Extern Player Variables**
+
+In order to share the SteamID (xuid), UserID and EntityID between multiple files and not having issues with the Linker, we created a new GlobalPlayerInfo.h file with those variables declared as extern.
+
+**Parsing the chosen Game Events of the Target Player**
+
+In ParseGameEvent(),  the CSVCMsg_GameEvent msg has its own eventid() method, which obviously returns the eventID. We check if the eventID is actually the one we want, else we return. Then we search in the msg keys the userID of the player, and if it is actually an event from the target player, we let the parser print it, else we return.
+
+```
+void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
+{
+	//other code
+
+	if (msg.eventid() != 169 && //jump
+		msg.eventid() != 129 && //weapon_fire
+		msg.eventid() != 132 && //weapon_reload
+		//msg.eventid() != ? && //grenade_thrown (not found)
+		msg.eventid() != 167 && //bullet_impact
+		msg.eventid() != 134 && //silencer_detach
+		msg.eventid() != 133 && //weapon_zoom
+		msg.eventid() != 136 && //weapon_zoom_rifle
+		msg.eventid() != 138 && //item_pickup 
+		msg.eventid() != 139 && //ammo_pickup
+		msg.eventid() != 140 && //item_equip
+		msg.eventid() != 106 && //bomb_abortplant
+		msg.eventid() != 156 && //flashbang_detonate
+		msg.eventid() != 155 && //hegrenade_detonate
+		msg.eventid() != 157 && //smokegrenade_detonate
+		msg.eventid() != 107 && //bomb_planted
+		msg.eventid() != 104 && //item_purchase
+		msg.eventid() != 172) {	//door_moving
+		return;
+	}
+
+	int NumKeys = msg.keys().size();
+	for (int i = 0; i < NumKeys; i++)
+	{
+		const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys(i);
+		const CSVCMsg_GameEvent::key_t& KeyValue = msg.keys(i);
+		if (Key.name().compare("userid") == 0 || Key.name().compare("attacker") == 0 || Key.name().compare("assister") == 0)
+		{
+			player_info_t *pPlayerInfo = FindPlayerInfo(KeyValue.val_short());
+			if (KeyValue.val_short() != userID)
+				return;
+			printf("Event from TargetPlayer with userid: %d \n", KeyValue.val_short());
+		}
+	}	
+	
+	//other code
+}
+```
+
+
 
 
 ## Automating the Parsing of the Match Pool
