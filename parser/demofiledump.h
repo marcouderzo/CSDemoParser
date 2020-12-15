@@ -239,8 +239,6 @@ public:
 	CDemoFile m_demofile;
 	CSVCMsg_GameEventList m_GameEventList;
 
-	int currentTick;
-
 	int m_nFrameNumber;
 
 };

@@ -39,9 +39,25 @@
 
 #include "GlobalPlayerInfo.h"
 
+
+// extern variables from GlobalPlayerInfo.h
 unsigned long long targetPlayerSteamID;
 int userID;
 int entityID;
+double mouseCoordX;
+double mouseCoordY;
+
+double playerPositionX;
+double playerPositionY;
+double playerPositionZ;
+
+double playerVelocityX;
+double playerVelocityY;
+double playerVelocityZ;
+
+int currentTick;
+
+//////////////////////////////////////
 
 // file globals
 static int s_nNumStringTables;
@@ -114,7 +130,7 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 			s.erase(endOfTickDelimiter);
 			s.erase(0, s.find_last_of(':')+1);
 			currentTick = std::stoi(s);
-			printf("------ Tick = %ld ------\n", currentTick);	
+			//printf("------ Tick = %ld ------\n", currentTick);	
 			va_end(vlist);
 		}
 
@@ -128,7 +144,7 @@ void PrintUserMessage( CDemoFileDump& Demo, const void *parseBuffer, int BufferS
 	
 	if ( msg.ParseFromArray( parseBuffer, BufferSize ) )
 	{
-		printf("[FromPrintUserMessage]");
+		//printf("[FromPrintUserMessage]");
 		Demo.MsgPrintf( msg, BufferSize, "%s", msg.DebugString().c_str() );
 	}
 }
@@ -570,11 +586,11 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 								isEventInteresting = true;
 							}
 						}
-						printf("Event from TargetPlayer with userid: %d \n", KeyValue.val_short());
+						//printf("Event from TargetPlayer with userid: %d \n", KeyValue.val_short());
 					}
 				}
 
-				if (!isEventInteresting) return;
+				if (!isEventInteresting && isPlayerDeath) return;
 
 				if ( g_bDumpGameEvents )
 				{
@@ -865,7 +881,7 @@ void PrintNetMessage< CSVCMsg_UpdateStringTable, svc_UpdateStringTable >( CDemoF
 			bool bIsUserInfo = !strcmp( table.szName, "userinfo" );
 			if ( g_bDumpStringTables )
 			{
-				printf( "UpdateStringTable:%d(%s):%d:\n", msg.table_id(), table.szName, msg.num_changed_entries() );
+				//printf( "UpdateStringTable:%d(%s):%d:\n", msg.table_id(), table.szName, msg.num_changed_entries() );
 			}
 			ParseStringTableUpdate( data, msg.num_changed_entries(), table.nMaxEntries, table.nUserDataSize, table.nUserDataSizeBits, table.nUserDataFixedSize, bIsUserInfo ); 
 		}
@@ -1173,8 +1189,8 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 	{
 		if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
 		{
-			printf("[beforePrintNetTables]");
-			printf("Table: %s\n", pTable->net_table_name().c_str());
+			//printf("[beforePrintNetTables]");
+			//printf("Table: %s\n", pTable->net_table_name().c_str());
 		}
 	}
 	/*
@@ -1195,6 +1211,20 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 			return false;
 		}
 	}
+
+	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
+	{
+		printf("Entity %d %f %f %f %f %f %f %f %f %f %f \n", currentTick,
+																mouseCoordX,
+																mouseCoordY,
+																playerPositionX,
+																playerPositionY,
+																playerPositionZ,
+																playerVelocityX,
+																playerVelocityY,
+																playerVelocityZ);
+	}
+
 
 	return true;
 }
@@ -1373,8 +1403,8 @@ void PrintNetMessage< CSVCMsg_PacketEntities, svc_PacketEntities >( CDemoFileDum
 								{
 									if (pEntity->m_nEntity == entityID)
 									{
-										printf("Player %llu , UID %d , EID %d", targetPlayerSteamID, userID, entityID);
-										printf("Entity Delta update: id:%d, class:%d, serial:%d\n", pEntity->m_nEntity, pEntity->m_uClass, pEntity->m_uSerialNum);
+										//printf("Player %llu , UID %d , EID %d", targetPlayerSteamID, userID, entityID);
+										//printf("Entity Delta update: id:%d, class:%d, serial:%d\n", pEntity->m_nEntity, pEntity->m_uClass, pEntity->m_uSerialNum);
 									}
 								}
 								if ( !ReadNewEntity( entityBitBuffer, pEntity ) )
@@ -1692,7 +1722,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 					{
 						userID = playerInfo.userID;
 						entityID = playerInfo.entityID;
-						printf("Found Target Player: %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
+						//printf("Found Target Player: %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
 					}
 				}
 				else 

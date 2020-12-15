@@ -294,7 +294,7 @@ Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedPro
 			pSendProp->var_name() == "m_angEyeAngles[1]")
 		{
 			//printf("[beforeDecodePropPrint]");
-			if (nFieldIndex != 6 && nFieldIndex != 16)
+			if (nFieldIndex != 16)
 			{
 				printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
 				hasToPrint = true;
@@ -339,6 +339,7 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 	const CSVCMsg_SendTable::sendprop_t *pSendProp = pFlattenedProp->m_prop;
 
 	bool hasToPrint = false;
+	bool hasToRefresh = false;
 
 	Prop_t *pResult = NULL;
 
@@ -356,41 +357,94 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 		pSendProp->var_name() == "m_angEyeAngles[1]") && Entity->m_nEntity==entityID)
 	{
 		//printf("[beforeDecodePropPrint]");
-		if (nFieldIndex != 6 && nFieldIndex != 16)
+		if (nFieldIndex != 16)
 		{
-			printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
-			hasToPrint = true;
+			//printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
+			hasToRefresh = true;
 		}
 	}
 	switch (pSendProp->type())
 	{
 	case DPT_Int:
 		pResult->m_value.m_int = Int_Decode(entityBitBuffer, pSendProp);
+		//printf("[Type is DPT_Int, ");
 		break;
 	case DPT_Float:
 		pResult->m_value.m_float = Float_Decode(entityBitBuffer, pSendProp);
+		//printf("[Type is DPT_Float, ");
 		break;
 	case DPT_Vector:
 		Vector_Decode(entityBitBuffer, pSendProp, pResult->m_value.m_vector);
+		//printf("[Type is DPT_Vector, ");
 		break;
 	case DPT_VectorXY:
 		VectorXY_Decode(entityBitBuffer, pSendProp, pResult->m_value.m_vector);
+		//printf("[Type is DPT_VectorXY, ");
 		break;
 	case DPT_String:
 		pResult->m_value.m_pString = String_Decode(entityBitBuffer, pSendProp);
+		//printf("[Type is DPT_String, ");
 		break;
 	case DPT_Array:
 		pResult = Array_Decode(entityBitBuffer, pFlattenedProp, pSendProp->num_elements(), uClass, nFieldIndex, bQuiet);
+		//printf("[Type is DPT_Array, ");
 		break;
 	case DPT_DataTable:
 		break;
 	case DPT_Int64:
 		pResult->m_value.m_int64 = Int64_Decode(entityBitBuffer, pSendProp);
+		//printf("[Type is DPT_Int64, ");
 		break;
 	}
 	if (!bQuiet && hasToPrint)
 	{
-		pResult->Print();
+		//pResult->Print();
 	}
+	
+	if (hasToRefresh)
+	{
+		if (pSendProp->var_name() == "m_vecVelocity[0]")
+		{
+			playerVelocityX = pResult->m_value.m_float;
+			//printf("Used m_float 1 ] \n");
+		}
+		
+		if (pSendProp->var_name() == "m_vecVelocity[1]")
+		{
+			playerVelocityZ = pResult->m_value.m_float;
+			//printf("Used m_float 2] \n");
+		}
+
+		if (pSendProp->var_name() == "m_vecVelocity[2]")
+		{
+			playerVelocityY = pResult->m_value.m_float;
+			//printf("Used m_float 3] \n");
+		}
+
+		if (pSendProp->var_name() == "m_vecOrigin")
+		{
+			playerPositionX = pResult->m_value.m_vector.x;
+			playerPositionY = pResult->m_value.m_vector.y;
+			//printf("Used vector.x & vector.y ] \n");
+		}
+		if (pSendProp->var_name() == "m_vecOrigin[2]")
+		{
+			playerPositionZ = pResult->m_value.m_vector.z;
+			//printf("Set m_vecorigin2 ] \n");
+		}
+		if (pSendProp->var_name() == "m_angEyeAngles[0]")
+		{
+			mouseCoordY = pResult->m_value.m_float;
+			//printf("Used m_float 4 ] \n");
+		}
+		if (pSendProp->var_name() == "m_angEyeAngles[1]")
+		{
+			mouseCoordX = pResult->m_value.m_float;
+			//printf("Used m_float 5] \n");
+		}
+		
+
+	}
+
 	return pResult;
 }

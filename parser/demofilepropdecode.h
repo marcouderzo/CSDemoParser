@@ -83,7 +83,7 @@ struct Prop_t
 	{
 		if ( m_nNumElements > 0 )
 		{
-			printf("[BeforePrintProp]");
+			//printf("[BeforePrintProp]");
 			printf( " Element: %d  ", ( nMaxElements ? nMaxElements : m_nNumElements ) - m_nNumElements ); //prints Element: 0  43285
 		}
 
@@ -91,13 +91,13 @@ struct Prop_t
 		{
 			case DPT_Int:
 				{
-					printf("[PrintValInt]");
+					//printf("[PrintValInt]");
 					printf( "%d\n", m_value.m_int );
 				}
 				break;
 			case DPT_Float:
 				{
-					printf("[PrintValFloat]");
+					//printf("[PrintValFloat]");
 					printf( "%f\n", m_value.m_float );
 				}
 				break;
@@ -110,13 +110,13 @@ struct Prop_t
 				break;
 			case DPT_VectorXY:
 				{
-					printf("[PrintingVecxy]");
+					//printf("[PrintingVecxy]");
 					printf( "%f, %f\n", m_value.m_vector.x, m_value.m_vector.y );
 				}
 				break;
 			case DPT_String:
 				{
-					printf("[printingValToStr]");
+					//printf("[printingValToStr]");
 					printf( "%s\n", m_value.m_pString );
 				}
 				break;
