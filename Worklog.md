@@ -8,10 +8,19 @@ Students Involved in the Project:
 
 ## Checklist
 
+**Matches**
+- [x] CS:GO Demo Retrievement: Feasibility Study and Decisions
+
+**Scripts**
 - [x] Create the Download Script
 - [x] Create the AutoParse Script
-- [x] Find out Player Events
+
+**Parser Understanding**
+- [x] General Understanding of demoinfogo
 - [x] Find out Player Tables with Camera, Position, Velocity
+- [x] Find out Player Events
+
+**Parser Modifications**
 - [x] Filter Player Table Output based on Player EntityID
 - [x] Filter Player Events Output based on Player userID
 - [ ] Clean Up Output
