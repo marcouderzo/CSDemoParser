@@ -102,13 +102,11 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 	{
 		va_list vlist;
 		const std::string& TypeName = msg.GetTypeName();
-		// Print the message type and size
-		//if (TypeName == "CNETMsg_Tick")
-			//printf("---- %s (%d bytes) -----------------\n", TypeName.c_str(), size);
 
-		va_start(vlist, fmt);
+
 		if (TypeName == "CNETMsg_Tick")
 		{
+			va_start(vlist, fmt);
 			char res[500];
 			vsprintf(res, fmt, vlist);
 			std::string s = res;
@@ -117,8 +115,9 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 			s.erase(0, s.find_last_of(':')+1);
 			currentTick = std::stoi(s);
 			printf("------ Tick = %ld ------\n", currentTick);	
+			va_end(vlist);
 		}
-		va_end(vlist);
+
 	}
 }
 
@@ -129,8 +128,7 @@ void PrintUserMessage( CDemoFileDump& Demo, const void *parseBuffer, int BufferS
 	
 	if ( msg.ParseFromArray( parseBuffer, BufferSize ) )
 	{
-		printf("[FromPrintUserMessage]\n");
-		//printf(msg.DebugString().c_str());
+		printf("[FromPrintUserMessage]");
 		Demo.MsgPrintf( msg, BufferSize, "%s", msg.DebugString().c_str() );
 	}
 }
@@ -468,45 +466,42 @@ void HandlePlayerDeath( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventLis
 	int assisterid = 0;
 	const char *pWeaponName = NULL;
 	bool bHeadshot = false;
-	for ( int i = 0; i < numKeys; i++ )
+	for (int i = 0; i < numKeys; i++)
 	{
-		const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys( i );
-		const CSVCMsg_GameEvent::key_t& KeyValue = msg.keys( i );
+		const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys(i);
+		const CSVCMsg_GameEvent::key_t& KeyValue = msg.keys(i);
 
-		if ( Key.name().compare( "userid" ) == 0 )
+		if (Key.name().compare("userid") == 0)
 		{
 			userid = KeyValue.val_short();
 		}
-		else if ( Key.name().compare( "attacker" ) == 0 )
+		else if (Key.name().compare("attacker") == 0)
 		{
 			attackerid = KeyValue.val_short();
 		}
-		else if ( Key.name().compare( "assister" ) == 0 )
+		else if (Key.name().compare("assister") == 0)
 		{
 			assisterid = KeyValue.val_short();
 		}
-		else if ( Key.name().compare( "weapon" ) == 0 )
+		else if (Key.name().compare("weapon") == 0)
 		{
 			pWeaponName = KeyValue.val_string().c_str();
 		}
-		else if ( Key.name().compare( "headshot" ) == 0 )
+		else if (Key.name().compare("headshot") == 0)
 		{
 			bHeadshot = KeyValue.val_bool();
 		}
 	}
-	
-	ShowPlayerInfo( "victim", userid, true, true );
-	//printf("(before ,)");
-	printf ( ", " );
-	ShowPlayerInfo( "attacker", attackerid, true, true );
-	//printf("(before weapoonname, hs tf)");
-	printf( ", %s, %s", pWeaponName, bHeadshot ? "true" : "false" );
-	if ( assisterid != 0 )
+
+	ShowPlayerInfo("victim", userid, true, true);
+	printf(", ");
+	ShowPlayerInfo("attacker", attackerid, true, true);
+	printf(", %s, %s", pWeaponName, bHeadshot ? "true" : "false");
+	if (assisterid != 0)
 	{
-		//printf ( ", " );
-		ShowPlayerInfo( "assister", assisterid, true, true );
+		ShowPlayerInfo("assister", assisterid, true, true);
 	}
-	printf( "\n" );
+	printf("\n");
 }
 
 void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
@@ -524,10 +519,13 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 				}
 
 				bool bAllowDeathReport = !g_bSupressWarmupDeaths || s_bMatchStartOccured;
-				if ( pDescriptor->name().compare( "player_death" ) == 0 && g_bDumpDeaths && bAllowDeathReport )
+				bool isPlayerDeath = false;
+				if (pDescriptor->name().compare("player_death") == 0 && g_bDumpDeaths && bAllowDeathReport)
 				{
-					HandlePlayerDeath( msg, pDescriptor );
+					isPlayerDeath = true;
+					//HandlePlayerDeath(msg, pDescriptor);
 				}
+
 
 				if (msg.eventid() != 169 && //jump
 					msg.eventid() != 129 && //weapon_fire
@@ -546,9 +544,12 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 					msg.eventid() != 157 && //smokegrenade_detonate
 					msg.eventid() != 107 && //bomb_planted
 					msg.eventid() != 104 && //item_purchase
+					msg.eventid() != 23  && //player_death
 					msg.eventid() != 172) {	//door_moving
 					return;
 				}
+
+				bool isEventInteresting = false;
 
 				int NumKeys = msg.keys().size();
 				for (int i = 0; i < NumKeys; i++)
@@ -557,14 +558,24 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 					const CSVCMsg_GameEvent::key_t& KeyValue = msg.keys(i);
 					if (Key.name().compare("userid") == 0 || Key.name().compare("attacker") == 0 || Key.name().compare("assister") == 0)
 					{
-						//printf("ABCD %s \n", KeyValue.val_string().c_str());
 						player_info_t *pPlayerInfo = FindPlayerInfo(KeyValue.val_short());
-						if (KeyValue.val_short() != userID)
+						if (KeyValue.val_short() != userID && !isPlayerDeath)
 							return;
+						else if (isPlayerDeath)
+						{
+							if ((Key.name().compare("userid") == 0 && KeyValue.val_short() == userID) ||
+								(Key.name().compare("attacker") == 0 && KeyValue.val_short() == userID) ||
+								(Key.name().compare("assister") == 0 && KeyValue.val_short() == userID))
+							{
+								isEventInteresting = true;
+							}
+
+						}
 						printf("Event from TargetPlayer with userid: %d \n", KeyValue.val_short());
 					}
 				}
 
+				if (!isEventInteresting) return;
 
 				if ( g_bDumpGameEvents )
 				{
@@ -1170,7 +1181,6 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 	/*
 	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
 	{
-		printf("Ciaooo ");
 		printf("%d", pEntity->m_nEntity);
 	}*/
 	for ( unsigned int i = 0; i < fieldIndices.size(); i++ )
