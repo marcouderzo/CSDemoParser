@@ -569,7 +569,6 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 							{
 								isEventInteresting = true;
 							}
-
 						}
 						printf("Event from TargetPlayer with userid: %d \n", KeyValue.val_short());
 					}
@@ -801,9 +800,9 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 
 			if ( g_bDumpStringTables )
 			{
-				printf( "player info\n{\n %s:true\n xuid:%lld\n name:%s\n userID:%d\n guid:%s\n friendsID:%d\n friendsName:%s\n fakeplayer:%d\n ishltv:%d\n filesDownloaded:%d\n}\n",
-					bAdded ? "adding" : "updating", playerInfo.xuid, playerInfo.name, playerInfo.userID, playerInfo.guid, playerInfo.friendsID,
-					playerInfo.friendsName, playerInfo.fakeplayer, playerInfo.ishltv, playerInfo.filesDownloaded );  // this should just print basic player info
+				//printf( "player info\n{\n %s:true\n xuid:%lld\n name:%s\n userID:%d\n guid:%s\n friendsID:%d\n friendsName:%s\n fakeplayer:%d\n ishltv:%d\n filesDownloaded:%d\n}\n",
+					//bAdded ? "adding" : "updating", playerInfo.xuid, playerInfo.name, playerInfo.userID, playerInfo.guid, playerInfo.friendsID,
+					//playerInfo.friendsName, playerInfo.fakeplayer, playerInfo.ishltv, playerInfo.filesDownloaded );  // this should just print basic player info
 			}
 		}
 		else
@@ -1353,11 +1352,11 @@ void PrintNetMessage< CSVCMsg_PacketEntities, svc_PacketEntities >( CDemoFileDum
 								{
 									if ( UpdateFlags & FHDR_DELETE )
 									{
-										printf( "Entity leaves PVS and is deleted: id:%d\n", nNewEntity );
+										//printf( "Entity leaves PVS and is deleted: id:%d\n", nNewEntity );
 									}
 									else
 									{
-										printf( "Entity leaves PVS: id:%d\n", nNewEntity );
+										//printf( "Entity leaves PVS: id:%d\n", nNewEntity );
 									}
 								}
 								RemoveEntity( nNewEntity );
@@ -1637,7 +1636,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 	int numstrings = buf.ReadWord();
 	if ( g_bDumpStringTables )
 	{
-		printf( "%d\n", numstrings );
+		//printf( "%d\n", numstrings );
 	}
 
 	if( bIsUserInfo )
@@ -1682,10 +1681,10 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 				{
 					if (g_bDumpStringTables) 
 					{
-						printf("[BeforeDumpST1]");
-						printf("adding:player entity:%d info:\n xuid:%lld\n name:%s\n userID:%d\n guid:%s\n friendsID:%d\n friendsName:%s\n fakeplayer:%d\n ishltv:%d\n filesDownloaded:%d\n",
-							i, playerInfo.xuid, playerInfo.name, playerInfo.userID, playerInfo.guid, playerInfo.friendsID,
-							playerInfo.friendsName, playerInfo.fakeplayer, playerInfo.ishltv, playerInfo.filesDownloaded);
+						//printf("[BeforeDumpST1]");
+						//printf("adding:player entity:%d info:\n xuid:%lld\n name:%s\n userID:%d\n guid:%s\n friendsID:%d\n friendsName:%s\n fakeplayer:%d\n ishltv:%d\n filesDownloaded:%d\n",
+						//	i, playerInfo.xuid, playerInfo.name, playerInfo.userID, playerInfo.guid, playerInfo.friendsID,
+						//	playerInfo.friendsName, playerInfo.fakeplayer, playerInfo.ishltv, playerInfo.filesDownloaded); //USEFUL FOR DEBUGGING AND CHECKING
 					}
 					s_PlayerInfos.push_back(playerInfo);
 					
@@ -1693,7 +1692,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 					{
 						userID = playerInfo.userID;
 						entityID = playerInfo.entityID;
-						printf("TROVATO TARGET PLAYER %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
+						printf("Found Target Player: %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
 					}
 				}
 				else 
