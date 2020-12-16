@@ -611,6 +611,110 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 }
 ```
 
+**Formatting the Entity Output as Required**
+
+From this [research paper](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) from Charles University, Prague, we found out that "*Each entity in the game is represented by its own structure (e.g., a player has a structure which contains coordinates on the map, pitch, health, etc.). Delta changes basically forms an update transaction of these structures – i.e., a list of game objects andtheir properties which should be inserted, updated, or removed from the game. Delta changes are much more complex to process as they do not carry a complete information, but only a change from the previous state.*" Therefore, to process the state of the game completely, we firstly had to gather all the data, store them and refresh them when it changed, as implied in the paper itself.
+
+In order to format the output in the form of: 
+
+```
+Entity currentTick, mouseCoordX, mouseCoordY, playerPositionX, playerPositionY, playerPositionZ, playerVelocityX, playerVelocityY, playerVelocityZ
+```
+
+we decided to add to `GlobalPlayerInfo.h` those variables, making them conveniently accessible from everywhere in the parser.
+
+```
+// Player Entity-Event Info
+extern double mouseCoordX;
+extern double mouseCoordY;
+
+extern double playerPositionX;
+extern double playerPositionY;
+extern double playerPositionZ;
+
+extern double playerVelocityX;
+extern double playerVelocityY;
+extern double playerVelocityZ;
+
+
+// Tick count
+extern int currentTick;
+```
+
+As those variables are decoded and printed in `DecodePropWithEntity()`, we modified it to update the variables in `GlobalPlayerInfo.h`, instead of printing them directly.
+
+```
+Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet, void *pEntity)
+{
+	//other code
+	
+	if (hasToRefresh)
+	{
+		if (pSendProp->var_name() == "m_vecVelocity[0]")
+		{
+			playerVelocityX = pResult->m_value.m_float;
+		}
+
+		if (pSendProp->var_name() == "m_vecVelocity[1]")
+		{
+			playerVelocityZ = pResult->m_value.m_float;
+		}
+
+		if (pSendProp->var_name() == "m_vecVelocity[2]")
+		{
+			playerVelocityY = pResult->m_value.m_float;
+		}
+
+		if (pSendProp->var_name() == "m_vecOrigin")
+		{
+			playerPositionX = pResult->m_value.m_vector.x;
+			playerPositionY = pResult->m_value.m_vector.y;
+		}
+		if (pSendProp->var_name() == "m_vecOrigin[2]")
+		{
+			playerPositionZ = pResult->m_value.m_vector.z;
+		}
+		if (pSendProp->var_name() == "m_angEyeAngles[0]")
+		{
+			mouseCoordY = pResult->m_value.m_float;
+		}
+		if (pSendProp->var_name() == "m_angEyeAngles[1]")
+		{
+			mouseCoordX = pResult->m_value.m_float;
+		}
+
+	}
+	
+	// other code
+}
+```
+
+
+In the `bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )` function, when the `DT_CSPlayer` table is read,  we let `DecodePropWithEntity()` update the values and when the `DT_CSPlayer` entityID matches the target player's entityID we print out the data.
+
+```
+bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
+{
+	// other code
+	
+	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
+	{
+		printf("Entity %d %f %f %f %f %f %f %f %f %f %f \n", currentTick,
+								     mouseCoordX,
+								     mouseCoordY,
+								     playerPositionX,
+								     playerPositionY,
+								     playerPositionZ,
+								     playerVelocityX,
+								     playerVelocityY,
+								     playerVelocityZ);
+	}
+	
+	// other code
+}
+```
+
+
 
 
 
