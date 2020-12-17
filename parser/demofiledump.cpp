@@ -393,12 +393,12 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 		if ( bCSV )
 		{
 			//printf("beforecallingprintf1");
-			printf( "%s, %s, %d", pField, pPlayerInfo->name, nIndex ); 
+			//printf( "%s, %s, %d", pField, pPlayerInfo->name, nIndex ); 
 		}
 		else
 		{
 			//printf("beforecallingprintf2");
-			printf( " %s: %s (id:%d)\n", pField, pPlayerInfo->name, nIndex ); //player_footstep{beforecallingprintf2 userid : AdreN(id : 12)}
+			//printf( " %s: %s (id:%d) ", pField, pPlayerInfo->name, nIndex ); //player_footstep{beforecallingprintf2 userid : AdreN(id : 12)}
 		}
 
 		/*weapon_fire
@@ -424,12 +424,12 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 					if ( bCSV )
 					{
 						//printf("beforeprintf1");
-						printf( ", %f, %f, %f", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
+						printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
 					}
 					else
 					{
 						//printf("beforeprintf2");
-						printf( "  position: %f, %f, %f\n", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
+						printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
 					}
 				}
 				PropEntry *pAngle0Prop = pEntity->FindProp( "m_angEyeAngles[0]" );
@@ -439,12 +439,12 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 					if ( bCSV )
 					{
 						//printf("beforeprintf3");
-						printf( ", %f, %f", pAngle0Prop->m_pPropValue->m_value.m_float, pAngle1Prop->m_pPropValue->m_value.m_float );
+						//printf( ", %f, %f", pAngle0Prop->m_pPropValue->m_value.m_float, pAngle1Prop->m_pPropValue->m_value.m_float );
 					}
 					else
 					{
 						//printf("beforeprintf4");
-						printf( "  facing: pitch:%f, yaw:%f\n", pAngle0Prop->m_pPropValue->m_value.m_float, pAngle1Prop->m_pPropValue->m_value.m_float );
+						//printf( "  facing: pitch:%f, yaw:%f\n", pAngle0Prop->m_pPropValue->m_value.m_float, pAngle1Prop->m_pPropValue->m_value.m_float );
 					}
 				}
 				PropEntry *pTeamProp = pEntity->FindProp( "m_iTeamNum" );
@@ -453,12 +453,12 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 					if ( bCSV )
 					{
 						//printf("beforeprintf5");
-						printf( ", %s", ( pTeamProp->m_pPropValue->m_value.m_int == 2 ) ? "T" : "CT" );
+						//printf( ", %s", ( pTeamProp->m_pPropValue->m_value.m_int == 2 ) ? "T" : "CT" );
 					}
 					else
 					{
 						//printf("beforeprintf6");
-						printf( "  team: %s\n", ( pTeamProp->m_pPropValue->m_value.m_int == 2 ) ? "T" : "CT" );
+						//printf( "  team: %s\n", ( pTeamProp->m_pPropValue->m_value.m_int == 2 ) ? "T" : "CT" );
 					}
 				}
 			}
@@ -531,13 +531,15 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 
 				bool bAllowDeathReport = !g_bSupressWarmupDeaths || s_bMatchStartOccured;
 				bool isPlayerDeath = false;
-				if (pDescriptor->name().compare("player_death") == 0 && g_bDumpDeaths && bAllowDeathReport)
+				if (pDescriptor->name().compare("player_death") == 0)
 				{
 					isPlayerDeath = true;
 					//HandlePlayerDeath(msg, pDescriptor);
 				}
 
 
+				// Ditching IDs for now, they are inconsistent between multiple demos
+				/*
 				if (msg.eventid() != 169 && //jump
 					msg.eventid() != 129 && //weapon_fire
 					msg.eventid() != 132 && //weapon_reload
@@ -559,10 +561,45 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 					msg.eventid() != 172) {	//door_moving
 					return;
 				}
+				*/
 
-				bool isEventInteresting = false;
+
+
+				if (pDescriptor->name() != "player_jump" && //player_jump
+					pDescriptor->name() != "weapon_fire" && //weapon_fire
+					pDescriptor->name() != "weapon_reload" && //weapon_reload
+					//pDescriptor->name() != "grenade_thrown" && //grenade_thrown			// NOT FOUND, EVEN THOUGH IT IS PRESENT IN DESCRIPTORS. 
+					pDescriptor->name() != "bullet_impact" && //bullet_impact				// Never shows up even when parsing with the original parser
+					pDescriptor->name() != "silencer_detach" && //silencer_detach
+					pDescriptor->name() != "weapon_zoom" && //weapon_zoom
+					pDescriptor->name() != "weapon_zoom_rifle" && //weapon_zoom_rifle
+					pDescriptor->name() != "item_pickup" && //item_pickup
+					pDescriptor->name() != "ammo_pickup" && //ammo_pickup 
+					pDescriptor->name() != "item_equip" && //item_equip
+					pDescriptor->name() != "bomb_abortplant" && //bomb_abortplant
+					pDescriptor->name() != "flashbang_detonate" && //flashbang_detonate
+					pDescriptor->name() != "hegrenade_detonate" && //hegrenade_detonate
+					pDescriptor->name() != "smokegrenade_detonate" && //smokegrenade_detonate
+					pDescriptor->name() != "bomb_planted" && //bomb_planted
+					pDescriptor->name() != "item_purchase" && //item_purchase
+					pDescriptor->name() != "player_death" && //player_death
+					pDescriptor->name() != "door_moving") //door_moving 
+				{	
+					return;
+				}
 
 				int NumKeys = msg.keys().size();
+
+				for (int i = 0; i < NumKeys; i++)
+				{
+					const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys(i);
+					const CSVCMsg_GameEvent::key_t& KeyValue = msg.keys(i);
+					if (!isPlayerDeath && Key.name().compare("userid") == 0 && KeyValue.val_short() != userID)
+						return;
+				}
+
+				bool isEventInteresting = false;
+				
 				for (int i = 0; i < NumKeys; i++)
 				{
 					const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys(i);
@@ -570,9 +607,7 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 					if (Key.name().compare("userid") == 0 || Key.name().compare("attacker") == 0 || Key.name().compare("assister") == 0)
 					{
 						player_info_t *pPlayerInfo = FindPlayerInfo(KeyValue.val_short());
-						if (KeyValue.val_short() != userID && !isPlayerDeath)
-							return;
-						else if (isPlayerDeath)
+						if (isPlayerDeath)
 						{
 							if ((Key.name().compare("userid") == 0 && KeyValue.val_short() == userID) ||
 								(Key.name().compare("attacker") == 0 && KeyValue.val_short() == userID) ||
@@ -586,14 +621,15 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 				}
 
 				if (!isEventInteresting && isPlayerDeath) return;
+				printf("Action %d ", currentTick);
 
 				if ( g_bDumpGameEvents )
 				{
-					printf( "%s\n{\n", pDescriptor->name().c_str() ); // Event Name
+					printf( "%s ", pDescriptor->name().c_str() ); // Event Name
 				}
-				printf(" eventid: ");
-				printf("%ld", msg.eventid());
-				printf("\n");
+				//printf(" eventid: ");
+				//printf("%ld", msg.eventid());
+				//printf("\n");
 				int numKeys = msg.keys().size();
 				for ( int i = 0; i < numKeys; i++ )
 				{
@@ -609,45 +645,88 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 						}
 						if ( !bHandled )
 						{
-							printf(" %s: ", Key.name().c_str() );
+							//printf(" %s: ", Key.name().c_str() );
 
 							if ( KeyValue.has_val_string() )
 							{
-								printf( "%s ", KeyValue.val_string().c_str() );
+								//printf( "%s ", KeyValue.val_string().c_str() );
 							}
 							if ( KeyValue.has_val_float() )
 							{
-								printf( "%f ", KeyValue.val_float() );
+								//printf( "%f ", KeyValue.val_float() );
 							}
 							if ( KeyValue.has_val_long() )
 							{
-								printf( "%d ", KeyValue.val_long() );
+								//printf( "%d ", KeyValue.val_long() );
 							}
 							if ( KeyValue.has_val_short() )
 							{
-								printf( "%d ", KeyValue.val_short() );
+								//printf( "%d ", KeyValue.val_short() );
 							}
 							if ( KeyValue.has_val_byte() )
 							{
-								printf( "%d ", KeyValue.val_byte() );
+								//printf( "%d ", KeyValue.val_byte() );
 							}
 							if ( KeyValue.has_val_bool() )
 							{
-								printf( "%d ", KeyValue.val_bool() );
+								//printf( "%d ", KeyValue.val_bool() );
 							}
 							if ( KeyValue.has_val_uint64() )
 							{
-								printf( "%lld ", KeyValue.val_uint64() );
+								//printf( "%lld ", KeyValue.val_uint64() );
 							}
-							printf( "\n" );
+							//printf( "\n" );
 						}
 					}
+					if (pDescriptor->name() == "weapon_fire" && Key.name().compare("weapon")==0)
+					{
+						printf("%s ", KeyValue.val_string().c_str());
+					}
+					if (pDescriptor->name() == "item_pickup" && Key.name().compare("item") == 0)
+					{
+						printf("%s ", KeyValue.val_string().c_str());
+					}
+					if (pDescriptor->name() == "item_equip" && Key.name().compare("item") == 0)
+					{
+						printf("%s ", KeyValue.val_string().c_str());
+					}		
+
+					if (pDescriptor->name() == "item_purchase" && Key.name().compare("weapon") == 0)
+					{
+						printf("%s ", KeyValue.val_string().c_str());
+					}
+
+					/*
+
+					// In case you want to keep it
+					if (pDescriptor->name() == "item_equip" && Key.name().compare("weptype") == 0)
+					{
+						printf("%d ", KeyValue.val_short());
+					}
+
+					// Bombsite index (A or B) does not really make any sense as it is a short int (e.g. 422).
+					if (pDescriptor->name() == "bomb_abortplant" && Key.name().compare("site") == 0)
+					{
+						printf("%d ", KeyValue.val_short());
+					}
+					if (pDescriptor->name() == "bomb_planted" && Key.name().compare("site") == 0)
+					{
+						printf("%d ", KeyValue.val_short());
+					}
+
+					*/
+					
+
+
 				}
 				if ( g_bDumpGameEvents )
 				{
 					//printf("tick: %i \n", s_nCurrentTick); // Added from github issue: events do not have any associated tick. (but tick is not correct)
-					printf( "}\n" );
+					//printf( "}\n" );
 				}
+
+
+				printf("\n");
 			}
 		}
 	}
@@ -1214,7 +1293,7 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 			return false;
 		}
 	}
-
+	/*
 	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
 	{
 		printf("Entity %d %f %f %f %f %f %f %f %f \n",  currentTick,
@@ -1227,7 +1306,7 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 														playerVelocityY,
 														playerVelocityZ);
 	}
-
+	*/
 	return true;
 }
 
