@@ -562,19 +562,18 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 }
 ```
 
-**Parsing the chosen Game Events of the Target Player**
+**Parsing Target Player's Game Events and Formatting the *Action* Output as Required**
 
-In `ParseGameEvent()`,  the `CSVCMsg_GameEvent msg` has its own `eventid()` method, which obviously returns the `eventID`. We check if the `eventID` is actually the one we want, else we return. Then we search in the `msg` keys the userID of the player, and if it is actually an event from the target player, we let the parser print it, else we return.
+In `ParseGameEvent()`,  the `CSVCMsg_GameEvent msg` has its own `eventid()` method, which obviously returns the `eventID`. It seemed like checking the IDs would just work fine, as we already had a complete event list.
 
 ```
 void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
 {
-	//other code
-
+	// other code
+	
 	if (msg.eventid() != 169 && //jump
 		msg.eventid() != 129 && //weapon_fire
 		msg.eventid() != 132 && //weapon_reload
-		//msg.eventid() != ? && //grenade_thrown (not found)
 		msg.eventid() != 167 && //bullet_impact
 		msg.eventid() != 134 && //silencer_detach
 		msg.eventid() != 133 && //weapon_zoom
@@ -588,11 +587,86 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 		msg.eventid() != 157 && //smokegrenade_detonate
 		msg.eventid() != 107 && //bomb_planted
 		msg.eventid() != 104 && //item_purchase
-		msg.eventid() != 172) {	//door_moving
+		msg.eventid() != 23  && //player_death
+		msg.eventid() != 172) //door_moving
+	{	
 		return;
+		
+	// other code
+}
+	
+```
+
+While testing, we noticed that some chosen events never came up, and some ditched ones did instead. We compared the event list with various demos, and we figured out that event IDs were not the same at all! Some of them were offset by two indexes, others were also missing. (We are still testing)
+
+Therefore, for consistency purposes, we decided to use the event's pDescriptor and check for the event name instead.
+
+Let's look at the function in detail:
+
+We start checking if it's a player_death event, as it is handled differently.
+
+```
+void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
+{
+	bool isPlayerDeath = false;
+	if (pDescriptor->name().compare("player_death") == 0)
+	{
+		isPlayerDeath = true;
+		//HandlePlayerDeath(msg, pDescriptor);
 	}
 
+    	if (	pDescriptor->name() != "player_jump" && //player_jump
+		pDescriptor->name() != "weapon_fire" && //weapon_fire
+		pDescriptor->name() != "weapon_reload" && //weapon_reload
+		//pDescriptor->name() != "grenade_thrown" && //grenade_thrown			// NOT FOUND, EVEN THOUGH IT IS PRESENT IN DESCRIPTORS! 
+		pDescriptor->name() != "bullet_impact" && //bullet_impact			// Never shows up even when parsing with the original parser
+		pDescriptor->name() != "silencer_detach" && //silencer_detach
+		pDescriptor->name() != "weapon_zoom" && //weapon_zoom
+		pDescriptor->name() != "weapon_zoom_rifle" && //weapon_zoom_rifle
+		pDescriptor->name() != "item_pickup" && //item_pickup
+		pDescriptor->name() != "ammo_pickup" && //ammo_pickup 
+		pDescriptor->name() != "item_equip" && //item_equip
+		pDescriptor->name() != "bomb_abortplant" && //bomb_abortplant
+		pDescriptor->name() != "flashbang_detonate" && //flashbang_detonate
+		pDescriptor->name() != "hegrenade_detonate" && //hegrenade_detonate
+		pDescriptor->name() != "smokegrenade_detonate" && //smokegrenade_detonate
+		pDescriptor->name() != "bomb_planted" && //bomb_planted
+		pDescriptor->name() != "item_purchase" && //item_purchase
+		pDescriptor->name() != "player_death" && //player_death
+		pDescriptor->name() != "door_moving") //door_moving 
+		{	
+			return;
+		}
+		
+		// function continues...
+
+```
+Then, we iterate through the event keys, and we check for events that are not player_death and that are not about the target player. In this case, we return as we have no interest in logging them.
+
+```
+	// ...here
+	
 	int NumKeys = msg.keys().size();
+
+	for (int i = 0; i < NumKeys; i++)
+	{
+		const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys(i);
+		const CSVCMsg_GameEvent::key_t& KeyValue = msg.keys(i);
+		if (!isPlayerDeath && Key.name().compare("userid") == 0 && KeyValue.val_short() != userID)
+			return;
+	}
+
+```
+We iterate again, but this time we we check for player_death events in which our target player is involved, whether it killed someone, assisted a kill or died. In all of those cases, we are interested in the event, so we determine the type of event. This is done by looking at the userid (the victim), at the attacker and at the assister. We set a string with the event type to add to the event name. 
+- player_death_k : target player killed.
+- player_death_a : target player assisted a kill.
+- player_death_d : target player died.
+
+```
+	bool isEventInteresting = false;
+
+	std::string deathEventType ="";
+
 	for (int i = 0; i < NumKeys; i++)
 	{
 		const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys(i);
@@ -600,19 +674,105 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 		if (Key.name().compare("userid") == 0 || Key.name().compare("attacker") == 0 || Key.name().compare("assister") == 0)
 		{
 			player_info_t *pPlayerInfo = FindPlayerInfo(KeyValue.val_short());
-			if (KeyValue.val_short() != userID)
-				return;
-			printf("Event from TargetPlayer with userid: %d \n", KeyValue.val_short());
+			if (isPlayerDeath)
+			{
+				if ((Key.name().compare("userid") == 0 && KeyValue.val_short() == userID) ||
+					(Key.name().compare("attacker") == 0 && KeyValue.val_short() == userID) ||
+					(Key.name().compare("assister") == 0 && KeyValue.val_short() == userID))
+				{
+					isEventInteresting = true;
+				}
+
+				if (Key.name().compare("userid") == 0 && KeyValue.val_short() == userID)
+					deathEventType = "_d";
+
+				if (Key.name().compare("attacker") == 0 && KeyValue.val_short() == userID)
+					deathEventType = "_k";
+
+				if (Key.name().compare("assister") == 0 && KeyValue.val_short() == userID)
+					deathEventType = "_a";
+			}
 		}
-	}	
-	
-	//other code
-}
+	}
+
+```
+If the event is a player_death event and is not relevant, we just return. Else, we add to the event name the deathEventType.
+
+```
+	if (!isEventInteresting && isPlayerDeath) return;
+	printf("Action %d ", currentTick);
+
+	if ( g_bDumpGameEvents )
+	{
+		printf( "%s%s ", pDescriptor->name().c_str(), deathEventType.c_str()); // Event Name
+	}
+
+	int numKeys = msg.keys().size();
+	for ( int i = 0; i < numKeys; i++ )
+	{
+		const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys( i );
+		const CSVCMsg_GameEvent::key_t& KeyValue = msg.keys( i );
+
+		if ( g_bDumpGameEvents )
+		{
+			bool bHandled = false;
+			if ( Key.name().compare( "userid" ) == 0 || Key.name().compare( "attacker" ) == 0 || Key.name().compare( "assister" ) == 0 )
+			{
+				bHandled = ShowPlayerInfo( Key.name().c_str(), KeyValue.val_short(), g_bShowExtraPlayerInfoInGameEvents );
+			}
+			
+			//other code
+}		
+
 ```
 
-**Formatting the Entity Output as Required**
+ShowPlayerInfo() is called. We only let the parser print the player position.
 
-From this [research paper](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) from Charles University, Prague, we found out that "*Each entity in the game is represented by its own structure (e.g., a player has a structure which contains coordinates on the map, pitch, health, etc.). Delta changes basically forms an update transaction of these structures – i.e., a list of game objects andtheir properties which should be inserted, updated, or removed from the game. Delta changes are much more complex to process as they do not carry a complete information, but only a change from the previous state.*" Therefore, to process the state of the game completely, we firstly had to gather all the data, store them and refresh them when it changed, as implied in the paper itself.
+```
+bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, bool bCSV = false )
+{
+	// other code
+	
+	int nEntityIndex = pPlayerInfo->entityID + 1;
+	EntityEntry *pEntity = FindEntity( nEntityIndex );
+	if ( pEntity )
+	{
+		PropEntry *pXYProp = pEntity->FindProp( "m_vecOrigin" );
+		PropEntry *pZProp = pEntity->FindProp( "m_vecOrigin[2]" );
+		if ( pXYProp && pZProp )
+		{
+			if ( bCSV )
+			{
+				printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
+			}
+			else
+			{
+				printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
+			}
+		}
+
+		// other code
+}	
+
+```
+When the function returns to ParseGameEvent(), we print additional information, depending on the event.
+
+To sum this all up, events are logged in the form of:
+
+```
+Action 116328 weapon_fire 2333.549072 1735.823730 141.488510 weapon_knife_karambit 
+
+Action 117964 player_death_k 1299.012817 3134.718750 128.031250 1132.668213 2954.592285 128.031250 
+Action 117964 player_death_a 1299.012817 3134.718750 128.031250 1132.668213 2954.592285 128.031250 
+Action 117964 player_death_d 1299.012817 3134.718750 128.031250 1132.668213 2954.592285 128.031250 
+```
+
+
+**Formatting the *Entity* Output as Required**
+
+Entities are not logged in complete bursts, dumping every table entry each tick. Indeed, demoinfogo deals with them with *Deltas*: this is to say that it only logs them when they change values.
+
+From [this research paper](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) from Charles University, Prague, we found out that "*Each entity in the game is represented by its own structure (e.g., a player has a structure which contains coordinates on the map, pitch, health, etc.). Delta changes basically forms an update transaction of these structures – i.e., a list of game objects andtheir properties which should be inserted, updated, or removed from the game. Delta changes are much more complex to process as they do not carry a complete information, but only a change from the previous state.*" Therefore, to process the state of the game completely, we firstly had to gather all the data, store them and refresh them when it changed, as implied in the paper itself.
 
 In order to format the output in the form of: 
 
