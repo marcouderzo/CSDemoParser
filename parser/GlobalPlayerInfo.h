@@ -7,16 +7,16 @@ extern int userID;
 extern int entityID;
 
 // Player Entity-Event Info
-extern double mouseCoordX;
-extern double mouseCoordY;
+extern float mouseCoordX;
+extern float mouseCoordY;
 
-extern double playerPositionX;
-extern double playerPositionY;
-extern double playerPositionZ;
+extern float playerPositionX;
+extern float playerPositionY;
+extern float playerPositionZ;
 
-extern double playerVelocityX;
-extern double playerVelocityY;
-extern double playerVelocityZ;
+extern float playerVelocityX;
+extern float playerVelocityY;
+extern float playerVelocityZ;
 
 
 // Tick count

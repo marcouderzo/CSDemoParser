@@ -36,6 +36,7 @@
 
 
 
+
 // in demofiledump.cpp
 extern const CSVCMsg_SendTable::sendprop_t *GetSendPropByIndex( uint32 uClass, uint32 uIndex );
 
@@ -274,31 +275,17 @@ Prop_t *Array_Decode( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedP
 
 Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet )
 {
-	const CSVCMsg_SendTable::sendprop_t *pSendProp = pFlattenedProp->m_prop;
+		const CSVCMsg_SendTable::sendprop_t *pSendProp = pFlattenedProp->m_prop;
 
-	bool hasToPrint = false;
-
-	Prop_t *pResult = NULL;
-
+		Prop_t *pResult = NULL;
 		if (pSendProp->type() != DPT_Array && pSendProp->type() != DPT_DataTable)
 		{
 			pResult = new Prop_t((SendPropType_t)(pSendProp->type()));
 		}
 
-		if (pSendProp->var_name() == "m_vecVelocity[0]" ||
-			pSendProp->var_name() == "m_vecVelocity[1]" ||
-			pSendProp->var_name() == "m_vecVelocity[2]" ||
-			pSendProp->var_name() == "m_vecOrigin" ||
-			pSendProp->var_name() == "m_vecOrigin[2]" ||
-			pSendProp->var_name() == "m_angEyeAngles[0]" ||
-			pSendProp->var_name() == "m_angEyeAngles[1]")
+		if (!bQuiet)
 		{
-			//printf("[beforeDecodePropPrint]");
-			if (nFieldIndex != 16)
-			{
-				printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
-				hasToPrint = true;
-			}
+			//printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
 		}
 		switch (pSendProp->type())
 		{
@@ -326,9 +313,9 @@ Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedPro
 			pResult->m_value.m_int64 = Int64_Decode(entityBitBuffer, pSendProp);
 			break;
 		}
-		if (!bQuiet && hasToPrint)
+		if (!bQuiet)
 		{
-			pResult->Print();
+			//pResult->Print();
 		}
 	return pResult;
 }
@@ -405,19 +392,28 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 	{
 		if (pSendProp->var_name() == "m_vecVelocity[0]")
 		{
+			//printf("X Velocity before assigning: %f \n", playerVelocityX);
 			playerVelocityX = pResult->m_value.m_float;
+			//printf("X Velocity after assigning: %f \n", playerVelocityX);
+			//printf("X Velocity in pResult: %f \n", pResult->m_value.m_float);
 			//printf("Used m_float 1 ] \n");
 		}
 		
 		if (pSendProp->var_name() == "m_vecVelocity[1]")
 		{
+			//printf("Z Velocity in pResult: %f \n", pResult->m_value.m_float);
+			//printf("Z Velocity before assigning: %f \n", playerVelocityZ);
 			playerVelocityZ = pResult->m_value.m_float;
+			//printf("Z Velocity after assigning: %f \n", playerVelocityZ);
+			//printf("m_float: %f \n", pResult->m_value.m_float);
+
 			//printf("Used m_float 2] \n");
 		}
 
 		if (pSendProp->var_name() == "m_vecVelocity[2]")
 		{
 			playerVelocityY = pResult->m_value.m_float;
+			
 			//printf("Used m_float 3] \n");
 		}
 
@@ -429,7 +425,10 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 		}
 		if (pSendProp->var_name() == "m_vecOrigin[2]")
 		{
-			playerPositionZ = pResult->m_value.m_vector.z;
+			playerPositionZ = pResult->m_value.m_float;
+			//printf("m_vector.z: %f \n", pResult->m_value.m_vector.z);
+			//printf("m_value.m_vector %f \n", pResult->m_value.m_vector);
+			//printf("m_float: %f \n", pResult->m_value.m_float);
 			//printf("Set m_vecorigin2 ] \n");
 		}
 		if (pSendProp->var_name() == "m_angEyeAngles[0]")

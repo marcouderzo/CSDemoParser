@@ -44,16 +44,16 @@
 unsigned long long targetPlayerSteamID;
 int userID;
 int entityID;
-double mouseCoordX;
-double mouseCoordY;
+float mouseCoordX;
+float mouseCoordY;
 
-double playerPositionX;
-double playerPositionY;
-double playerPositionZ;
+float playerPositionX;
+float playerPositionY;
+float playerPositionZ;
 
-double playerVelocityX;
-double playerVelocityY;
-double playerVelocityZ;
+float playerVelocityX;
+float playerVelocityY;
+float playerVelocityZ;
 
 int currentTick;
 
@@ -114,7 +114,7 @@ bool CDemoFileDump::Open( const char *filename )
 
 void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size, const char *fmt, ... )
 {
-	if ( g_bDumpNetMessages )
+	if (g_bDumpNetMessages)
 	{
 		va_list vlist;
 		const std::string& TypeName = msg.GetTypeName();
@@ -128,7 +128,7 @@ void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size,
 			std::string s = res;
 			auto endOfTickDelimiter = s.find_first_of('h');
 			s.erase(endOfTickDelimiter);
-			s.erase(0, s.find_last_of(':')+1);
+			s.erase(0, s.find_last_of(':') + 1);
 			currentTick = std::stoi(s);
 			//printf("------ Tick = %ld ------\n", currentTick);	
 			va_end(vlist);
@@ -232,11 +232,6 @@ void PrintNetMessage( CDemoFileDump& Demo, const void *parseBuffer, int BufferSi
 		{
 			//printf("listaeventi");
 			Demo.m_GameEventList.CopyFrom( msg );
-
-			std::ofstream myfile;
-			myfile.open("logs/eventslist.txt");
-			myfile << msg.DebugString().c_str();
-			myfile.close();
 			
 		}
 		Demo.MsgPrintf( msg, BufferSize, "%s", msg.DebugString().c_str() );
@@ -813,6 +808,13 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 			else {
 				*existing = playerInfo;
 			}
+			if (playerInfo.xuid == targetPlayerSteamID)
+			{
+				userID = playerInfo.userID;
+				entityID = playerInfo.entityID;
+
+				printf("Settati userID %d entityID %d \n", userID, entityID);
+			}
 
 			if ( g_bDumpStringTables )
 			{
@@ -829,6 +831,7 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 				//printf( " %d, %s, %d, %s \n", entryIndex, pEntry, nBytes, pUserData );
 			}
 		}
+
 
 
 		if ( history.size() > 31 )
@@ -852,10 +855,10 @@ void PrintNetMessage< CSVCMsg_CreateStringTable, svc_CreateStringTable >( CDemoF
 		bool bIsUserInfo = !strcmp( msg.name().c_str(), "userinfo" );
 		if ( g_bDumpStringTables )
 		{
-			//printf( "CreateStringTable:%s:%d:%d:%d:%d:\n", msg.name().c_str(), msg.max_entries(), msg.num_entries(), msg.user_data_size(), msg.user_data_size_bits() ); //not relevant
+			//printf( "CreateStringTable:%s:%d:%d:%d:%d:\n", msg.name().c_str(), msg.max_entries(), msg.num_entries(), msg.user_data_size(), msg.user_data_size_bits() );
 		}
 		CBitRead data( &msg.string_data()[ 0 ], msg.string_data().size() );
-		ParseStringTableUpdate( data,  msg.num_entries(), msg.max_entries(), msg.user_data_size(), msg.user_data_size_bits(), msg.user_data_fixed_size(), bIsUserInfo ); 
+		ParseStringTableUpdate( data,  msg.num_entries(), msg.max_entries(), msg.user_data_size(), msg.user_data_size_bits(), msg.user_data_fixed_size(), bIsUserInfo ); //entra qui nello switch case dem_packet
 
 		strcpy_s( s_StringTables[ s_nNumStringTables ].szName, msg.name().c_str() );
 		s_StringTables[ s_nNumStringTables ].nMaxEntries = msg.max_entries();
@@ -883,7 +886,7 @@ void PrintNetMessage< CSVCMsg_UpdateStringTable, svc_UpdateStringTable >( CDemoF
 			{
 				//printf( "UpdateStringTable:%d(%s):%d:\n", msg.table_id(), table.szName, msg.num_changed_entries() );
 			}
-			ParseStringTableUpdate( data, msg.num_changed_entries(), table.nMaxEntries, table.nUserDataSize, table.nUserDataSizeBits, table.nUserDataFixedSize, bIsUserInfo ); 
+			ParseStringTableUpdate( data, msg.num_changed_entries(), table.nMaxEntries, table.nUserDataSize, table.nUserDataSizeBits, table.nUserDataFixedSize, bIsUserInfo ); //entra qui nello switch case dem_packet
 		}
 		else
 		{
@@ -1214,17 +1217,16 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 
 	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
 	{
-		printf("Entity %d %f %f %f %f %f %f %f %f %f %f \n", currentTick,
-																mouseCoordX,
-																mouseCoordY,
-																playerPositionX,
-																playerPositionY,
-																playerPositionZ,
-																playerVelocityX,
-																playerVelocityY,
-																playerVelocityZ);
+		printf("Entity %d %f %f %f %f %f %f %f %f \n",  currentTick,
+														mouseCoordX,
+														mouseCoordY,
+														playerPositionX,
+														playerPositionY,
+														playerPositionZ,
+														playerVelocityX,
+														playerVelocityY,
+														playerVelocityZ);
 	}
-
 
 	return true;
 }
@@ -1711,6 +1713,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 				{
 					if (g_bDumpStringTables) 
 					{
+						printf("qui1");
 						//printf("[BeforeDumpST1]");
 						//printf("adding:player entity:%d info:\n xuid:%lld\n name:%s\n userID:%d\n guid:%s\n friendsID:%d\n friendsName:%s\n fakeplayer:%d\n ishltv:%d\n filesDownloaded:%d\n",
 						//	i, playerInfo.xuid, playerInfo.name, playerInfo.userID, playerInfo.guid, playerInfo.friendsID,
@@ -1720,6 +1723,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 					
 					if (playerInfo.xuid == targetPlayerSteamID)
 					{
+						printf("player trovato (metodo DumpStringTable())");
 						userID = playerInfo.userID;
 						entityID = playerInfo.entityID;
 						//printf("Found Target Player: %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
@@ -1728,17 +1732,26 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 				else 
 				{
 					*existing = playerInfo;
+					printf("qui2");
+					if (playerInfo.xuid == targetPlayerSteamID)
+					{
+						userID = playerInfo.userID;
+						entityID = playerInfo.entityID;
+						//printf("Found Target Player: %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
+					}
 				}
 			}
 			else
 			{
 				if ( g_bDumpStringTables )
 				{
+					
 					//printf("boh");
 					//printf( " %d, %s, userdata[%d] \n", i, stringname, userDataSize );
 				}
+				printf("qui3");
 			}
-
+			printf("qui4");
 			delete [] data;
 
 			assert( buf.GetNumBytesLeft() > 10 );
@@ -1752,7 +1765,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 			}
 		}
 	}
-
+	printf("qui5");
 	// Client side stuff
 	if ( buf.ReadOneBit() == 1 )
 	{

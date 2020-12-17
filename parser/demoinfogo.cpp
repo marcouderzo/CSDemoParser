@@ -65,6 +65,7 @@ int __cdecl main( int argc, char *argv[] )
 
 	if( DemoFileDump.Open( argv[ nFileArgument ] ) )
 	{
+		
 		std::string file = argv[nFileArgument];
 
 		size_t lastSlash = file.find_last_of('/');
@@ -81,3 +82,7 @@ int __cdecl main( int argc, char *argv[] )
 
 	return 1;
 }
+
+
+
+
