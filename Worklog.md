@@ -444,7 +444,6 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 	{
 		userID = playerInfo.userID;
 		entityID = playerInfo.entityID;
-		printf("TROVATO TARGET PLAYER %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
 	}
 	
 	//other code
@@ -714,9 +713,166 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 }
 ```
 
+During testing multiple demos, we found out that in the `void CDemoFileDump::DoDump()` function called in `main()`, the parser reads a command from the demo header, and handles it via a `switch`. More information on the `DEM` format [here](https://developer.valvesoftware.com/wiki/DEM_Format).
+
+Not all demos ever enter in the `dem_stringtables` switch case, causing `DumpStringTables()` to never be called.
+
+```
+case dem_stringtables:
+{
+	char *data = ( char * )malloc( DEMO_RECORD_BUFFER_SIZE );
+	CBitRead buf( data, DEMO_RECORD_BUFFER_SIZE );
+	m_demofile.ReadRawData( ( char* )buf.GetBasePointer(), buf.GetNumBytesLeft() );
+	buf.Seek( 0 );
+	if ( !DumpStringTables( buf ) )
+	{
+		printf( "Error parsing string tables. \n" );
+	}
+	free( data );
+}
+break;
+
+```
+
+The parser would enter in the `dem_packet` switch case instead.
+
+```
+case dem_packet:
+{
+	HandleDemoPacket();
+}
+break;	
+```
+
+This results in the parser not ever setting the global player variables,  causing no output in the log.
+
+In order to understand what was happening, we decided to follow the call stack of the parser, starting from `HandleDemoPacket()`. The latter calls `DumpDemoPacket()`, as follows:
+
+```
+void CDemoFileDump::HandleDemoPacket()
+{
+	//other code
+
+	DumpDemoPacket( buf, length );
+}
+```
+
+`DumpDemoPacket()` has its own switch, and defines a macro for the `PrintNetMessage()` function for each command.
 
 
+```
+void CDemoFileDump::DumpDemoPacket( CBitRead &buf, int length )
+{
+	//other code
 
+	switch( Cmd )
+	{
+	   #define HANDLE_NetMsg( _x )	case net_ ## _x: PrintNetMessage< CNETMsg_ ## _x, net_ ## _x >( *this, buf.GetBasePointer() + buf.GetNumBytesRead(), Size ); break
+	   #define HANDLE_SvcMsg( _x )	case svc_ ## _x: PrintNetMessage< CSVCMsg_ ## _x, svc_ ## _x >( *this, buf.GetBasePointer() + buf.GetNumBytesRead(), Size ); break
+
+		default:
+			// unknown net message
+			break;
+
+		HANDLE_NetMsg( NOP );            	// 0
+		HANDLE_NetMsg( Disconnect );        // 1
+		HANDLE_NetMsg( File );              // 2
+		HANDLE_NetMsg( Tick );              // 4
+		HANDLE_NetMsg( StringCmd );         // 5
+		HANDLE_NetMsg( SetConVar );         // 6
+		HANDLE_NetMsg( SignonState );       // 7
+		HANDLE_SvcMsg( ServerInfo );        // 8
+		HANDLE_SvcMsg( SendTable );         // 9
+		HANDLE_SvcMsg( ClassInfo );         // 10
+		HANDLE_SvcMsg( SetPause );          // 11
+		HANDLE_SvcMsg( CreateStringTable ); // 12
+		HANDLE_SvcMsg( UpdateStringTable ); // 13
+		HANDLE_SvcMsg( VoiceInit );         // 14
+		HANDLE_SvcMsg( VoiceData );         // 15
+		HANDLE_SvcMsg( Print );             // 16
+		HANDLE_SvcMsg( Sounds );            // 17
+		HANDLE_SvcMsg( SetView );           // 18
+		HANDLE_SvcMsg( FixAngle );          // 19
+		HANDLE_SvcMsg( CrosshairAngle );    // 20
+		HANDLE_SvcMsg( BSPDecal );          // 21
+		HANDLE_SvcMsg( UserMessage );       // 23
+		HANDLE_SvcMsg( GameEvent );         // 25
+		HANDLE_SvcMsg( PacketEntities );    // 26
+		HANDLE_SvcMsg( TempEntities );      // 27
+		HANDLE_SvcMsg( Prefetch );          // 28
+		HANDLE_SvcMsg( Menu );              // 29
+		HANDLE_SvcMsg( GameEventList );     // 30
+		HANDLE_SvcMsg( GetCvarValue );      // 31
+
+		#undef HANDLE_SvcMsg
+		#undef HANDLE_NetMsg
+	}
+
+	//other code
+}
+```
+
+
+`PrintNetMessage()` is a templated function which has lots of definitions. In one of the many, `ParseStringTableUpdate()` is called:
+
+```
+template <>
+void PrintNetMessage< CSVCMsg_CreateStringTable, svc_CreateStringTable >( CDemoFileDump& Demo, const void *parseBuffer, int BufferSize )
+{
+	// other code
+	
+	CBitRead data( &msg.string_data()[ 0 ], msg.string_data().size() );
+	
+	ParseStringTableUpdate( data,  msg.num_entries(), msg.max_entries(), msg.user_data_size(), msg.user_data_size_bits(), msg.user_data_fixed_size(), bIsUserInfo );
+	
+	// other code
+}
+```
+
+`ParseStringTableUpdate()` has something in common with the original `DumpStringTable()` function.
+
+```
+void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int user_data_size, int user_data_size_bits, int user_data_fixed_size, bool bIsUserInfo )
+{
+	//other code
+	
+	if ( bIsUserInfo && pUserData != NULL )
+	{
+		const player_info_t *pUnswappedPlayerInfo = ( const player_info_t * )pUserData;
+		player_info_t playerInfo = *pUnswappedPlayerInfo;  					// -----> that's the playerInfo structure
+		playerInfo.entityID = entryIndex;							// -----> that's the entityID
+
+		LowLevelByteSwap( &playerInfo.xuid, &pUnswappedPlayerInfo->xuid );
+		LowLevelByteSwap( &playerInfo.userID, &pUnswappedPlayerInfo->userID );
+		LowLevelByteSwap( &playerInfo.friendsID, &pUnswappedPlayerInfo->friendsID );
+
+		bool bAdded = false;
+		auto existing = FindPlayerByEntity(entryIndex);  					
+		if ( !existing ) 
+		{
+			bAdded = true;
+			s_PlayerInfos.push_back(playerInfo);
+		}
+		else {
+			*existing = playerInfo;
+		}
+		
+		//other code
+	}	
+}
+```
+This basically offers us another chance to set our own player variables. Indeed, we have the whole `player_info_t playerInfo` as before, as well as the Entity Entry index, which is the entityID.
+
+Therefore, we just added:
+
+```
+if (playerInfo.xuid == targetPlayerSteamID)
+{
+	userID = playerInfo.userID;
+	entityID = playerInfo.entityID;
+}
+```
+After setting the `entityID` and `userID` variables, the parser could now retrieve them and check them out in the `if()` statements, thus letting the parser print out the information from `ReadNewEntity()` as it should.
 
 ## Automating the Parsing of the Match Pool
 
