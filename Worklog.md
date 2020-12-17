@@ -26,7 +26,7 @@ Students Involved in the Project:
 - [x] Filter Player Table Output based on Player EntityID
 - [x] Filter Player Events Output based on Player userID
 - [x] Clean Up Output
-- [ ] Format Parser Output as Required
+- [x] Format Parser Output as Required
 
 
 ## Important note
@@ -169,7 +169,10 @@ Actually, every velocity is only logged if it changes, but, compared to Y veloci
 
 **Player Events**
 
-Let's now talk about player events. The main ones are:
+Let's now talk about player events. As you will see, pitch, yaw and position are not inherently part of the events: there are no such keys. From now, whatever piece of information that is not mentioned in the event's key table is taken directly from the player entity (see the DT_CSPlayer Table mentioned before).
+
+The player events we agreed to keep are the following:
+
 - `weapon_fire`
 - `weapon_reload`
 - `player_jump`
@@ -181,6 +184,15 @@ Let's now talk about player events. The main ones are:
 **Weapon Fire**
 
 A major player event to consider is the `weapon_fire` one.
+This event is fired each time a bullet is fired, or a projectile thrown, by a player.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| silenced  |  True if the weapon has a silencer active.        |bool
+| userid    |	The userid of the player that fired the weapon.	|short
+| weapon    |	The type of weapon that was fired.	        |string
+
+Output example:
 
 ```
 weapon_fire
@@ -202,7 +214,15 @@ Note that grenades and similar items are not logged using the `grenade_thrown` e
 
 **Weapon Reload**
 
-The `weapon_reload` event is triggered when a player reloads his gun. 
+The `weapon_reload` event is fired when a player reloads their weapon by pressing their ‘reload’ button. Automatic reloading does not fire this event.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| userid    |	The userid of the player that reloaded their weapon.	|short
+
+
+Output Example:
+
 ```
 weapon_reload
 {
@@ -217,6 +237,12 @@ The parameters listed are the same as before.
 **Player Jump**
 
 Then, the `player_jump` event.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| userid    |	The userid of the player that jumped.	|short
+
+Output Example:
 
 ```
 player_jump
@@ -235,6 +261,12 @@ Let's talk about aim related events. In CS:GO, only sniper rifles and a couple o
 
 The `weapon_zoom` event is fired each time a player zooms in (or out) their weapon. This only fires on sniper rifles.
 
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| userid    |	The userid of the player that zoomed their weapon	|short
+
+Descriptors:
+
 ```
 descriptors {
   eventid: 133
@@ -246,6 +278,13 @@ descriptors {
 ```
 
 The `weapon_zoom_rifle` event is fired when a player zooms in with non-sniper rifles.
+
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| userid    |	The userid of the player that zoomed their weapon	|short
+
+Descriptors:
 
 ```
 descriptors {
@@ -285,6 +324,22 @@ As you can see, the first chunck seems to be the descending part of the crouch a
 
 Let's talk about `item_equip` and `item_pickup` events. The `item_pickup` event is triggered when a player picks up an item from the ground. The `item_equip` event states the default equipment / equipment at the start of a new round. When a player buys a weapon both `item_equip` and `item_pickup` are triggered in this order. When a player buys an item (e.g. grenade), the `item_pickup` event alone is triggered.
 
+**Item Equip**
+
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| canzoom |	True if the weapon has a zoom feature. |	bool
+| hassilencer |	True if the weapon has a silencer available. |	bool
+| hastracers |	True if the weapon has tracer bullets that show when fired. |	bool
+| ispainted |	True if the weapon is painted.	| bool
+| issilenced |	True if the weapon has a silencer and it is on.	| bool
+| item	| The type of item/weapon that the player equipped. |	string
+| userid |	The userid of the player that equipped the item. | short
+| weptype |	The weapon type of the item equipped (more below). | short
+
+Output Example:
+
 ```
 
 item_equip
@@ -302,7 +357,19 @@ item_equip
  weptype: 2 
  ispainted: 0 
 }
+```
 
+**Item Pickup**
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| item |  The index of the item the player picked up.        | string
+| userid    |	The userid of the player that fired the weapon.	|short
+| silent    |	True if the item is a weapon that has a silencer. | bool
+
+Output Example:
+
+```
 item_pickup
 {
  userid: Mark (id:2)
@@ -318,7 +385,24 @@ item_pickup
 
 **Player Death**
 
-The `player_death` event is triggered when a player dies. 
+The `player_death` event is triggered when a player dies. It the *Modifying the Parser* section we will explain how we can differenciate this event and use it to log both the target player's death and a kill/assist by them.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| assister |	The userid of the player that assisted in the kill (if any). |	short
+| attacker |	The userid of the killer. |	short
+| dominated |	True (1) if the kill caused the killer to be dominating the victim. |	short
+| headshot |	True if the killshot was to the victim’s head hitbox. |	bool
+| noreplay |	 N/A	| bool
+| penetrated |	The number of objects that were penetrated by the bullet before it struck the victim. |	short
+| revenge |	True (1) if the victim was dominating the killer. |	short
+| userid |	The userid of the victim. |	short
+| weapon |	The type of weapon used to kill the victim. |	string
+| weapon_fauxitemid |	Faux item id of weapon killer used. |	string
+| weapon_itemid	| Inventory item id of weapon killer used. | string
+| weapon_originalowner_xuid |	 	string
+
+Output Example:
 
 ```
 
@@ -346,12 +430,17 @@ player_death
 
 ```
 
-The useful data in this event are the `userid`, `position`, `pitch`, `yaw` of the dead player and the attacker, as well as the weapon used to kill and weather or not it was a headshot.
-
 
 **Bomb Planted, Bomb Defused**
 
 The `bomb_planted` event is triggered when a player plants the bomb.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| site	| The index of the site where the bomb was planted. |	short
+| userid |	The userid of the player that planted the bomb.	| short
+
+Output Example:
 
 ```
 bomb_planted
@@ -365,7 +454,15 @@ bomb_planted
 ```
 `Position`, `pitch` and `yaw` are useful in order to know where the player plants the bomb inside the bombsite. 
 
+
+
 The `bomb_planted` event is triggered when a player defuses the bomb.
+
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| site	| The index of the site where the bomb was defused. |	short
+| userid |	The userid of the player that defused the bomb.	| short
 
 ```
 bomb_defused
@@ -383,6 +480,11 @@ bomb_defused
 
 The `round_mvp` event is triggered at the end of every round, announcing the Most Valuable Player of the round (most kills, longest time alive...)
 
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| reason |	The reason why the player is the MVP of the round. |	short
+| userid |	The userid of the player that was the MVP of the round.	| short
+
 ```
 round_mvp
 {
@@ -394,7 +496,6 @@ round_mvp
  musickitmvps: 0 
 }
 ```
-`Position`, `pitch` and `yaw` show where the player is when the event is triggered. `Reason` key is yet to be discovered.
 
 **Finding Event IDs**
 
@@ -403,17 +504,6 @@ In the .proto files, there isn't any event list in the form of `GameEvent1: name
 **More Info**
 
 A Full event list is available [here](http://wiki.sourcepython.com/developing/events/csgo.html)
-
-CS:GO Data PreProcessing [Research Paper](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) from Charles University, Prague.
-
-
-
-
-
-
-
-
-
 
 
 ### Modifying the Parser
