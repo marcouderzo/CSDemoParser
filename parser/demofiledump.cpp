@@ -600,6 +600,8 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 
 				bool isEventInteresting = false;
 				
+				std::string deathEventType ="";
+
 				for (int i = 0; i < NumKeys; i++)
 				{
 					const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys(i);
@@ -615,6 +617,15 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 							{
 								isEventInteresting = true;
 							}
+
+							if (Key.name().compare("userid") == 0 && KeyValue.val_short() == userID)
+								deathEventType = "_d";
+
+							if (Key.name().compare("attacker") == 0 && KeyValue.val_short() == userID)
+								deathEventType = "_k";
+
+							if (Key.name().compare("assister") == 0 && KeyValue.val_short() == userID)
+								deathEventType = "_a";
 						}
 						//printf("Event from TargetPlayer with userid: %d \n", KeyValue.val_short());
 					}
@@ -625,7 +636,7 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 
 				if ( g_bDumpGameEvents )
 				{
-					printf( "%s ", pDescriptor->name().c_str() ); // Event Name
+					printf( "%s%s ", pDescriptor->name().c_str(), deathEventType.c_str()); // Event Name
 				}
 				//printf(" eventid: ");
 				//printf("%ld", msg.eventid());
@@ -892,7 +903,7 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 				userID = playerInfo.userID;
 				entityID = playerInfo.entityID;
 
-				printf("Settati userID %d entityID %d \n", userID, entityID);
+				//printf("Settati userID %d entityID %d \n", userID, entityID);
 			}
 
 			if ( g_bDumpStringTables )
@@ -1293,7 +1304,7 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 			return false;
 		}
 	}
-	/*
+	
 	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
 	{
 		printf("Entity %d %f %f %f %f %f %f %f %f \n",  currentTick,
@@ -1306,7 +1317,7 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 														playerVelocityY,
 														playerVelocityZ);
 	}
-	*/
+	
 	return true;
 }
 
