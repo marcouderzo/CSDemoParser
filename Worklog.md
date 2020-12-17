@@ -420,14 +420,12 @@ CS:GO Data PreProcessing [Research Paper](https://www.researchgate.net/publicati
 
 As the parser outputs using `printf`, we decided to filter the `printf` calls, making them trigger only when we wanted to log something useful.
 
+Most of the code not needed (e.g. useless printf() calls) is commented out. We decided to keep it commented over deleting it for clarity and reuse purposes. 
+
 **Setting The Parser Arguments**
 
 Calling the parser with arguments can be annoying and makes the shell commands unnecessarily verbose, so we decided to set them in the source code and be done with them.
 
-
-**Cleaning up the output: Useless Printfs**
-
-We commented out `printfs` calls that were unrelated with the player itself, in order to still keep them in case of further reuse of the parser.
 
 **Global Extern Player Variables**
 
@@ -451,35 +449,30 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 ```
 **Handling Messages**
 
-The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick". This particular message was originally printed with `vprintf(fmt, vlist)`, and contained other unnecessary information about `host_computationTime`. Having to deal with a function with variable arguments, and being stuck with using a `va_list`, we switched to `vsprintf`, stored the message into a string, and then only kept the tick-related portion of it. We finally convert the string to an integer and store it in currentTick, which is a member variable of the CDemoFileDump class.
+The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick". This particular message was originally printed with `vprintf(fmt, vlist)`, and contained other unnecessary information about `host_computationTime`. Having to deal with a function with variable arguments, and being stuck with using a `va_list`, we switched to `vsprintf`, stored the message into a string, and then only kept the tick-related portion of it. We finally convert the string to an integer and store it in currentTick, which is an extern variable in `GlobalPlayerInfo.h`
 
 ```
 void CDemoFileDump::MsgPrintf( const ::google::protobuf::Message& msg, int size, const char *fmt, ... )
 {
-	if ( g_bDumpNetMessages )
+	if (g_bDumpNetMessages)
 	{
 		va_list vlist;
 		const std::string& TypeName = msg.GetTypeName();
 
-		// Print the message type and size
-		if (TypeName == "CNETMsg_Tick")
-			printf("---- %s (%d bytes) -----------------\n", TypeName.c_str(), size);
 
-		va_start(vlist, fmt);
 		if (TypeName == "CNETMsg_Tick")
 		{
+			va_start(vlist, fmt);
 			char res[500];
 			vsprintf(res, fmt, vlist);
 			std::string s = res;
 			auto endOfTickDelimiter = s.find_first_of('h');
 			s.erase(endOfTickDelimiter);
-			s.erase(0, s.find_last_of(':')+1);
+			s.erase(0, s.find_last_of(':') + 1);
 			currentTick = std::stoi(s);
-			printf("------ Tick = %ld ------\n", currentTick);
-			
+			va_end(vlist);
 		}
-		va_end(vlist);
-	}
+	}	
 }
 ```
 
@@ -564,7 +557,15 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 
 **Parsing Target Player's Game Events and Formatting the *Action* Output as Required**
 
-In `ParseGameEvent()`,  the `CSVCMsg_GameEvent msg` has its own `eventid()` method, which obviously returns the `eventID`. It seemed like checking the IDs would just work fine, as we already had a complete event list.
+In order to format the game events output as required:
+
+```
+Action Tick Type playerPositionX playerPositionY playerPositionZ (....and other data depending on the particular event)
+```
+
+we came up with different strategies. First of all we pin pointed how the parser deals with game events and where it does it.
+
+In `ParseGameEvent()`,  the `CSVCMsg_GameEvent msg` has its own `eventid()` method, which obviously returns the `eventID`. It seemed like checking the IDs would just work fine to discard the unwanted events, as we already had a complete event list. Later we would have used the `CSVCMsg_GameEventList::descriptor_t *pDescriptor` to check the userid of the player.
 
 ```
 void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
@@ -597,13 +598,17 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 	
 ```
 
-While testing, we noticed that some chosen events never came up, and some ditched ones did instead. We compared the event list with various demos, and we figured out that event IDs were not the same at all! Some of them were offset by two indexes, others were also missing. (We are still testing)
+While testing, we noticed that some chosen events never got logged, and some discarded ones did instead. We compared the event list with various demos, and we figured out that event IDs were not the same at all! Some of them were offset by two indexes, others were also missing. We are still testing why it's happening, but in the meantime we came up with a different solution.
 
-Therefore, for consistency purposes, we decided to use the event's pDescriptor and check for the event name instead.
+Therefore, for consistency purposes, we decided to use the event's `pDescriptor` and check for the event name instead. Indeed, we don't really need the `CSVCMsg_GameEvent &msg` message anyways, if not to check the id of the events.
 
 Let's look at the function in detail:
 
-We start checking if it's a player_death event, as it is handled differently.
+We start checking if it's a `player_death` event, as it is handled differently. If that's the case, we prepare to handle it later. 
+
+Then we basically check the descriptor's name for the events we are interested in. If that's not an event we care about, we return. As you can see, the logic behind it is the same as before, but without the danger of IDs inconsistency.
+
+Note that the grenade_thrown event is never triggered, not in our parser, nor in the original one. Strangely enough, it is present in the descriptors, but it is missing from this [list](http://wiki.sourcepython.com/developing/events/csgo.html) we used for double-checking.
 
 ```
 void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
@@ -641,7 +646,7 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 		// function continues...
 
 ```
-Then, we iterate through the event keys, and we check for events that are not player_death and that are not about the target player. In this case, we return as we have no interest in logging them.
+Then, we iterate through the event keys, and we check for events that are not `player_death` and that are not about the target player. In this case, we return as we have no interest in logging them.
 
 ```
 	// ...here
@@ -655,14 +660,19 @@ Then, we iterate through the event keys, and we check for events that are not pl
 		if (!isPlayerDeath && Key.name().compare("userid") == 0 && KeyValue.val_short() != userID)
 			return;
 	}
+	
+	// function continues...
+```
+We iterate again, but this time we we check for `player_death` events in which our target player is involved, whether it killed someone, assisted a kill or died. In all of those cases, we are interested in the event, so we determine the type of event. This is done by looking at the userid (the victim), at the attacker and at the assister. We set a string with the event type to add to the event name. 
+
+- *player_death_k* : target player killed.
+- *player_death_a* : target player assisted a kill.
+- *player_death_d* : target player died.
+
 
 ```
-We iterate again, but this time we we check for player_death events in which our target player is involved, whether it killed someone, assisted a kill or died. In all of those cases, we are interested in the event, so we determine the type of event. This is done by looking at the userid (the victim), at the attacker and at the assister. We set a string with the event type to add to the event name. 
-- player_death_k : target player killed.
-- player_death_a : target player assisted a kill.
-- player_death_d : target player died.
-
-```
+	// ...here
+	
 	bool isEventInteresting = false;
 
 	std::string deathEventType ="";
@@ -694,11 +704,14 @@ We iterate again, but this time we we check for player_death events in which our
 			}
 		}
 	}
+	
+	// function continues...
 
 ```
-If the event is a player_death event and is not relevant, we just return. Else, we add to the event name the deathEventType.
+If the event is a `player_death` event and is not relevant, we just return. Else, we add to the event name the `deathEventType`.
 
 ```
+	// ...here
 	if (!isEventInteresting && isPlayerDeath) return;
 	printf("Action %d ", currentTick);
 
@@ -726,7 +739,7 @@ If the event is a player_death event and is not relevant, we just return. Else, 
 
 ```
 
-ShowPlayerInfo() is called. We only let the parser print the player position.
+The `ShowPlayerInfo()` function is called. We only let the parser print the player position.
 
 ```
 bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, bool bCSV = false )
@@ -755,17 +768,7 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 }	
 
 ```
-When the function returns to ParseGameEvent(), we print additional information, depending on the event.
-
-To sum this all up, events are logged in the form of:
-
-```
-Action 116328 weapon_fire 2333.549072 1735.823730 141.488510 weapon_knife_karambit 
-
-Action 117964 player_death_k 1299.012817 3134.718750 128.031250 1132.668213 2954.592285 128.031250 
-Action 117964 player_death_a 1299.012817 3134.718750 128.031250 1132.668213 2954.592285 128.031250 
-Action 117964 player_death_d 1299.012817 3134.718750 128.031250 1132.668213 2954.592285 128.031250 
-```
+When the function returns to `ParseGameEvent()`, we print additional information, depending on the event.
 
 
 **Formatting the *Entity* Output as Required**
@@ -831,7 +834,7 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 		}
 		if (pSendProp->var_name() == "m_vecOrigin[2]")
 		{
-			playerPositionZ = pResult->m_value.m_vector.z;
+			playerPositionZ = pResult->m_value.m_float;
 		}
 		if (pSendProp->var_name() == "m_angEyeAngles[0]")
 		{
