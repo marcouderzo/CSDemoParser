@@ -167,6 +167,10 @@ Fields 4-5 contain `m_vecVelocity[0]` and `m_vecVelocity[1]`, which represent th
 
 Actually, every velocity is only logged if it changes, but, compared to Y velocity, X and Z velocities are the ones that change the most. Moreover, they go "hand in hand" in the majority of the times. This is because, statistically speaking, there is a very small chance that the player will move perfectly along one of those axis. 
 
+**Finding an Event List with IDs**
+
+In the .proto files, there isn't any event list in the form of `GameEvent1: name="name", event_id=id`. Instead, every demo has a `m_GameEventList`, which is a `CSVCMsg_GameEventList` that inherits from `::google::protobuf::Message`. Dumping the `T msg` that is assigned to `CSVCMsg_GameEventList`, we get a list of all game events, each of them with its own descriptors. A `CSVCMsg_GameEvent` is a class that also inherits from `::google::protobuf::Message`. Inside the `CSVCMsg_GameEvent` class, an useful method can be found: `inline ::google::protobuf::int32 eventid() const`. By calling it when the game event list is dumped, we were able to match the event name and the id and thus make an event list ourselves. 
+
 **Player Events**
 
 Let's now talk about player events. As you will see, pitch, yaw and position are not inherently part of the events: there are no such keys. From now, whatever piece of information that is not mentioned in the event's key table is taken directly from the player entity (see the DT_CSPlayer Table mentioned before).
@@ -176,10 +180,25 @@ The player events we agreed to keep are the following:
 - `weapon_fire`
 - `weapon_reload`
 - `player_jump`
+- `player_crouch` -> Custom Event
+- `player_death`
 - `weapon_zoom`
 - `weapon_zoom_rifle`
 - `item_pickup`
 - `item_equip`
+- `item_purchase`
+- `ammo_pickup`
+- `silencer_detach`
+- `bomb_planted`
+- `bomb_defused`
+- `bomb_abortplant`
+- `bomb_abortdefuse`
+- `round_mvp`
+- `flashbang_detonate`
+- `hegrendade_detonate`
+- `smokegrenade_detonate`
+- `door_moving`
+- `bullet_impact`
 
 **Weapon Fire**
 
@@ -255,7 +274,80 @@ player_jump
 
 It is a pretty interesting one, as it can be a parameter to look into when trying to recognize a player. Skilled CS:GO players use a technique called Bunny Hopping to move faster. It is done by jumping repeatedly while changing direction right to left and vice versa, pretty much in a zig-zag. The technique used is pretty much the same, but, exactly like with the spray control, everyone has its own peculiar way of doing it, whether it is timing, synchronization or movement pattern.
 
-**Aiming**
+**Crouching**
+
+As of right now, we haven't found any events regarding crouching in the demo descriptors. What we have found, instead, is that `m_vecViewOffset[2]` is logged just once in all our tests, but it pops up a bunch of times in the crouch test demo. It turned out that `m_vecViewOffset` is the position of the eyes from `vecOrigin`.
+
+```
+Field: 14, m_vecViewOffset[2] = 64.062561
+Field: 14, m_vecViewOffset[2] = 62.936462
+Field: 14, m_vecViewOffset[2] = 59.933529
+Field: 14, m_vecViewOffset[2] = 56.054741
+Field: 14, m_vecViewOffset[2] = 51.800587
+Field: 14, m_vecViewOffset[2] = 48.172043
+Field: 14, m_vecViewOffset[2] = 46.044968
+
+Field: 14, m_vecViewOffset[2] = 47.671555
+Field: 14, m_vecViewOffset[2] = 51.925709
+Field: 14, m_vecViewOffset[2] = 57.055717
+Field: 14, m_vecViewOffset[2] = 61.685238
+Field: 14, m_vecViewOffset[2] = 63.937439
+Field: 14, m_vecViewOffset[2] = 64.062561
+Field: 14, m_vecViewOffset[2] = 64.062561
+```
+
+As you can see, the first chunck seems to be the descending part of the crouch action, from `64.062561` to `46.044968`. The second one is the ascending part, from `47.671555` back to `64.062561`. So we assume that the `64.062561` value represents the standing state, and `46.044968` represents the crouched state.
+
+
+**Player Death**
+
+The `player_death` event is triggered when a player dies. It the *Modifying the Parser* section we will explain how we can differenciate this event and use it to log both the target player's death and a kill/assist by them.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| assister |	The userid of the player that assisted in the kill (if any). |	short
+| attacker |	The userid of the killer. |	short
+| dominated |	True (1) if the kill caused the killer to be dominating the victim. |	short
+| headshot |	True if the killshot was to the victim’s head hitbox. |	bool
+| noreplay |	 N/A	| bool
+| penetrated |	The number of objects that were penetrated by the bullet before it struck the victim. |	short
+| revenge |	True (1) if the victim was dominating the killer. |	short
+| userid |	The userid of the victim. |	short
+| weapon |	The type of weapon used to kill the victim. |	string
+| weapon_fauxitemid |	Faux item id of weapon killer used. |	string
+| weapon_itemid	| Inventory item id of weapon killer used. | string
+| weapon_originalowner_xuid |	 	string
+
+Output Example:
+
+```
+
+player_death
+{
+ userid: KRIMZ (id:24)
+  position: -1328.922729, 2227.859619, 2.369247
+  facing: pitch:352.699585, yaw:333.061523
+  team: T
+ attacker: mou (id:8)
+  position: -1079.365845, 2109.473633, 60.030960
+  facing: pitch:11.332397, yaw:152.973633
+  team: CT
+ assister: 0 
+ weapon: usp_silencer 
+ weapon_itemid: 7288248617 
+ weapon_fauxitemid: 17293822569121710141 
+ weapon_originalowner_xuid: 76561198012944495 
+ headshot: 1 
+ dominated: 0 
+ revenge: 0 
+ penetrated: 0 
+ noreplay: 0 
+}
+
+```
+
+
+**Aiming: Weapon Zoom**
 
 Let's talk about aim related events. In CS:GO, only sniper rifles and a couple of automatic rifles allow zooming in and out (i.e. aiming).
 
@@ -295,30 +387,6 @@ descriptors {
     name: "userid"
   }
 ```
-
-**Crouching**
-
-As of right now, we haven't found any events regarding crouching in the demo descriptors. What we have found, instead, is that `m_vecViewOffset[2]` is logged just once in all our tests, but it pops up a bunch of times in the crouch test demo. It turned out that `m_vecViewOffset` is the position of the eyes from `vecOrigin`.
-
-```
-Field: 14, m_vecViewOffset[2] = 64.062561
-Field: 14, m_vecViewOffset[2] = 62.936462
-Field: 14, m_vecViewOffset[2] = 59.933529
-Field: 14, m_vecViewOffset[2] = 56.054741
-Field: 14, m_vecViewOffset[2] = 51.800587
-Field: 14, m_vecViewOffset[2] = 48.172043
-Field: 14, m_vecViewOffset[2] = 46.044968
-
-Field: 14, m_vecViewOffset[2] = 47.671555
-Field: 14, m_vecViewOffset[2] = 51.925709
-Field: 14, m_vecViewOffset[2] = 57.055717
-Field: 14, m_vecViewOffset[2] = 61.685238
-Field: 14, m_vecViewOffset[2] = 63.937439
-Field: 14, m_vecViewOffset[2] = 64.062561
-Field: 14, m_vecViewOffset[2] = 64.062561
-```
-
-As you can see, the first chunck seems to be the descending part of the crouch action, from `64.062561` to `46.044968`. The second one is the ascending part, from `47.671555` back to `64.062561`. So we assume that the `64.062561` value represents the standing state, and `46.044968` represents the crouched state.
 
 **Equipment, Buying Weapons & Items, Picking them Up from the Ground**
 
@@ -382,54 +450,39 @@ item_pickup
 }
 
 ```
+**Item Purchase**
 
-**Player Death**
-
-The `player_death` event is triggered when a player dies. It the *Modifying the Parser* section we will explain how we can differenciate this event and use it to log both the target player's death and a kill/assist by them.
+The `item_purchase` event is fired each time a player purchases an item. Actually, we never seen it came up during our events testing sessions, nor in the much longer competitive matches.
 
 | Name      | Description                                       | Type
 |-----------|-------------------------------------------------  | -----
-| assister |	The userid of the player that assisted in the kill (if any). |	short
-| attacker |	The userid of the killer. |	short
-| dominated |	True (1) if the kill caused the killer to be dominating the victim. |	short
-| headshot |	True if the killshot was to the victim’s head hitbox. |	bool
-| noreplay |	 N/A	| bool
-| penetrated |	The number of objects that were penetrated by the bullet before it struck the victim. |	short
-| revenge |	True (1) if the victim was dominating the killer. |	short
-| userid |	The userid of the victim. |	short
-| weapon |	The type of weapon used to kill the victim. |	string
-| weapon_fauxitemid |	Faux item id of weapon killer used. |	string
-| weapon_itemid	| Inventory item id of weapon killer used. | string
-| weapon_originalowner_xuid |	 	string
+|team |	The team number of the player that purchased an item. |	short
+|userid	| The userid of the player that purchased an item. |	short
+|weapon	| The type of item that the player purchased. |	string
 
-Output Example:
+We have no output example available.
 
-```
+**Ammo Pickup**
 
-player_death
-{
- userid: KRIMZ (id:24)
-  position: -1328.922729, 2227.859619, 2.369247
-  facing: pitch:352.699585, yaw:333.061523
-  team: T
- attacker: mou (id:8)
-  position: -1079.365845, 2109.473633, 60.030960
-  facing: pitch:11.332397, yaw:152.973633
-  team: CT
- assister: 0 
- weapon: usp_silencer 
- weapon_itemid: 7288248617 
- weapon_fauxitemid: 17293822569121710141 
- weapon_originalowner_xuid: 76561198012944495 
- headshot: 1 
- dominated: 0 
- revenge: 0 
- penetrated: 0 
- noreplay: 0 
-}
+The `ammo_pickup` event is triggered when a player picks up weapon ammos. We never found a single istance of this event being logged. 
 
-```
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| index	 |	| long
+| item	 |	| string
+| userid |	 |	short
 
+No Output Example available.
+
+**Silencer Detach**
+
+The `silencer_detach` event is triggered when a player detaches the silencer from their weapon.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+|userid	| |	short
+
+No Output Example available. 
 
 **Bomb Planted, Bomb Defused**
 
@@ -456,7 +509,7 @@ bomb_planted
 
 
 
-The `bomb_planted` event is triggered when a player defuses the bomb.
+The `bomb_defused` event is triggered when a player defuses the bomb.
 
 
 | Name      | Description                                       | Type
@@ -475,6 +528,21 @@ bomb_defused
 }
 
 ```
+
+The `bomb_abortplant` is triggered when a player aborts the bomb plant.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| userid |	The userid of the player that aborted the bomb plant.	| short
+
+
+The `bomb_abortdefuse` is triggered when a player aborts the bomb defuse.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| userid |	The userid of the player that aborted the bomb defuse.	| short
+
+
 
 **Round MVP (Most Valuable Player)**
 
@@ -497,9 +565,115 @@ round_mvp
 }
 ```
 
-**Finding Event IDs**
+**Flashbang Detonation**
 
-In the .proto files, there isn't any event list in the form of `GameEvent1: name="name", event_id=id`. Instead, every demo has a `m_GameEventList`, which is a `CSVCMsg_GameEventList` that inherits from `::google::protobuf::Message`. Dumping the `T msg` that is assigned to `CSVCMsg_GameEventList`, we get a list of all game events, each of them with its own descriptors. A `CSVCMsg_GameEvent` is a class that also inherits from `::google::protobuf::Message`. Inside the `CSVCMsg_GameEvent` class, an useful method can be found: `inline ::google::protobuf::int32 eventid() const`. By calling it when the game event list is dumped, we were able to match the event name and the id and thus make an event list ourselves. 
+This event is fired when a flashbang detonates.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| entityid	| The index of the flashbang that detonated.	| short
+| userid	| The userid of the player that threw the flashbang.	| short
+| x	| The x coordinate on the map where the flashbang detonated. |	float
+| y	| The y coordinate on the map where the flashbang detonated. |	float
+| z	| The z coordinate on the map where the flashbang detonated. |	float
+
+Output Example:
+
+```
+flashbang_detonate
+{
+ userid: paszaBiceps (id:48)
+  position: 2290.599121, 2342.761475, 128.031250
+  facing: pitch:1.494141, yaw:119.674072
+  team: CT
+ entityid: 592 
+ x: 2333.904297 
+ y: 2196.434082 
+ z: 130.007111 
+}
+```
+
+
+**High Explosive Grenade Detonation**
+
+The `hegrenade_detonate` event is fired when a high explosive grenade detonates.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| entityid	| The index of the grenade that detonated.	| short
+| userid	| The userid of the player that threw the grenade.	| short
+| x	| The x coordinate on the map where the grenade detonated. |	float
+| y	| The y coordinate on the map where the grenade detonated. |	float
+| z	| The z coordinate on the map where the grenade detonated. |	float
+
+Output Example:
+
+```
+hegrenade_detonate
+{
+ userid: paszaBiceps (id:48)
+  position: 709.969910, 2194.751953, 200.633133
+  facing: pitch:359.956055, yaw:232.849731
+  team: CT
+ entityid: 194 
+ x: -74.130783 
+ y: 1431.750366 
+ z: 175.692062 
+}
+```
+
+**Smoke Grenade Detonation**
+
+The `smokegrenade_detonate` event is fired when a smoke grenade detonates.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| entityid	| The index of the smoke grenade that detonated.	| short
+| userid	| The userid of the player that threw the smoke grenade.	| short
+| x	| The x coordinate on the map where the smoke grenade detonated. |	float
+| y	| The y coordinate on the map where the smoke grenade detonated. |	float
+| z	| The z coordinate on the map where the smoke grenade detonated. |	float
+
+Output Example:
+
+```
+smokegrenade_detonate
+{
+ userid: paszaBiceps (id:48)
+  position: 655.060791, 2631.935547, 213.209351
+  facing: pitch:6.207275, yaw:220.770264
+  team: CT
+ entityid: 199 
+ x: 829.143066 
+ y: 2247.610596 
+ z: 138.758911 
+}
+```
+
+**Door Moving**
+
+The `door_moving` event is fired when a door is opened or closed. This event is never triggered, even when we analyzed a dedicated demo in which the player opens and closes a door many times.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| entindex |	The index of the door.	| long
+| userid |	The userid of the player that activated the door’s movement. |	short
+
+No Output Example available.
+
+**Bullet Impact**
+
+The `bullet_impact` event is fired when a player shoots their weapon and the bullet impacts a surface. Never got logged during our tests.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| userid |	The userid of the player that fired the bullet.	| short
+| x |	The x coordinate on the map where the impact took place. |	float
+| y |	The y coordinate on the map where the impact took place. |	float
+| z |	The z coordinate on the map where the impact took place. |	float
+
+No Output Example available.
+
 
 **More Info**
 
