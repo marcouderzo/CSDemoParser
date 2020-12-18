@@ -1301,6 +1301,11 @@ if (playerInfo.xuid == targetPlayerSteamID)
 ```
 After setting the `entityID` and `userID` variables, the parser could now retrieve them and check them out in the `if()` statements, thus letting the parser print out the information from `ReadNewEntity()` as it should.
 
+## Parser Output Documentation
+
+The Parser Output is not very straight-forward to understand, expecially when it comes to game events' additional information. The complete documentation of the Parser's output format is [here](https://github.com/marcouderzo/CSDemoParser/blob/main/documentation/ParserFormat_Documentation.md). 
+
+
 ## Automating the Parsing of the Match Pool
 
 ### autoparse.py
