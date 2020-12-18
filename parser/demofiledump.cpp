@@ -577,10 +577,13 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 					pDescriptor->name() != "ammo_pickup" && //ammo_pickup 
 					pDescriptor->name() != "item_equip" && //item_equip
 					pDescriptor->name() != "bomb_abortplant" && //bomb_abortplant
+					pDescriptor->name() != "bomb_abortdefuse" &&
 					pDescriptor->name() != "flashbang_detonate" && //flashbang_detonate
 					pDescriptor->name() != "hegrenade_detonate" && //hegrenade_detonate
 					pDescriptor->name() != "smokegrenade_detonate" && //smokegrenade_detonate
 					pDescriptor->name() != "bomb_planted" && //bomb_planted
+					pDescriptor->name() != "bomb_defused" && //bomb_defused
+					pDescriptor->name() != "round_mvp" && //round_mvp
 					pDescriptor->name() != "item_purchase" && //item_purchase
 					pDescriptor->name() != "player_death" && //player_death
 					pDescriptor->name() != "door_moving") //door_moving 
