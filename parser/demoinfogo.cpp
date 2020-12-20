@@ -41,10 +41,6 @@ int __cdecl main( int argc, char *argv[] )
 {
 	CDemoFileDump DemoFileDump;
 
-	printf("demoinfogo: Entities are dumped as follows \n");
-	printf("Entity currentTick, mouseCoordX, mouseCoordY, playerPositionX, playerPositionY, playerPositionZ, playerVelocityX, playerVelocityY, playerVelocityZ \n");
-	printf("Event Tick Type playerPositionX, playerPositionY, playerPositionZ, (others if needed) \n");
-
 	std::string s = argv[1];
 	targetPlayerSteamID = stoull(s);
 

@@ -42,8 +42,8 @@
 
 // extern variables from GlobalPlayerInfo.h
 unsigned long long targetPlayerSteamID;
-int userID;
-int entityID;
+int userID= -1;
+int entityID= -1;
 float mouseCoordX;
 float mouseCoordY;
 
@@ -54,6 +54,8 @@ float playerPositionZ;
 float playerVelocityX;
 float playerVelocityY;
 float playerVelocityZ;
+
+bool isPlayerCrouched = false;
 
 int currentTick;
 
@@ -1308,6 +1310,11 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 		}
 	}
 	
+	if (userID == -1 && entityID == -1)
+	{
+		exit(-1); // SteamID passed to main is not correct. No User with such steamID in the match.
+	}
+
 	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
 	{
 		printf("Entity %d %f %f %f %f %f %f %f %f \n",  currentTick,

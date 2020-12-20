@@ -328,12 +328,20 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 	bool hasToPrint = false;
 	bool hasToRefresh = false;
 
+	bool isCrouchEvent = false;
+
 	Prop_t *pResult = NULL;
 
 	if (pSendProp->type() != DPT_Array && pSendProp->type() != DPT_DataTable)
 	{
 		pResult = new Prop_t((SendPropType_t)(pSendProp->type()));
 	}
+
+	if (pSendProp->var_name() == "m_vecViewOffset[2]" && Entity->m_nEntity == entityID)
+	{
+		isCrouchEvent = true;
+	}
+
 
 	if ((pSendProp->var_name() == "m_vecVelocity[0]" ||
 		pSendProp->var_name() == "m_vecVelocity[1]" ||
@@ -358,7 +366,7 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 		break;
 	case DPT_Float:
 		pResult->m_value.m_float = Float_Decode(entityBitBuffer, pSendProp);
-		//printf("[Type is DPT_Float, ");
+		//printf("[Type is DPT_Float, value is %f", pResult->m_value.m_float);
 		break;
 	case DPT_Vector:
 		Vector_Decode(entityBitBuffer, pSendProp, pResult->m_value.m_vector);
@@ -387,6 +395,55 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 	{
 		//pResult->Print();
 	}
+
+
+
+
+
+	// FULL_STANDING: 64.062561f
+	// FULL_CROUCHED: 46.044968f
+
+	if (isCrouchEvent)
+	{
+		if (pResult->m_value.m_float != 0.000000f) // if the value has already been initialized
+		{
+			if (pResult->m_value.m_float < 64.062561f && !isPlayerCrouched) 
+			{ 
+				isPlayerCrouched = true; 
+				printf("Action %d player_crouch %f %f %f \n", currentTick, playerPositionX, playerPositionY, playerPositionZ);
+			}
+			else if (pResult->m_value.m_float == 64.062561f && isPlayerCrouched)
+			{
+				isPlayerCrouched = false;
+			}
+
+
+			
+			/*  //this logic is correct but the output from the parser is uncertain.
+
+					// OK: Action 128976 player_crouch_init 294.492950 653.842590 20.064556 63.311829
+					// OK: Action 129000 player_crouch_full 294.492950 653.842590 20.064556 46.044968
+					// NOPE: Action 129260 player_crouch_init 295.996918 654.045227 33.935287 46.044968        <------------------
+
+
+			if (pResult->m_value.m_float == 64.062561f) {  //if back in standing state, the player is no longer crouched.
+				isPlayerCrouched = false; //set crouched to false
+				printf("PlayerStanding, setCrouchToFalse\n");
+			}
+
+			if (pResult->m_value.m_float < 64.062561f && !isPlayerCrouched) //if he is descending for the first time
+			{
+				printf("Action %d player_crouch_init %f %f %f %f\n", currentTick, playerPositionX, playerPositionY, playerPositionZ, pResult->m_value.m_float); // I print player_crouch_init
+				isPlayerCrouched = true; // I state that the crouch event has started
+			}
+			else if (pResult->m_value.m_float == 46.044968f) // if reached full crouch state and the init was also called before, but not in the same function call (or else it wrongly will print both)
+			{
+				printf("Action %d player_crouch_full %f %f %f %f\n", currentTick, playerPositionX, playerPositionY, playerPositionZ, pResult->m_value.m_float); // I print player_crouch_full
+				isPlayerCrouched = true;
+			}*/
+		}
+	}
+
 	
 	if (hasToRefresh)
 	{

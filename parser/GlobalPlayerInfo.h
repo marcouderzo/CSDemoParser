@@ -18,6 +18,8 @@ extern float playerVelocityX;
 extern float playerVelocityY;
 extern float playerVelocityZ;
 
+extern bool isPlayerCrouched;
+
 
 // Tick count
 extern int currentTick;
