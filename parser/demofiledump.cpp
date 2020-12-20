@@ -1312,7 +1312,8 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 	
 	if (userID == -1 && entityID == -1)
 	{
-		exit(-1); // SteamID passed to main is not correct. No User with such steamID in the match.
+		printf("Wrong SteamID");
+		exit(-2); // SteamID passed to main is not correct. No User with such steamID in the match.
 	}
 
 	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)

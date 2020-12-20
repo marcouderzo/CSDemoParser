@@ -44,7 +44,7 @@ int __cdecl main( int argc, char *argv[] )
 	std::string s = argv[1];
 	targetPlayerSteamID = stoull(s);
 
-	printf("Parsing Player with SteamID: %s", s.c_str());
+	printf("Parsing Player with SteamID: %llu \n", targetPlayerSteamID);
 
 	int nFileArgument = 2;
 
@@ -75,6 +75,8 @@ int __cdecl main( int argc, char *argv[] )
 		DemoFileDump.DoDump();
 		fclose(stdout);
 	}
+
+	printf("Done!");
 
 	return 1;
 }
