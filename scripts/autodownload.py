@@ -3,6 +3,7 @@ import re
 import os
 import time as t
 from pyunpack import Archive
+import json
 
 # link: https://www.hltv.org/stats/players/matches/...
 
@@ -73,13 +74,15 @@ def goToDownloadPage(path, link, nextLink):
 
     innerDriver.close()
 
-def takePlayerMatches(path, profileLink):
+def takePlayerMatches(path, profileLink, playerNamePar):
     """
         Questa funzione prende il link del profilo di un giocatore (che viene passato dal chiamante) e scarica 100
         partite del giocatore di cui gli viene passato il link del profilo.
         Si avvale di un'altra funzione
         è possibile che bisogni specificare i percorsi di Firefox e Chrome anche se non dovrebbe essere necessario
      """
+
+     listOfMatch = []
 
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_experimental_option("useAutomationExtension", False)
@@ -132,36 +135,46 @@ def takePlayerMatches(path, profileLink):
             goToDownloadPage(path, resultA.get_attribute("href"), nextLink)
             print("Scaricato il {} file".format(str(i + 1) + "°"))
         i = i + 1
+        listOfMatch.append(playerNamePar + "_" + str(i))
 
     driver.close()
+    dizionario.update(playerNamePar, listOfMatch)
 
 
 path = 'C:/Users/marco/AppData/Local/Google/Chrome/Application/chromedriver.exe'
 
-#download('https://www.hltv.org/matches/2335421/youngsters-vs-heretics-lootbet-season-3')
-#takePlayerMatches(path, "https://www.hltv.org/stats/players/matches/317/pashabiceps")
-
-del = input("Vuoi cancellare i file .rar alla fine dello script?")
+canc = input("Vuoi cancellare i file .rar alla fine dello script?")
+dizionario = {}
 
 #Prendo tutti i link dal file Players.txt
 f = open("Players.txt")
 
+playerName = []
+
 for x in f:
-    takePlayerMatches(path, str(x))
+
+	stringAux = str(x)
+	lastIndex = stringAux.r_find("/")
+	playerName = playerName.append(stringAux[lastIndex+1 : ])
+
+    takePlayerMatches(path, str(x), playerName[-1])
 
 f.close()
 
+json.dump(dizionario, open("MatchesDict.json", w))
+
 #Faccio l'unrar di tutti i file in un'apposita sottocartella
 pathOfScript = 'C:/Users/marco/Desktop/pyscript/dl'
-i = 1
+i = 0
 for entry in os.scandir(pathOfScript):
     if entry.is_file() and entry.path.endswith('.rar'):
-        pathToExtract = path + '/tmp/' + str(i)
+        pathToExtract = path + '/tmp/'
+        os.rename(pathToExtract + entry.__name__, playerName[i / 100] + "_" +str (i % 100 + 1))
         i = i + 1
         Archive(entry.path).extractall(pathToExtract, auto_create_dir = True)
 
 #elimino i file .rar
-if del == "Si" or del == "si":
+if canc == "Si" or canc == "si":
     for entry in os.scandir(pathOfScript):
         if entry.is_file() and entry.path.endswith('.rar'):
             os.remove(entry.path)
