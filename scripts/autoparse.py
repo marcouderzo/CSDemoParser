@@ -41,7 +41,7 @@ SteamID_dict = {  'pashabiceps': [76561197973845818],
              'adren': [76561197961631761, 76561198006466707],
              'hazed': [76561197990571509, 76561197999248947],
              'pyth': [76561198017578295],
-             'freakazoid': [76561198030919062],
+             'freakazoid': [76561197977148799, 76561198030919062],
              'neo': [76561197960725934],
              'lambert': [76561197960282565],
              'arya': [76561197960677505],
@@ -58,7 +58,7 @@ SteamID_dict = {  'pashabiceps': [76561197973845818],
              }
 
 
-Matches_dict = {  #'pashabiceps': ['pashabiceps_1.dem' , 'pashabiceps_2.dem'],
+Matches_dict = {  'pashabiceps': ['pashabiceps_1.dem' , 'pashabiceps_2.dem'],
                   'freakazoid': ['freakazoid_1.dem', 'freakazoid_2.dem'],
 }
 
@@ -75,6 +75,7 @@ os.chdir("..")
 os.chdir("parser")
 
 for player in Matches_dict.items(): #for each player
+    #print(player)
     for match in player[1]: #take every match of that player
         for file in os.listdir(demospath): #in the demospath folder
             if file.endswith(".dem") and file == match: #check for that match
@@ -91,7 +92,7 @@ for player in Matches_dict.items(): #for each player
                             hasFailedWithSteamIDs=False
                             hasExitedUnexpectedly=False
 
-                            if(p.returncode == -2): #failed, for loop continues with next steamID, if present.
+                            if(p.returncode == 2): #failed, for loop continues with next steamID, if present.
                                 print("No such SteamID in this match, retrying with next SteamID...")
                                 hasFailedWithSteamIDs=True
                             if(p.returncode == 1): #succeded, break the for loop and go on with next file
@@ -103,14 +104,18 @@ for player in Matches_dict.items(): #for each player
                                 print("Unexpected Exit Code: " + str(p.returncode))
                                 hasExitedUnexpectedly=True
 
-                if not success: #if failed with every SteamID in dictionary, save the match name for later report.
-                    print("Could not find the target player with any of the SteamIDs! Check the report later.")
+                if not success:
                     failedParsings.append(file)
-                    hasFailedAtLeastOnce=True
+                    if not success and hasFailedWithSteamIDs: #if failed with every SteamID in dictionary, save the match name for later report.
+                        print("Could not find the target player with any of the SteamIDs! Check the report later.")
+                        hasFailedAtLeastOnce=True
+                    if not success and hasExitedUnexpectedly: #if failed with every SteamID in dictionary, save the match name for later report.
+                        print("Could not parse this match (Unexpected exit code)! Check the report later.")
+                        hasFailedAtLeastOnce=True    
                     
 
 print("--------REPORT--------")
-if (hasFailed):
+if (hasFailedAtLeastOnce):
     print("Could not parse these matches:")
     print(failedParsings)
 else:
