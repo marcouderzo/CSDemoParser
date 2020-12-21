@@ -1,4 +1,7 @@
-# Output testing
+# Output Validation Testing
+# Checks for abnormal lines in the logs.
+# Outputs may have a void line before EOF. The script will not count that as a new line
+# If two or more blank lines are present, (\n), the script will consider such carriage return as new lines.
 
 import os
 
