@@ -82,7 +82,7 @@ def takePlayerMatches(path, profileLink, playerNamePar):
         è possibile che bisogni specificare i percorsi di Firefox e Chrome anche se non dovrebbe essere necessario
      """
 
-     listOfMatch = []
+    listOfMatch = []
 
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_experimental_option("useAutomationExtension", False)
@@ -156,8 +156,7 @@ for x in f:
 	stringAux = str(x)
 	lastIndex = stringAux.r_find("/")
 	playerName = playerName.append(stringAux[lastIndex+1 : ])
-
-    takePlayerMatches(path, str(x), playerName[-1])
+	takePlayerMatches(path, str(x), playerName[-1])
 
 f.close()
 
