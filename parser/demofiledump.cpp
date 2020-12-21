@@ -99,7 +99,7 @@ __declspec( noreturn ) void fatal_errorf( const char* fmt, ... )
 	buf[ sizeof( buf ) - 1 ] = 0;
     va_end( vlist );
 
-    fprintf( stderr, "\nERROR: %s\n", buf );
+    //fprintf( stderr, "\nERROR: %s\n", buf );
     exit( -1 );
 }
 
@@ -107,7 +107,7 @@ bool CDemoFileDump::Open( const char *filename )
 {
 	if ( !m_demofile.Open( filename ) )
 	{
-		fprintf( stderr, "Couldn't open '%s'\n", filename );
+		//fprintf( stderr, "Couldn't open '%s'\n", filename );
 		return false;
 	}
 
@@ -507,14 +507,14 @@ void HandlePlayerDeath( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventLis
 	}
 
 	ShowPlayerInfo("victim", userid, true, true);
-	printf(", ");
+	//printf(", ");
 	ShowPlayerInfo("attacker", attackerid, true, true);
-	printf(", %s, %s", pWeaponName, bHeadshot ? "true" : "false");
+	//printf(", %s, %s", pWeaponName, bHeadshot ? "true" : "false");
 	if (assisterid != 0)
 	{
 		ShowPlayerInfo("assister", assisterid, true, true);
 	}
-	printf("\n");
+	//printf("\n");
 }
 
 void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::descriptor_t *pDescriptor )
@@ -793,7 +793,7 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 
 	if ( bEncodeUsingDictionaries )
 	{
-		printf( "ParseStringTableUpdate: Encoded with dictionaries, unable to decode.\n" );
+		//printf( "ParseStringTableUpdate: Encoded with dictionaries, unable to decode.\n" );
 		return;
 	}
 
@@ -812,8 +812,7 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 		
 		if ( entryIndex < 0 || entryIndex >= nMaxEntries )
 		{
-			printf("BEFORE ParseStringTableUpdate: bogus string index");
-			printf( "ParseStringTableUpdate: bogus string index %i\n", entryIndex );
+			//printf( "ParseStringTableUpdate: bogus string index %i\n", entryIndex );
 			return;
 		}
 
@@ -831,7 +830,7 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 				int index = buf.ReadUBitLong( 5 );
 				if( size_t( index ) >= history.size() )
 				{
-					printf("ParseStringTableUpdate: Invalid index %d, expected < %u\n", index, (unsigned)history.size());
+					//printf("ParseStringTableUpdate: Invalid index %d, expected < %u\n", index, (unsigned)history.size());
 					exit(-1);
 				}
 				int bytestocopy = buf.ReadUBitLong( SUBSTRING_BITS );
@@ -868,7 +867,7 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 				nBytes = buf.ReadUBitLong( MAX_USERDATA_BITS );
 				if ( nBytes > sizeof( tempbuf ) )
 				{
-					printf( "ParseStringTableUpdate: user data too large (%d bytes).", nBytes);
+					//printf( "ParseStringTableUpdate: user data too large (%d bytes).", nBytes);
 					return;
 				}
 
@@ -994,8 +993,7 @@ void RecvTable_ReadInfos( const CSVCMsg_SendTable& msg )
 {
 	if ( g_bDumpDataTables )
 	{
-		printf("[beforedumpingDT]");
-		printf( "%s:%d\n", msg.net_table_name().c_str(), msg.props_size() ); 
+		//printf( "%s:%d\n", msg.net_table_name().c_str(), msg.props_size() ); 
 	
 		for ( int iProp=0; iProp < msg.props_size(); iProp++ )
 		{
@@ -1003,13 +1001,11 @@ void RecvTable_ReadInfos( const CSVCMsg_SendTable& msg )
 
 			if ( ( sendProp.type() == DPT_DataTable ) || ( sendProp.flags() & SPROP_EXCLUDE ) )
 			{
-				printf("[beforePrintProps]");
-				printf( "%d:%06X:%s:%s%s\n", sendProp.type(), sendProp.flags(), sendProp.var_name().c_str(), sendProp.dt_name().c_str(), ( sendProp.flags() & SPROP_EXCLUDE ) ? " exclude" : "" );  
+				//printf( "%d:%06X:%s:%s%s\n", sendProp.type(), sendProp.flags(), sendProp.var_name().c_str(), sendProp.dt_name().c_str(), ( sendProp.flags() & SPROP_EXCLUDE ) ? " exclude" : "" );  
 			}
 			else if ( sendProp.type() == DPT_Array )
 			{
-				printf("[beforePrintProps1]");
-				printf( "%d:%06X:%s[%d]\n", sendProp.type(), sendProp.flags(), sendProp.var_name().c_str(), sendProp.num_elements() );
+				//printf( "%d:%06X:%s[%d]\n", sendProp.type(), sendProp.flags(), sendProp.var_name().c_str(), sendProp.num_elements() );
 			}
 			else // 0 values, nothing interesting to be logged.
 			{
@@ -1467,7 +1463,7 @@ void PrintNetMessage< CSVCMsg_PacketEntities, svc_PacketEntities >( CDemoFileDum
 							EntityEntry *pEntity = AddEntity( nNewEntity, uClass, uSerialNum );
 							if ( !ReadNewEntity( entityBitBuffer, pEntity ) )
 							{
-								printf( "*****Error reading entity! Bailing on this PacketEntities!\n" );
+								//printf( "*****Error reading entity! Bailing on this PacketEntities!\n" );
 								return;
 							}
 						}
@@ -1477,7 +1473,7 @@ void PrintNetMessage< CSVCMsg_PacketEntities, svc_PacketEntities >( CDemoFileDum
 						{
 							if ( !bAsDelta )  // Should never happen on a full update.
 							{
-								printf( "WARNING: LeavePVS on full update" );
+								//printf( "WARNING: LeavePVS on full update" );
 								updateType = Failed;	// break out
 								assert( 0 );
 							}
@@ -1514,7 +1510,7 @@ void PrintNetMessage< CSVCMsg_PacketEntities, svc_PacketEntities >( CDemoFileDum
 								}
 								if ( !ReadNewEntity( entityBitBuffer, pEntity ) )
 								{
-									printf( "*****Error reading entity! Bailing on this PacketEntities!\n" );
+									//printf( "*****Error reading entity! Bailing on this PacketEntities!\n" );
 									return;
 								}
 							}
@@ -1529,7 +1525,7 @@ void PrintNetMessage< CSVCMsg_PacketEntities, svc_PacketEntities >( CDemoFileDum
 						{
 							if ( !bAsDelta )  // Should never happen on a full update.
 							{
-								printf( "WARNING: PreserveEnt on full update" );
+								//printf( "WARNING: PreserveEnt on full update" );
 								updateType = Failed;	// break out
 								assert( 0 );
 							}
@@ -1537,14 +1533,14 @@ void PrintNetMessage< CSVCMsg_PacketEntities, svc_PacketEntities >( CDemoFileDum
 							{
 								if ( nNewEntity >= MAX_EDICTS )
 								{
-									printf( "PreserveEnt: nNewEntity == MAX_EDICTS" );
+									//printf( "PreserveEnt: nNewEntity == MAX_EDICTS" );
 									assert( 0 );
 								}
 								else
 								{
 									if ( g_bDumpPacketEntities )
 									{
-										printf( "PreserveEnt: id:%d\n", nNewEntity );
+										//printf( "PreserveEnt: id:%d\n", nNewEntity );
 									}
 								}
 							}
@@ -1693,7 +1689,7 @@ bool ParseDataTable( CBitRead &buf )
 		int size = 0;
 		if ( !ReadFromBuffer( buf, &pBuffer, size ) )
 		{
-			printf( "ParseDataTable: ReadFromBuffer failed.\n" );
+			//printf( "ParseDataTable: ReadFromBuffer failed.\n" );
 			return false;
 		}
 		msg.ParseFromArray( pBuffer, size );
@@ -1715,7 +1711,7 @@ bool ParseDataTable( CBitRead &buf )
 		entry.nClassID = buf.ReadShort();
 		if ( entry.nClassID >= nServerClasses )
 		{
-			printf( "ParseDataTable: invalid class index (%d).\n", entry.nClassID);
+			//printf( "ParseDataTable: invalid class index (%d).\n", entry.nClassID);
 			return false;
 		}
 
@@ -1736,8 +1732,7 @@ bool ParseDataTable( CBitRead &buf )
 
 		if ( g_bDumpDataTables )
 		{
-			printf("[BeforeDumpDT1]");
-			printf( "class:%d:%s:%s(%d)\n", entry.nClassID, entry.strName, entry.strDTName, entry.nDataTable ); // TOCHECK
+			//printf( "class:%d:%s:%s(%d)\n", entry.nClassID, entry.strName, entry.strDTName, entry.nDataTable ); // TOCHECK
 		}
 		s_ServerClasses.push_back( entry );
 	}
@@ -1745,7 +1740,7 @@ bool ParseDataTable( CBitRead &buf )
 
 	if ( g_bDumpDataTables )
 	{
-		printf( "Flattening data tables..." );
+		//printf( "Flattening data tables..." );
 	}
 	for ( int i = 0; i < nServerClasses; i++ )
 	{
@@ -1753,7 +1748,7 @@ bool ParseDataTable( CBitRead &buf )
 	}
 	if ( g_bDumpDataTables )
 	{
-		printf( "Done.\n" );
+		//printf( "Done.\n" );
 	}
 
 	// perform integer log2() to set s_nServerClassBits
@@ -1816,7 +1811,6 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 				{
 					if (g_bDumpStringTables) 
 					{
-						printf("qui1");
 						//printf("[BeforeDumpST1]");
 						//printf("adding:player entity:%d info:\n xuid:%lld\n name:%s\n userID:%d\n guid:%s\n friendsID:%d\n friendsName:%s\n fakeplayer:%d\n ishltv:%d\n filesDownloaded:%d\n",
 						//	i, playerInfo.xuid, playerInfo.name, playerInfo.userID, playerInfo.guid, playerInfo.friendsID,
@@ -1826,7 +1820,6 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 					
 					if (playerInfo.xuid == targetPlayerSteamID)
 					{
-						printf("player trovato (metodo DumpStringTable())");
 						userID = playerInfo.userID;
 						entityID = playerInfo.entityID;
 						//printf("Found Target Player: %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
@@ -1835,7 +1828,6 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 				else 
 				{
 					*existing = playerInfo;
-					printf("qui2");
 					if (playerInfo.xuid == targetPlayerSteamID)
 					{
 						userID = playerInfo.userID;
@@ -1852,9 +1844,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 					//printf("boh");
 					//printf( " %d, %s, userdata[%d] \n", i, stringname, userDataSize );
 				}
-				printf("qui3");
 			}
-			printf("qui4");
 			delete [] data;
 
 			assert( buf.GetNumBytesLeft() > 10 );
@@ -1868,7 +1858,6 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 			}
 		}
 	}
-	printf("qui5");
 	// Client side stuff
 	if ( buf.ReadOneBit() == 1 )
 	{
@@ -1892,8 +1881,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 				{
 					if ( g_bDumpStringTables )
 					{
-						printf("[BeforeDumpST3]");
-						printf( " %d, %s, userdata[%d] \n", i, stringname, userDataSize );
+						//printf( " %d, %s, userdata[%d] \n", i, stringname, userDataSize );
 					}
 				}
 
@@ -1906,8 +1894,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 				{
 					if ( g_bDumpStringTables )
 					{
-						printf("[BeforeDumpST4]");
-						printf( " %d, %s \n", i, stringname );
+						//printf( " %d, %s \n", i, stringname );
 					}
 				}
 			}
@@ -1933,7 +1920,7 @@ bool DumpStringTables( CBitRead &buf )
 		bool bIsUserInfo = !strcmp( tablename, "userinfo" );
 		if ( !DumpStringTable( buf, bIsUserInfo ) )
 		{
-			printf( "Error reading string table %s\n", tablename );
+			//printf( "Error reading string table %s\n", tablename );
 		}
 	}
 
@@ -1979,7 +1966,7 @@ void CDemoFileDump::DoDump()
 					buf.Seek( 0 );
 					if ( !ParseDataTable( buf ) )
 					{
-						printf( "Error parsing data tables. \n" );
+						//printf( "Error parsing data tables. \n" );
 					}
 					free( data );
 				}
@@ -1993,7 +1980,7 @@ void CDemoFileDump::DoDump()
 					buf.Seek( 0 );
 					if ( !DumpStringTables( buf ) )
 					{
-						printf( "Error parsing string tables. \n" );
+						//printf( "Error parsing string tables. \n" );
 					}
 					free( data );
 				}

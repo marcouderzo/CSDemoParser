@@ -66,7 +66,7 @@ void CDemoFile::ReadCmdHeader( unsigned char& cmd, int32& tick, unsigned char& p
 	
 	if ( cmd <=0 )
 	{
-		fprintf( stderr, "CDemoFile::ReadCmdHeader: Missing end tag in demo file.\n");
+		//fprintf( stderr, "CDemoFile::ReadCmdHeader: Missing end tag in demo file.\n");
 		cmd = dem_stop;
 		return;
 	}
@@ -106,7 +106,7 @@ int32 CDemoFile::ReadRawData( char *buffer, int32 length )
 	
 	if ( buffer && (length < size) )
 	{
-		fprintf( stderr, "CDemoFile::ReadRawData: buffer overflow (%i).\n", size );
+		//fprintf( stderr, "CDemoFile::ReadRawData: buffer overflow (%i).\n", size );
 		return -1;
 	}
 
@@ -141,7 +141,7 @@ bool CDemoFile::Open( const char *name )
 
 		if( Length < sizeof( m_DemoHeader ) )
 		{
-			fprintf( stderr, "CDemoFile::Open: file too small. %s.\n", name );
+			//fprintf( stderr, "CDemoFile::Open: file too small. %s.\n", name );
 			fclose( fp );
 			return false;
 		}
@@ -151,14 +151,14 @@ bool CDemoFile::Open( const char *name )
 
 		if ( strcmp ( m_DemoHeader.demofilestamp, DEMO_HEADER_ID ) )
 		{
-			fprintf( stderr, "CDemoFile::Open: %s has invalid demo header ID.\n", name );
+			//fprintf( stderr, "CDemoFile::Open: %s has invalid demo header ID.\n", name );
 			fclose( fp );
 			return false;
 		}
 
 		if ( m_DemoHeader.demoprotocol != DEMO_PROTOCOL )
 		{
-			fprintf( stderr, "CDemoFile::Open: demo file protocol %i invalid, expected version is %i \n", m_DemoHeader.demoprotocol, DEMO_PROTOCOL );
+			//fprintf( stderr, "CDemoFile::Open: demo file protocol %i invalid, expected version is %i \n", m_DemoHeader.demoprotocol, DEMO_PROTOCOL );
 			fclose( fp );
 			return false;
 		}
@@ -172,7 +172,7 @@ bool CDemoFile::Open( const char *name )
 
 	if ( !m_fileBuffer.size() )
 	{
-		fprintf( stderr, "CDemoFile::Open: couldn't open file %s.\n", name );
+		//fprintf( stderr, "CDemoFile::Open: couldn't open file %s.\n", name );
 		Close();
 		return false;
 	}

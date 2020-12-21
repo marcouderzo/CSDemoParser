@@ -187,7 +187,7 @@ const char *String_Decode( CBitRead &entityBitBuffer, const CSVCMsg_SendTable::s
 
 	if ( len >= DT_MAX_STRING_BUFFERSIZE )
 	{
-		printf( "String_Decode( %s ) invalid length (%d)\n", pSendProp->var_name().c_str(), len );
+		//printf( "String_Decode( %s ) invalid length (%d)\n", pSendProp->var_name().c_str(), len );
 		len = DT_MAX_STRING_BUFFERSIZE - 1;
 	}
 

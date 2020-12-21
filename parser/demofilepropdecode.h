@@ -84,7 +84,7 @@ struct Prop_t
 		if ( m_nNumElements > 0 )
 		{
 			//printf("[BeforePrintProp]");
-			printf( " Element: %d  ", ( nMaxElements ? nMaxElements : m_nNumElements ) - m_nNumElements ); //prints Element: 0  43285
+			//printf( " Element: %d  ", ( nMaxElements ? nMaxElements : m_nNumElements ) - m_nNumElements ); //prints Element: 0  43285
 		}
 
 		switch ( m_type )
@@ -126,7 +126,6 @@ struct Prop_t
 				break;
 			case DPT_Int64:
 				{
-					printf("[PrintInt64]");
 					printf( "%lld\n", m_value.m_int64 );
 				}
 				break;
