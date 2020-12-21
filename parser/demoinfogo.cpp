@@ -73,7 +73,9 @@ int __cdecl main( int argc, char *argv[] )
 		file = "logs/" + file + ".txt";
 		freopen(file.c_str(), "w", stdout); // redirect all stdout to a file
 		DemoFileDump.DoDump();
-		fclose(stdout);
+		printf("done1");
+		//fclose();
+		printf("done2");
 	}
 
 	printf("Done!");
