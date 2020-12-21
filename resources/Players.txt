@@ -1,50 +1,50 @@
-https://www.hltv.org/stats/players/matches/317/pashabiceps 76561197973845818
-https://www.hltv.org/stats/players/matches/3055/flusha 76561197991348083 76561198117206736
-https://www.hltv.org/stats/players/matches/3849/jw 76561198031554200
-https://www.hltv.org/stats/players/matches/7528/krimz 76561198262534196 76561198031651584
-https://www.hltv.org/stats/players/matches/885/olofmeister 76561197988627193
-https://www.hltv.org/stats/players/matches/429/karrigan 76561197989430253
-https://www.hltv.org/stats/players/matches/7592/device 76561197987713664
-https://www.hltv.org/stats/players/matches/7412/gla1ve 76561198010511021
-https://www.hltv.org/stats/players/matches/4954/xyp9x 76561198116400733
-https://www.hltv.org/stats/players/matches/7398/dupreeh 76561198004854956
-https://www.hltv.org/stats/players/matches/8918/electronic 76561198044045107
-https://www.hltv.org/stats/players/matches/7594/flamie 76561198116523276
-https://www.hltv.org/stats/players/matches/7998/s1mple 76561198298306246 76561198034202275
-https://www.hltv.org/stats/players/matches/1225/shox 76561198006920295
-https://www.hltv.org/stats/players/matches/7170/smithzz 76561197962060457 76561198267915276
-https://www.hltv.org/stats/players/matches/7167/kennys 76561197987883012 76561198406770456 76561198364448565
-https://www.hltv.org/stats/players/matches/9816/aleksib 76561198013243326 76561198073116389
-https://www.hltv.org/stats/players/matches/9216/coldzera 76561198039986599
-https://www.hltv.org/stats/players/matches/2023/fallen 76561197960690195
-https://www.hltv.org/stats/players/matches/8564/fer 76561197999186947
-https://www.hltv.org/stats/players/matches/10588/liazz 76561198072321716
-https://www.hltv.org/stats/players/matches/3741/niko 76561198041683378
-https://www.hltv.org/stats/players/matches/10394/twistzz 76561198016255205
-https://www.hltv.org/stats/players/matches/2757/guardian 76561197972331023
-https://www.hltv.org/stats/players/matches/10664/olivia 76561198061745802
-https://www.hltv.org/stats/players/matches/12713/floppy 76561198306519263
-https://www.hltv.org/stats/players/matches/12271/moose 76561198078144931 76561198324395878
-https://www.hltv.org/stats/players/matches/39/get-right 76561197982036918
-https://www.hltv.org/stats/players/matches/9078/k0nfig 76561197979669175 76561198069730996
-https://www.hltv.org/stats/players/matches/7443/twist 76561197980244859 76561198147205437
-https://www.hltv.org/stats/players/matches/9574/snatchie 76561197981967565
-https://www.hltv.org/stats/players/matches/629/fox 76561197962205264 76561198094086500
-https://www.hltv.org/stats/players/matches/2730/chrisj 76561198223789184 76561197988539104
-https://www.hltv.org/stats/players/matches/203/n0thing 76561197961021014
-https://www.hltv.org/stats/players/matches/7433/adren 76561197961631761 76561198006466707
-https://www.hltv.org/stats/players/matches/8347/hazed 76561197990571509 76561197999248947
-https://www.hltv.org/stats/players/matches/7527/pyth 76561198017578295 
-https://www.hltv.org/stats/players/matches/7808/freakazoid 76561198030919062
-https://www.hltv.org/stats/players/matches/165/neo 76561197960725934
-https://www.hltv.org/stats/players/matches/8047/lambert 76561197960282565
-https://www.hltv.org/stats/players/matches/6453/arya 76561197960677505
-https://www.hltv.org/stats/players/matches/484/zeus 76561198019328472 76561198129539354
-https://www.hltv.org/stats/players/matches/161/taz 76561197960499780
-https://www.hltv.org/stats/players/matches/8504/lex 76561197962957566 76561197973133888
-https://www.hltv.org/stats/players/matches/9348/crush 76561197997247152
-https://www.hltv.org/stats/players/matches/7218/krystal 76561197977791735
-https://www.hltv.org/stats/players/matches/11110/golden 76561198076775225
-https://www.hltv.org/stats/players/matches/9217/taco 76561198013142296 76561198275584267
-https://www.hltv.org/stats/players/matches/13978/coffee 76561198206916976
-https://www.hltv.org/stats/players/matches/13228/voltage 76561198047129384
+https://www.hltv.org/stats/players/matches/317/pashabiceps
+https://www.hltv.org/stats/players/matches/3055/flusha
+https://www.hltv.org/stats/players/matches/3849/jw
+https://www.hltv.org/stats/players/matches/7528/krimz
+https://www.hltv.org/stats/players/matches/885/olofmeister
+https://www.hltv.org/stats/players/matches/429/karrigan
+https://www.hltv.org/stats/players/matches/7592/device
+https://www.hltv.org/stats/players/matches/7412/gla1ve
+https://www.hltv.org/stats/players/matches/4954/xyp9x
+https://www.hltv.org/stats/players/matches/7398/dupreeh
+https://www.hltv.org/stats/players/matches/8918/electronic
+https://www.hltv.org/stats/players/matches/7594/flamie
+https://www.hltv.org/stats/players/matches/7998/s1mple
+https://www.hltv.org/stats/players/matches/1225/shox
+https://www.hltv.org/stats/players/matches/7170/smithzz
+https://www.hltv.org/stats/players/matches/7167/kennys
+https://www.hltv.org/stats/players/matches/9816/aleksib
+https://www.hltv.org/stats/players/matches/9216/coldzera
+https://www.hltv.org/stats/players/matches/2023/fallen
+https://www.hltv.org/stats/players/matches/8564/fer
+https://www.hltv.org/stats/players/matches/10588/liazz
+https://www.hltv.org/stats/players/matches/3741/niko
+https://www.hltv.org/stats/players/matches/10394/twistzz
+https://www.hltv.org/stats/players/matches/2757/guardian
+https://www.hltv.org/stats/players/matches/10664/olivia
+https://www.hltv.org/stats/players/matches/12713/floppy
+https://www.hltv.org/stats/players/matches/12271/moose
+https://www.hltv.org/stats/players/matches/39/get-right
+https://www.hltv.org/stats/players/matches/9078/k0nfig
+https://www.hltv.org/stats/players/matches/7443/twist
+https://www.hltv.org/stats/players/matches/9574/snatchie
+https://www.hltv.org/stats/players/matches/629/fox
+https://www.hltv.org/stats/players/matches/2730/chrisj
+https://www.hltv.org/stats/players/matches/203/n0thing
+https://www.hltv.org/stats/players/matches/7433/adren
+https://www.hltv.org/stats/players/matches/8347/hazed
+https://www.hltv.org/stats/players/matches/7527/pyth
+https://www.hltv.org/stats/players/matches/7808/freakazoid
+https://www.hltv.org/stats/players/matches/165/neo
+https://www.hltv.org/stats/players/matches/8047/lambert
+https://www.hltv.org/stats/players/matches/6453/arya
+https://www.hltv.org/stats/players/matches/484/zeus
+https://www.hltv.org/stats/players/matches/161/taz
+https://www.hltv.org/stats/players/matches/8504/lex
+https://www.hltv.org/stats/players/matches/9348/crush
+https://www.hltv.org/stats/players/matches/7218/krystal
+https://www.hltv.org/stats/players/matches/11110/golden
+https://www.hltv.org/stats/players/matches/9217/taco
+https://www.hltv.org/stats/players/matches/13978/coffee
+https://www.hltv.org/stats/players/matches/13228/voltage
