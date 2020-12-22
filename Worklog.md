@@ -763,36 +763,7 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 ```
 Then, it was time to modify `DecodeProp().`
 
-```
-Prop_t *DecodeProp( CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet )
-{
-	//other code
-
-	if (pSendProp->var_name() == "m_vecVelocity[0]" ||
-	    pSendProp->var_name() == "m_vecVelocity[1]" ||
-	    pSendProp->var_name() == "m_vecVelocity[2]" ||
-	    pSendProp->var_name() == "m_vecOrigin" ||
-	    pSendProp->var_name() == "m_vecOrigin[2]" ||
-	    pSendProp->var_name() == "m_angEyeAngles[0]" ||
-	    pSendProp->var_name() == "m_angEyeAngles[1]")
-	{
-		printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
-		hasToPrint = true;
-	}
-
-	// other code
-
-	if (!bQuiet && hasToPrint)
-	{
-		pResult->Print();
-	}
-	
-	//other code
-}	
-
-```
-
-After modifiying it, we realized it printed the right fields, but of every player in the match. In order to fix it, we would have to pass an additional argument to `DecodeProp()`, potentially breaking the code somewhere else. Thus, we decided to play it safe and created a new function `Prop_t *DecodePropWithEntity()`, which is basically the same as the original one, but it also takes in an `EntityEntry`, used to check whether or not the Entity is actually the target player or someone else. 
+After modifiying it, we realized it printed the right fields, but of every player in the match. In order to fix it, we would have to pass an additional argument to `DecodeProp()`, potentially breaking the code somewhere else. Thus, we decided to play it safe and created a new function `Prop_t *DecodePropWithEntity()`, which is basically the same as the original one, but it also takes in an `EntityEntry`, used to check whether or not the Entity is actually the target player or someone else. (Note that the original DecodeProp() is now as it was.)
 
 ```
 Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet, void *pEntity)
