@@ -1052,7 +1052,7 @@ This is the easiest way of logging a crouch_event.
 
 We came up with a different way of doing it, by differenciating partial crouches and full crouches.
 
-We basically check for then first time m_vecViewOffset[2] lowers after a standing-state, and we define this behaviour as crouch_event_init. Then we check for m_vecViewOffset[2] to lower again down to 46.044968f, which is a full crouch, defined as crouch_event_full.
+We basically check for then first time m_vecViewOffset[2] lowers after a standing-state, and we define this behaviour as `player_crouch_init`. Then we check for m_vecViewOffset[2] to lower again down to 46.044968f, which is a full crouch, defined as `player_crouch_full`.
 
 ```
 if (pResult->m_value.m_float == 64.062561f) {
@@ -1088,7 +1088,7 @@ Originally, the values changed as follows:
 46.044968 -> full crouch without an init as there is no intermediate state!
 ```
 
-As you can see, 46.044968 should be considered a full crouch event, but it isn't. This is because the player crouches down, stands up, and then crouches down again. The second time though, `m_vecViewOffset[2]` goes immediately from 64.062561f to 46.044968, and as this happens pretty much in a single variation, the parser will interpret as a `crouch_event_init`. 
+As you can see, 46.044968 should be considered a full crouch event, but it isn't. This is because the player crouches down, stands up, and then crouches down again. The second time though, `m_vecViewOffset[2]` goes immediately from 64.062561f to 46.044968, and as this happens pretty much in a single variation, the parser will interpret as a `player_crouch_init`. 
 
 As the dataset will be used to train an Artificial Intelligence, we thought that dumping potentially wrong data in favour of more raw information was not worth it. We decided to comment out this last way of logging crouch events, in case you want to check it out.
 
