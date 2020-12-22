@@ -288,7 +288,7 @@ const CSVCMsg_GameEventList::descriptor_t *GetGameEventDescriptor( const CSVCMsg
 	{
 		if ( g_bDumpGameEvents )
 		{
-			printf( "%s", msg.DebugString().c_str() );
+			//printf( "%s", msg.DebugString().c_str() );
 		}
 		return NULL;
 	}
