@@ -419,7 +419,7 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 
 
 			
-			/*  //this logic is correct but the output from the parser is uncertain.
+			/*  //correct but the output from the parser is uncertain.
 
 					// OK: Action 128976 player_crouch_init 294.492950 653.842590 20.064556 63.311829
 					// OK: Action 129000 player_crouch_full 294.492950 653.842590 20.064556 46.044968
