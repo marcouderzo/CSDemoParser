@@ -180,7 +180,7 @@ The player events we agreed to keep are the following:
 - `weapon_fire`
 - `weapon_reload`
 - `player_jump`
-- `player_crouch` -> Custom Event
+- `player_crouch` (Custom Event)
 - `player_death`
 - `weapon_zoom`
 - `weapon_zoom_rifle`
@@ -297,6 +297,8 @@ Field: 14, m_vecViewOffset[2] = 64.062561
 ```
 
 As you can see, the first chunck seems to be the descending part of the crouch action, from `64.062561` to `46.044968`. The second one is the ascending part, from `47.671555` back to `64.062561`. So we assume that the `64.062561` value represents the standing state, and `46.044968` represents the crouched state.
+
+We came up with a solution to simulate this game event in a seamless way. Check the "Modifying the Parser" section for more information.
 
 
 **Player Death**
@@ -1033,6 +1035,91 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 
 ```
 When the function returns to `ParseGameEvent()`, we print additional information, depending on the event.
+
+**Creating a Custom Crouch Event**
+
+As there is no `crouch_event` in the event list, we came up with a way of simulating such game event (see what we discovered in the parser in the "Understanding the Parser" section).
+
+In `GlobalPlayerInfo.h`, we defined a new extern variable: bool `isPlayerCrouched`.
+
+In the `DecodePropWithEntity()` function, we check for the `m_vecViewOffset[2]` prop and the correct `entityID`. If we find both of them, we can be sure that's about the target player offsetting from `vecOrigin`, which only happens when a player crouches.
+
+```
+Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet, void *pEntity)
+{
+	// other code
+	if (pSendProp->var_name() == "m_vecViewOffset[2]" && Entity->m_nEntity == entityID)
+	{
+		isCrouchEvent = true;
+	}
+	
+	//function continues...
+```
+
+We check if the value has already been initialized. Then, if `m_vecViewOffset[2]` is < 64.062561f (standing-state) and it the first time the player is crouching (and it is not a value in between the crouching event) we print out `printf("Action %d player_crouch %f %f %f \n", currentTick, playerPositionX, playerPositionY, playerPositionZ)`, which seamlessly simulates a crouch event. Else, if the player was crouched and it is now standing (`m_vecViewOffset[2]` == 64.062561f) we assert that the player is now in standing-state.
+
+```
+	//...here
+	
+	if (isCrouchEvent)
+	{
+		if (pResult->m_value.m_float != 0.000000f) // if the value has already been initialized
+		{
+			if (pResult->m_value.m_float < 64.062561f && !isPlayerCrouched) 
+			{ 
+				isPlayerCrouched = true; 
+				printf("Action %d player_crouch %f %f %f \n", currentTick, playerPositionX, playerPositionY, playerPositionZ);
+			}
+			else if (pResult->m_value.m_float == 64.062561f && isPlayerCrouched)
+			{
+				isPlayerCrouched = false;
+			}
+}			
+```
+
+This is the easiest way of logging a crouch_event. 
+
+We came up with a different way of doing it, by differenciating partial crouches and full crouches.
+
+We basically check for then first time m_vecViewOffset[2] lowers after a standing-state, and we define this behaviour as crouch_event_init. Then we check for m_vecViewOffset[2] to lower again down to 46.044968f, which is a full crouch, defined as crouch_event_full.
+
+```
+if (pResult->m_value.m_float == 64.062561f) {
+	isPlayerCrouched = false;
+	printf("PlayerStanding, setCrouchToFalse\n");
+}
+
+if (pResult->m_value.m_float < 64.062561f && !isPlayerCrouched)
+{
+	printf("Action %d player_crouch_init %f %f %f %f\n", currentTick, playerPositionX, playerPositionY, playerPositionZ, pResult->m_value.m_float);
+	isPlayerCrouched = true;
+}
+else if (pResult->m_value.m_float == 46.044968f)
+{
+	printf("Action %d player_crouch_full %f %f %f %f\n", currentTick, playerPositionX, playerPositionY, playerPositionZ, pResult->m_value.m_float);
+	isPlayerCrouched = true;
+}
+```
+
+Note that this is very error-prone. Indeed, checking in the output, sometimes we get:
+
+```
+OK : Action 128976 player_crouch_init 294.492950 653.842590 20.064556 63.311829
+OK : Action 129000 player_crouch_full 294.492950 653.842590 20.064556 46.044968
+WRONG! : Action 129260 player_crouch_init 295.996918 654.045227 33.935287 46.044968        <------------------
+```
+Originally, the values changed as follows:
+
+```
+63.311829 -> initiates crouching
+46.044968 -> full crouch
+64.062561 -> standing
+46.044968 -> full crouch without an init as there is no intermediate state!
+```
+
+As you can see, 46.044968 should be considered a full crouch event, but it isn't. This is because the player crouches down, stands up, and then crouches down again. The second time though, `m_vecViewOffset[2]` goes immediately from 64.062561f to 46.044968, and as this happens pretty much in a single variation, the parser will interpret as a `crouch_event_init`. 
+
+As the dataset will be used to train an Artificial Intelligence, we thought that dumping potentially wrong data in favour of more raw information was not worth it. We decided to comment out this last way of logging crouch events, in case you want to check it out.
 
 
 **Formatting the *Entity* Output as Required**
