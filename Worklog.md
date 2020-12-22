@@ -835,7 +835,9 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 	
 ```
 
-While testing, we noticed that some chosen events never got logged, and some discarded ones did instead. We compared the event list with various demos, and we figured out that event IDs were not the same at all! Some of them were offset by two indexes, others were also missing. We are still testing why it's happening, but in the meantime we came up with a different solution.
+While testing, we noticed that some chosen events never got logged, and some discarded ones did instead. We compared the event list with various demos, and we figured out that event IDs were not the same at all! Some of them were offset by two indexes, others were also missing. 
+
+We used a diff checker to look into this. An example of those inconsistencies can be clearly seen in [this diff](https://www.diffchecker.com/zC7OIIba).
 
 Therefore, for consistency purposes, we decided to use the event's `pDescriptor` and check for the event name instead. Indeed, we don't really need the `CSVCMsg_GameEvent &msg` message anyways, if not to check the id of the events.
 
