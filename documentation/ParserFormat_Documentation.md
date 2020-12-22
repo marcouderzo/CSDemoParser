@@ -37,7 +37,14 @@ Action 250360 weapon_fire 867.432922 2405.222412 144.230499 weapon_hegrenade
 
 ### player_crouch -> Custom Event
 
-To Do.
+*Action currentTick, player_crouch playerPositionX, playerPositionY, playerPositionZ)*
+
+**Output Example**
+
+```
+Action 176724 player_crouch -1274.234619 -987.730347 -125.380936
+```
+
 
 ### player_death
 
