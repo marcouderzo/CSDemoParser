@@ -47,6 +47,12 @@ def download(path, innerLink):
 
     finalDriver.close()
 
+
+
+
+
+
+
 def goToDownloadPage(path, link, nextLink):
     """
         Funzione che scarica il singolo replay
@@ -71,8 +77,14 @@ def goToDownloadPage(path, link, nextLink):
             if "?" not in innerLink:
 
                 download(path, innerLink)
+                break
 
     innerDriver.close()
+
+
+
+
+
 
 def takePlayerMatches(path, profileLink, playerNamePar):
     """
@@ -135,10 +147,91 @@ def takePlayerMatches(path, profileLink, playerNamePar):
             goToDownloadPage(path, resultA.get_attribute("href"), nextLink)
             print("Scaricato il {} file".format(str(i + 1) + "°"))
         i = i + 1
+        prev = nextLink
         listOfMatch.append(playerNamePar + "_" + str(i))
 
     driver.close()
     dizionario.update(playerNamePar, listOfMatch)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 path = 'C:/Users/marco/AppData/Local/Google/Chrome/Application/chromedriver.exe'
