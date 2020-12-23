@@ -14,6 +14,7 @@ Students Involved in the Project:
 **Scripts**
 - [x] Create the Download Script
 - [x] Create the AutoParse Script
+- [x] Create the Dataset Validation Script
 
 **Parser Understanding**
 - [x] General Understanding of demoinfogo
