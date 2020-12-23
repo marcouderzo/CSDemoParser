@@ -1373,3 +1373,12 @@ The Parser Output is not very straight-forward to understand, expecially when it
 As the match pool is very large, parsing every match manually is just not feasable. So, we decided to write a simple script to automate the parsing process.
 
 You can read the documentation on how it works in detail [here](https://github.com/marcouderzo/CSDemoParser/blob/main/documentation/autoparse%20Script%20Documentation.md)
+
+
+## Dataset Validation Testing
+
+### validatedataset.py
+
+Testing and validating the dataset is always a good practice. We decided to write a simple but very effective script that does it.
+
+You can read the documentation on the tests we decided to run [here](https://github.com/marcouderzo/CSDemoParser/blob/main/documentation/validateoutput%20Script%20Documentation.md)
