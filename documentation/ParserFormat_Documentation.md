@@ -122,6 +122,25 @@ Action 149056 item_equip 2449.139893 2010.219971 128.031250 knife
 
 No Output Example available as it never got logged.
 
+### player_blind
+
+*Action Tick Type playerPositionX playerPositionY playerPositionZ blind_duration*
+
+**Output Example**
+
+```
+Action 149056 player_blind 2449.139893 2010.219971 128.031250 3.030241
+```
+
+### player_falldamage
+
+*Action Tick Type playerPositionX playerPositionY playerPositionZ damage*
+
+**Output Example**
+
+```
+Action 149056 player_blind 2449.139893 2010.219971 128.031250 6.994048 
+```
 
 
 
