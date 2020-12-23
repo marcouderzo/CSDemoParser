@@ -546,6 +546,45 @@ The `bomb_abortdefuse` is triggered when a player aborts the bomb defuse.
 | userid |	The userid of the player that aborted the bomb defuse.	| short
 
 
+The `bomb_beginplant` is triggered when a player begins the bomb plant.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| userid |	The userid of the player that began planting the bomb.	| short
+
+**Output Example**
+
+```
+bomb_beginplant
+{
+ userid: SWOLEfREAKAZOiD (id:40)
+  position: -1166.488647, -79.961365, 98.031250
+  facing: pitch:4.619751, yaw:96.531372
+  team: T
+ site: 504 
+}
+```
+
+The `bomb_begindefuse` is triggered when a player begins the bomb defuse.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| userid |	The userid of the player that began defusing the bomb.	| short
+| haskit |	if the player has a defuse kit	| short
+
+**Output Example**
+
+```
+bomb_begindefuse
+{
+ userid: BNBptr (id:35)
+  position: -1159.983765, -28.044533, 117.279297
+  facing: pitch:55.442505, yaw:279.761353
+  team: CT
+ haskit: 0 
+}
+```
+
 
 **Round MVP (Most Valuable Player)**
 
@@ -652,6 +691,143 @@ smokegrenade_detonate
  z: 138.758911 
 }
 ```
+
+**Tactic Grenade Detonation**
+
+The `tagrenade_detonate` event is fired when a tactic grenade detonates.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| entityid	| The index of the tactic grenade that detonated.	| short
+| userid	| The userid of the player that threw the tactic grenade.	| short
+| x	| The x coordinate on the map where the tactic grenade detonated. |	float
+| y	| The y coordinate on the map where the tactic grenade detonated. |	float
+| z	| The z coordinate on the map where the tactic grenade detonated. |	float
+
+No Output example available.
+
+**Molotov Detonation**
+
+The `molotov_detonate` event is fired when a molotov detonates.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| entityid	| The index of the molotov that detonated.	| short
+| userid	| The userid of the player that threw the molotov.	| short
+| x	| The x coordinate on the map where the molotov detonated. |	float
+| y	| The y coordinate on the map where the molotov detonated. |	float
+| z	| The z coordinate on the map where the molotov detonated. |	float
+
+No Output example available.
+
+**Decoy Detonation**
+
+The `decoy_detonate` event is fired when a decoy detonates.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| entityid	| The index of the decoy that detonated.	| short
+| userid	| The userid of the player that threw the decoy.	| short
+| x	| The x coordinate on the map where the decoy decoy. |	float
+| y	| The y coordinate on the map where the molotov decoy. |	float
+| z	| The z coordinate on the map where the molotov decoy. |	float
+
+**Output Example**
+
+```
+decoy_detonate
+{
+ userid: SWOLEfood (id:31)
+  position: -621.247681, -1829.594849, 145.029633
+  facing: pitch:7.443237, yaw:85.984497
+  team: T
+ entityid: 473 
+ x: -1195.489136 
+ y: -3041.499268 
+ z: 249.889053 
+}
+```
+
+**Bomb Dropped, Defuser Dropped**
+
+The `bomb_dropped` event is fired when a player drops the bomb.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| entindex |	The index of the c4 entity that was dropped. | 	long
+| userid |	The userid of the player that dropped the bomb. |	short
+
+The `defuser_dropped` event is fired when a player drops the bomb.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| entityid	| |	long
+
+**Bomb Pickup, Defuser Pickup**
+
+The `bomb_pickup` event is fired when a player picks up the bomb.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+userid |	The userid of the player that picked up the bomb. |	short
+
+**Output Example**
+
+```
+bomb_pickup
+{
+ userid: SWOLEfREAKAZOiD (id:40)
+  position: -2398.636719, -1318.219116, 486.440796
+  facing: pitch:1.071167, yaw:76.734009
+  team: T
+}
+```
+
+The `defuser_pickup` event is fired when a player picks up a defuser.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+userid	The userid of the player that picked up the defuser.	short
+entityid |	 	| long
+
+No Output Example available.
+
+**Player Fall Damage**
+
+The `player_falldamage` event is fired when a player sustains damage from falling from a height.
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| damage |	The amount of damage the player sustained. |	float
+| userid |	The userid of the player that fell. |	short
+
+**Output Example**
+
+```
+player_falldamage
+{
+ userid: SWOLEfREAKAZOiD (id:40)
+  position: -1827.862305, 1032.602417, 247.951172
+  facing: pitch:26.696777, yaw:266.539307
+  team: T
+ damage: 6.994048 
+}
+```
+
+**Player Blid**
+
+The `player_blind` event is fired when a player is blinded by a flashbang.
+
+
+| Name      | Description                                       | Type
+|-----------|-------------------------------------------------  | -----
+| userid	| id of the player |	short
+| attacker	| player who threw the flashbang |	short
+| entityid	| entity id of the flashbang  |	short
+| blind_duration	| how much the player was blinded for |	float
+
+
+
 
 **Door Moving**
 
