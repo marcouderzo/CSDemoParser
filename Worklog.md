@@ -189,17 +189,29 @@ The player events we agreed to keep are the following:
 - `item_equip`
 - `item_purchase`
 - `ammo_pickup`
-- `silencer_detach`
+- `bullet_impact` *
+- `silencer_detach` *
 - `bomb_planted`
 - `bomb_defused`
+- `bomb_beginplant`
 - `bomb_abortplant`
+- `bomb_begindefuse`
 - `bomb_abortdefuse`
+- `bomb_dropped`
+- `defuser_dropped`
+- `bomb_pickup`
+- `defuser_pickup`
 - `round_mvp`
+- `grenade_thrown` *
 - `flashbang_detonate`
 - `hegrendade_detonate`
 - `smokegrenade_detonate`
+- `tagrenade_detonate`
+- `decoy_detonate`
+- `molotov_detonate
+- `player_falldamage`
+- `player_blind`
 - `door_moving`
-- `bullet_impact`
 
 **Weapon Fire**
 
@@ -1046,6 +1058,7 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 		pDescriptor->name() != "weapon_zoom_rifle" && //weapon_zoom_rifle
 		pDescriptor->name() != "item_pickup" && //item_pickup
 		pDescriptor->name() != "ammo_pickup" && //ammo_pickup 
+		pDescriptor->name() != "silencer_detach" &&
 		pDescriptor->name() != "item_equip" && //item_equip
 		pDescriptor->name() != "bomb_beginplant" && //bomb_beginplant
 		pDescriptor->name() != "bomb_abortplant" && //bomb_abortplant
