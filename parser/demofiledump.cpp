@@ -578,21 +578,27 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 					pDescriptor->name() != "item_pickup" && //item_pickup
 					pDescriptor->name() != "ammo_pickup" && //ammo_pickup 
 					pDescriptor->name() != "item_equip" && //item_equip
-					pDescriptor->name() != "bomb_beginplant" && //bomb_beginplant
-					pDescriptor->name() != "bomb_abortplant" && //bomb_abortplant
-					pDescriptor->name() != "bomb_begindefuse" && //bomb_begindefuse
-					pDescriptor->name() != "bomb_abortdefuse" && //bomb_abortdefuse
 					pDescriptor->name() != "flashbang_detonate" && //flashbang_detonate
 					pDescriptor->name() != "hegrenade_detonate" && //hegrenade_detonate
 					pDescriptor->name() != "smokegrenade_detonate" && //smokegrenade_detonate
 					pDescriptor->name() != "molotov_detonate" && //molotov_detonate
 					pDescriptor->name() != "decoy_detonate" && //decoy_detonate
 					pDescriptor->name() != "tagrenade_detonate" &&
+					pDescriptor->name() != "bomb_beginplant" && //bomb_beginplant
+					pDescriptor->name() != "bomb_abortplant" && //bomb_abortplant
+					pDescriptor->name() != "bomb_begindefuse" && //bomb_begindefuse
+					pDescriptor->name() != "bomb_abortdefuse" && //bomb_abortdefuse
 					pDescriptor->name() != "bomb_planted" && //bomb_planted
 					pDescriptor->name() != "bomb_defused" && //bomb_defused
+					pDescriptor->name() != "bomb_pickup" &&
+					pDescriptor->name() != "bomb_dropped" &&
+					pDescriptor->name() != "defuser_dropped" &&
+					pDescriptor->name() != "defuser_pickup" &&
 					pDescriptor->name() != "round_mvp" && //round_mvp
 					pDescriptor->name() != "item_purchase" && //item_purchase
 					pDescriptor->name() != "player_death" && //player_death
+					pDescriptor->name() != "player_falldamage" &&
+					pDescriptor->name() != "player_blind" &&
 					pDescriptor->name() != "door_moving") //door_moving 
 				{	
 					return;
@@ -710,32 +716,24 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 					if (pDescriptor->name() == "item_equip" && Key.name().compare("item") == 0)
 					{
 						printf("%s ", KeyValue.val_string().c_str());
-					}		
+					}
 
 					if (pDescriptor->name() == "item_purchase" && Key.name().compare("weapon") == 0)
 					{
 						printf("%s ", KeyValue.val_string().c_str());
 					}
 
-					/*
-
-					// In case you want to keep it
-					if (pDescriptor->name() == "item_equip" && Key.name().compare("weptype") == 0)
+					if (pDescriptor->name() == "player_blind" && Key.name().compare("blind_duration") == 0)
 					{
-						printf("%d ", KeyValue.val_short());
+						printf("%f ", KeyValue.val_float());
 					}
 
-					// Bombsite index (A or B) does not really make any sense as it is a short int (e.g. 422).
-					if (pDescriptor->name() == "bomb_abortplant" && Key.name().compare("site") == 0)
+					if (pDescriptor->name() == "player_falldamage" && Key.name().compare("damage") == 0)
 					{
-						printf("%d ", KeyValue.val_short());
-					}
-					if (pDescriptor->name() == "bomb_planted" && Key.name().compare("site") == 0)
-					{
-						printf("%d ", KeyValue.val_short());
+						printf("%f ", KeyValue.val_float());
 					}
 
-					*/
+
 					
 
 
