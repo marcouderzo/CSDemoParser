@@ -1039,21 +1039,35 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
     	if (	pDescriptor->name() != "player_jump" && //player_jump
 		pDescriptor->name() != "weapon_fire" && //weapon_fire
 		pDescriptor->name() != "weapon_reload" && //weapon_reload
-		//pDescriptor->name() != "grenade_thrown" && //grenade_thrown			// NOT FOUND, EVEN THOUGH IT IS PRESENT IN DESCRIPTORS! 
-		pDescriptor->name() != "bullet_impact" && //bullet_impact			// Never shows up even when parsing with the original parser
+		pDescriptor->name() != "grenade_thrown" && //grenade_thrown	// NOT FOUND, EVEN THOUGH IT IS PRESENT IN DESCRIPTORS. 
+		pDescriptor->name() != "bullet_impact" && //bullet_impact	// Never shows up even when parsing with the original parser
 		pDescriptor->name() != "silencer_detach" && //silencer_detach
 		pDescriptor->name() != "weapon_zoom" && //weapon_zoom
 		pDescriptor->name() != "weapon_zoom_rifle" && //weapon_zoom_rifle
 		pDescriptor->name() != "item_pickup" && //item_pickup
 		pDescriptor->name() != "ammo_pickup" && //ammo_pickup 
 		pDescriptor->name() != "item_equip" && //item_equip
+		pDescriptor->name() != "bomb_beginplant" && //bomb_beginplant
 		pDescriptor->name() != "bomb_abortplant" && //bomb_abortplant
+		pDescriptor->name() != "bomb_begindefuse" && //bomb_begindefuse
+		pDescriptor->name() != "bomb_abortdefuse" && //bomb_abortdefuse
 		pDescriptor->name() != "flashbang_detonate" && //flashbang_detonate
 		pDescriptor->name() != "hegrenade_detonate" && //hegrenade_detonate
 		pDescriptor->name() != "smokegrenade_detonate" && //smokegrenade_detonate
+		pDescriptor->name() != "molotov_detonate" && //molotov_detonate
+		pDescriptor->name() != "decoy_detonate" && //decoy_detonate
+		pDescriptor->name() != "tagrenade_detonate" &&
 		pDescriptor->name() != "bomb_planted" && //bomb_planted
+		pDescriptor->name() != "bomb_defused" && //bomb_defused
+		pDescriptor->name() != "round_mvp" && //round_mvp
 		pDescriptor->name() != "item_purchase" && //item_purchase
 		pDescriptor->name() != "player_death" && //player_death
+		pDescriptor->name() != "bomb_dropped" &&
+		pDescriptor->name() != "defuser_dropped" &&
+		pDescriptor->name() != "bomb_pickup" &&
+		pDescriptor->name() != "defuser_pickup" &&
+		pDescriptor->name() != "player_falldamage" &&
+		pDescriptor->name() != "player_blind" &&
 		pDescriptor->name() != "door_moving") //door_moving 
 		{	
 			return;
@@ -1186,9 +1200,9 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 ```
 When the function returns to `ParseGameEvent()`, we print additional information, depending on the event.
 
-**Creating a Custom Crouch Event**
+**OLD: Creating a Custom Crouch Event**
 
-As there is no `crouch_event` in the event list, we came up with a way of simulating such game event (see what we discovered in the parser in the "Understanding the Parser" section).
+*(This is deprecated, we are handling it in a different way)* - As there is no `crouch_event` in the event list, we came up with a way of simulating such game event (see what we discovered in the parser in the "Understanding the Parser" section).
 
 In `GlobalPlayerInfo.h`, we defined a new extern variable: bool `isPlayerCrouched`.
 
