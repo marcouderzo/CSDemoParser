@@ -886,6 +886,20 @@ Calling the parser with arguments can be annoying and makes the shell commands u
 
 In order to share the SteamID (`xuid`), UserID and EntityID between multiple files and not having issues with the Linker, we created a new `GlobalPlayerInfo.h` file with those variables declared as extern.
 
+
+```
+#ifndef GLOBALPLAYERINFO_H
+#define GLOBALPLAYERINFO_H
+
+extern unsigned long long targetPlayerSteamID;
+extern int userID;
+extern int entityID;
+
+// (added new variables later...)
+
+#endif
+```
+
 Those variables are assigned in `DumpStringTable()` when the parser finds the `PlayerInfo` with the matching `SteamID`.
 
 ```
