@@ -4,12 +4,12 @@
 
 The player entity is represented as follows:
 
-*Entity currentTick mouseCoordX mouseCoordY playerPositionX playerPositionY playerPositionZ playerVelocityX playerVelocityY playerVelocityZ*
+*Entity currentTick mouseCoordX mouseCoordY playerPositionX playerPositionY playerPositionZ playerVelocityX playerVelocityY playerVelocityZ crouchStateYOffset*
 
 **Output Example**
 
 ```
-Entity 250280 345.097046 358.725586 200.976746 706.085266 80.031250 180.222641 0.000000 -17.836735
+Entity 250280 345.097046 358.725586 200.976746 706.085266 80.031250 180.222641 0.000000 -17.836735 64.062561
 ```
 
 
