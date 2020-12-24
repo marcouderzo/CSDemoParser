@@ -18,7 +18,7 @@ extern float playerVelocityX;
 extern float playerVelocityY;
 extern float playerVelocityZ;
 
-extern bool isPlayerCrouched;
+extern float crouchStateYOffset;
 
 
 // Tick count

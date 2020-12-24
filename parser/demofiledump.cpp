@@ -55,7 +55,7 @@ float playerVelocityX;
 float playerVelocityY;
 float playerVelocityZ;
 
-bool isPlayerCrouched = false;
+float crouchStateYOffset;
 
 int currentTick;
 
@@ -1319,7 +1319,7 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 
 	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
 	{
-		printf("Entity %d %f %f %f %f %f %f %f %f \n",  currentTick,
+		printf("Entity %d %f %f %f %f %f %f %f %f %f\n",currentTick,
 														mouseCoordX,
 														mouseCoordY,
 														playerPositionX,
@@ -1327,7 +1327,8 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 														playerPositionZ,
 														playerVelocityX,
 														playerVelocityY,
-														playerVelocityZ);
+														playerVelocityZ,
+														crouchStateYOffset);
 	}
 	
 	return true;

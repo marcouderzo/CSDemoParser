@@ -325,10 +325,7 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 	EntityEntry* Entity = static_cast<EntityEntry*>(pEntity);
 	const CSVCMsg_SendTable::sendprop_t *pSendProp = pFlattenedProp->m_prop;
 
-	bool hasToPrint = false;
-	bool hasToRefresh = false;
-
-	bool isCrouchEvent = false;
+	bool hasToUpdate = false;
 
 	Prop_t *pResult = NULL;
 
@@ -337,10 +334,6 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 		pResult = new Prop_t((SendPropType_t)(pSendProp->type()));
 	}
 
-	if (pSendProp->var_name() == "m_vecViewOffset[2]" && Entity->m_nEntity == entityID)
-	{
-		isCrouchEvent = true;
-	}
 
 
 	if ((pSendProp->var_name() == "m_vecVelocity[0]" ||
@@ -349,13 +342,13 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 		pSendProp->var_name() == "m_vecOrigin" ||
 		pSendProp->var_name() == "m_vecOrigin[2]" ||
 		pSendProp->var_name() == "m_angEyeAngles[0]" ||
-		pSendProp->var_name() == "m_angEyeAngles[1]") && Entity->m_nEntity==entityID)
+		pSendProp->var_name() == "m_angEyeAngles[1]" ||
+		pSendProp->var_name() == "m_vecViewOffset[2]") && Entity->m_nEntity==entityID)
 	{
-		//printf("[beforeDecodePropPrint]");
 		if (nFieldIndex != 16)
 		{
 			//printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
-			hasToRefresh = true;
+			hasToUpdate = true;
 		}
 	}
 	switch (pSendProp->type())
@@ -391,7 +384,7 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 		//printf("[Type is DPT_Int64, ");
 		break;
 	}
-	if (!bQuiet && hasToPrint)
+	if (!bQuiet)
 	{
 		//pResult->Print();
 	}
@@ -400,8 +393,15 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 
 
 
-	// FULL_STANDING: 64.062561f
-	// FULL_CROUCHED: 46.044968f
+	/*
+	// ------DEPRECATED------ m_vecViewOffset[2] is now part of Entity
+
+
+	// GIVEN:
+	//		FULL_STANDING: 64.062561f
+	//		FULL_CROUCHED: 46.044968f
+
+	// SOLUTION 1:
 
 	if (isCrouchEvent)
 	{
@@ -417,7 +417,8 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 				isPlayerCrouched = false;
 			}
 
-
+	
+	// SOLUTION 2:
 			
 			/*  //correct but the output from the parser is uncertain.
 
@@ -440,12 +441,13 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 			{
 				printf("Action %d player_crouch_full %f %f %f %f\n", currentTick, playerPositionX, playerPositionY, playerPositionZ, pResult->m_value.m_float); // I print player_crouch_full
 				isPlayerCrouched = true;
-			}*/
+			}
 		}
 	}
+	*/
 
 	
-	if (hasToRefresh)
+	if (hasToUpdate)
 	{
 		if (pSendProp->var_name() == "m_vecVelocity[0]")
 		{
@@ -497,6 +499,17 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 		{
 			mouseCoordX = pResult->m_value.m_float;
 			//printf("Used m_float 5] \n");
+		}
+
+		if (pSendProp->var_name() == "m_angEyeAngles[1]")
+		{
+			mouseCoordX = pResult->m_value.m_float;
+			//printf("Used m_float 5] \n");
+		}
+
+		if (pSendProp->var_name() == "m_vecViewOffset[2]") // crouching yOffset is dumped in Entity.
+		{
+			crouchStateYOffset = pResult->m_value.m_float;
 		}
 		
 
