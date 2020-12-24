@@ -968,7 +968,8 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 	pSendProp->var_name() == "m_vecOrigin" ||
 	pSendProp->var_name() == "m_vecOrigin[2]" ||
 	pSendProp->var_name() == "m_angEyeAngles[0]" ||
-	pSendProp->var_name() == "m_angEyeAngles[1]") && Entity->m_nEntity==entityID)
+	pSendProp->var_name() == "m_angEyeAngles[1]" ||
+	pSendProp->var_name() == "m_vecViewOffset[2]") && Entity->m_nEntity==entityID)
 	{
 		if (nFieldIndex != 6 && nFieldIndex != 16)
 		{
@@ -1215,7 +1216,9 @@ When the function returns to `ParseGameEvent()`, we print additional information
 
 **OLD: Creating a Custom Crouch Event**
 
-*(This is deprecated, we are handling it in a different way)* - As there is no `crouch_event` in the event list, we came up with a way of simulating such game event (see what we discovered in the parser in the "Understanding the Parser" section).
+*The following section is deprecated. After further investigation, we switched from handling the yOffset as a custom game event, to including it into Entity as a constantly-updating value. We are keeping the following explaination only for work-logging purposes. Check the Entity section for information on the current implementation.* 
+
+As there is no `crouch_event` in the event list, we came up with a way of simulating such game event (see what we discovered in the parser in the "Understanding the Parser" section).
 
 In `GlobalPlayerInfo.h`, we defined a new extern variable: bool `isPlayerCrouched`.
 
@@ -1298,6 +1301,8 @@ As you can see, 46.044968 should be considered a full crouch event, but it isn't
 
 As the dataset will be used to train an Artificial Intelligence, we thought that dumping potentially wrong data in favour of more raw information was not worth it. We decided to comment out this last way of logging crouch events, in case you want to check it out.
 
+*Update: As this is deprecated, check the Entity section below.*
+
 
 **Formatting the *Entity* Output as Required**
 
@@ -1308,7 +1313,7 @@ From [this research paper](https://www.researchgate.net/publication/318873037_Da
 In order to format the output in the form of: 
 
 ```
-Entity currentTick, mouseCoordX, mouseCoordY, playerPositionX, playerPositionY, playerPositionZ, playerVelocityX, playerVelocityY, playerVelocityZ
+Entity currentTick, mouseCoordX, mouseCoordY, playerPositionX, playerPositionY, playerPositionZ, playerVelocityX, playerVelocityY, playerVelocityZ, crouchStateYOffset
 ```
 
 we decided to add to `GlobalPlayerInfo.h` those variables, making them conveniently accessible from everywhere in the parser.
@@ -1326,16 +1331,36 @@ extern double playerVelocityX;
 extern double playerVelocityY;
 extern double playerVelocityZ;
 
+extern float crouchStateYOffset;
+
 
 // Tick count
 extern int currentTick;
 ```
 
 As those variables are decoded and printed in `DecodePropWithEntity()`, we modified it to update the variables in `GlobalPlayerInfo.h`, instead of printing them directly.
+As we explained before, we first check for the prop name and for the correct player entityID, then if that's a prop we want to log, we update the global variable. Note that `m_vecViewOffset[2]` has been added later: we switched from handling that value as a custom crouch event, to logging it directly as part of Entity.
 
 ```
 Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet, void *pEntity)
 {
+
+	if ((pSendProp->var_name() == "m_vecVelocity[0]" ||
+		pSendProp->var_name() == "m_vecVelocity[1]" ||
+		pSendProp->var_name() == "m_vecVelocity[2]" ||
+		pSendProp->var_name() == "m_vecOrigin" ||
+		pSendProp->var_name() == "m_vecOrigin[2]" ||
+		pSendProp->var_name() == "m_angEyeAngles[0]" ||
+		pSendProp->var_name() == "m_angEyeAngles[1]" ||
+		pSendProp->var_name() == "m_vecViewOffset[2]") && Entity->m_nEntity==entityID)
+	{
+		if (nFieldIndex != 16)
+		{
+			//printf("Field: %d, %s = ", nFieldIndex, pSendProp->var_name().c_str());
+			hasToUpdate = true;
+		}
+	}
+
 	//other code
 	
 	if (hasToRefresh)
@@ -1372,6 +1397,10 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 		{
 			mouseCoordX = pResult->m_value.m_float;
 		}
+		if (pSendProp->var_name() == "m_vecViewOffset[2]") // crouching yOffset is dumped in Entity.
+		{
+			crouchStateYOffset = pResult->m_value.m_float;
+		}
 
 	}
 	
@@ -1397,7 +1426,8 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 								     playerPositionZ,
 								     playerVelocityX,
 								     playerVelocityY,
-								     playerVelocityZ);
+								     playerVelocityZ,
+								     crouchStateYOffset);
 	}
 	
 	// other code
