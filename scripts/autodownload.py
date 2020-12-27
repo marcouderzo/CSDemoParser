@@ -11,6 +11,7 @@ import json
 
 def download(path, innerLink):
 
+    global downloaded
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -18,21 +19,27 @@ def download(path, innerLink):
     finalDriver = webdriver.Chrome(path, options=chrome_options)
     finalDriver.get(innerLink)
 
+    print("Third driver done")
+
     box = finalDriver.find_elements_by_class_name("stream-box")
     link = box[0].find_elements_by_tag_name("a")[0].get_attribute("href")
+
+    print("RealLink {}".format(link))
 
     downloadingDriver = webdriver.Chrome(path, options=chrome_options)
     downloadingDriver.get(link)
 
-    t.sleep(2)
+    print("Fourth driver done")
+
+    t.sleep(20)
 
     dlname=""
 
-    for file in os.listdir("C:/Users/marco/Downloads/"):
+    for file in os.listdir("C:/Users/samuk/Downloads"):
         if file.endswith(".crdownload"):
             dlname = file
 
-    targetfile = 'C:/Users/marco/Downloads/' + dlname
+    targetfile = 'C:/Users/samuk/Downloads/' + dlname
     print(targetfile)
 
     hasDownloaded = False
@@ -42,6 +49,9 @@ def download(path, innerLink):
         if not os.path.exists(targetfile):
             hasDownloaded = True
 
+    print("Download done")
+
+    downloaded = downloaded + 1
 
     downloadingDriver.close()
 
@@ -67,15 +77,20 @@ def goToDownloadPage(path, link, nextLink):
     innerDriver = webdriver.Chrome(path, options=chrome_options)
     innerDriver.get(link)
 
+    print("Second driver done")
+
     innerResult = innerDriver.find_elements_by_tag_name("a")
+    print("InnerResultLength {}".format(len(innerResult)))
 
     for x in innerResult:
 
         innerLink = x.get_attribute("href")
         # /matches/2335421/youngsters-vs-heretics-lootbet-season-3
         if type(innerLink).__name__ != "NoneType" and innerLink.find("/matches/") > 0 and nextLink in innerLink:
+            print("Ci entro")
             if "?" not in innerLink:
 
+                print("InnerLink {}".format(innerLink))
                 download(path, innerLink)
                 break
 
@@ -94,6 +109,8 @@ def takePlayerMatches(path, profileLink, playerNamePar):
         è possibile che bisogni specificare i percorsi di Firefox e Chrome anche se non dovrebbe essere necessario
      """
 
+    global downloaded
+    downloaded = 0
     listOfMatch = []
 
     chrome_options = webdriver.ChromeOptions()
@@ -103,55 +120,64 @@ def takePlayerMatches(path, profileLink, playerNamePar):
     driver = webdriver.Chrome(path, options=chrome_options)
     driver.get(profileLink)
 
+    print("First driver set")
+
     # driver.maximize_window()
 
     table = driver.find_elements_by_class_name("stats-table")
-    #print(str(len(table)))
+    print("Length of table {}".format(str(len(table))))
     resultTd = table[0].find_elements_by_tag_name("td")
-    #print(resultTd[0].text)
+    print("First td text {}".format(resultTd[0].text))
 
     prev = ''
     i = 0
 
-    while i < 100:
+
+    while downloaded < 3:
         # aux conta gli elementi td. Interessano il primo, il secondo e il terzo di ogni riga
         # (i nomi dei team e la data della partita).
         # Ci sono 7 colonne nella tabella
         aux = 7 * i
+        print(str(aux))
         # resultA contiene tutti i link figli del td corrente e che sono dei link. Questo si riduce a un solo elemento
         # per ogni td, però essento il risultato inserito in una lista bisogna comunque selezionare il primo elemento
         resultA = resultTd[aux].find_elements_by_tag_name("a")[0]
-        # print(type(resultA))
-        # print(resultA)
-        # print(resultA[0].text)
-        # print(resultA[0].get_attribute("href"))
-        # print(str(len(resultA)))
+        print("Type {}".format(type(resultA)))
+        print("result {}".format(resultA))
+        print("text {}".format(resultA.text))
+        print("href {}".format(resultA.get_attribute("href")))
 
         team = resultTd[aux + 1].text
         # Dopo il nome del team c'è uno spazio seguito da un numero tra parentesi. Le 3 linee seguenti servono a
         # togliere questi caratteri, con l'accortezza che bisogna rimuovere solo gli spazi e i numeri che compaiono
         # alla fine
         team = re.sub(" (\([0-9]+\))", "", team)
+        team = team.replace(" ", "-")
         team = team.lower()
-        #print(team)
+        print("Team {}".format(team))
 
         enemyTeam = resultTd[aux + 2].text
         # rimozione dei caratteri analoga alla precedente
         enemyTeam = re.sub(" (\([0-9]+\))", "", enemyTeam)
+        enemyTeam = enemyTeam.replace(" ", "-")
         enemyTeam = enemyTeam.lower()
-        #print(enemyTeam)
+        print("EnemyTeam {}".format(enemyTeam))
 
         nextLink = "/" + team + "-vs-" + enemyTeam
-        #print(nextLink)
+        print("NextLink {}".format(nextLink))
+
         if nextLink != prev:
             goToDownloadPage(path, resultA.get_attribute("href"), nextLink)
-            print("Scaricato il {} file".format(str(i + 1) + "°"))
+            print("Scaricato il {} file".format(str(downloaded) + "°"))
+            listOfMatch.append(playerNamePar + "_" + str(downloaded))
+            prev = nextLink
         i = i + 1
-        prev = nextLink
-        listOfMatch.append(playerNamePar + "_" + str(i))
 
+
+
+    print(listOfMatch)
     driver.close()
-    dizionario.update(playerNamePar, listOfMatch)
+    dizionario[playerNamePar] = listOfMatch
 
 
 
@@ -234,7 +260,7 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 
 
 
-path = 'C:/Users/marco/AppData/Local/Google/Chrome/Application/chromedriver.exe'
+path = 'C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe'
 
 canc = input("Vuoi cancellare i file .rar alla fine dello script?")
 dizionario = {}
@@ -244,16 +270,22 @@ f = open("Players.txt")
 
 playerName = []
 
-for x in f:
+downloaded = 0
 
-	stringAux = str(x)
-	lastIndex = stringAux.r_find("/")
-	playerName = playerName.append(stringAux[lastIndex+1 : ])
-	takePlayerMatches(path, str(x), playerName[-1])
+for x in f:
+    stringAux = str(x)
+    print(stringAux)
+    lastIndex = stringAux.rfind("/")
+    playerName.append(stringAux[lastIndex + 1 : ])
+    print(stringAux[lastIndex + 1 : ])
+    takePlayerMatches(path, str(x), playerName[len(playerName)-1])
+    print(playerName)
 
 f.close()
 
-json.dump(dizionario, open("MatchesDict.json", w))
+jsonDump = json.dumps(dizionario)
+with open("MatchesDict.json", "w") as outfile:
+    outfile.write(jsonDump)
 
 #Faccio l'unrar di tutti i file in un'apposita sottocartella
 pathOfScript = 'C:/Users/marco/Desktop/pyscript/dl'
@@ -265,7 +297,7 @@ for entry in os.scandir(pathOfScript):
         i = i + 1
         Archive(entry.path).extractall(pathToExtract, auto_create_dir = True)
 
-#elimino i file .rar
+# elimino i file .rar
 if canc == "Si" or canc == "si":
     for entry in os.scandir(pathOfScript):
         if entry.is_file() and entry.path.endswith('.rar'):
