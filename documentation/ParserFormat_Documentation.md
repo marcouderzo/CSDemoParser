@@ -19,7 +19,7 @@ Game events related to the player are much less straight-forward to understand, 
 
 A Game Event, or *Action* is defined as it follows:
 
-*Action Tick Type playerPositionX playerPositionY playerPositionZ*
+*Action Tick Type*
 
 This part of the output is common to all events. Then, for some events, the output continues. Here they are.
 
@@ -27,7 +27,7 @@ Note that the events not listed below follow the standard output definition.
 
 ### weapon_fire
 
-*Action Tick Type playerPositionX playerPositionY playerPositionZ weapon*
+*Action Tick Type weapon*
 
 **Output Example**
 
@@ -35,27 +35,16 @@ Note that the events not listed below follow the standard output definition.
 Action 250360 weapon_fire 867.432922 2405.222412 144.230499 weapon_hegrenade
 ```
 
-### player_crouch -> Custom Event
+### player_death *
 
-*Action currentTick, player_crouch playerPositionX, playerPositionY, playerPositionZ)*
-
-**Output Example**
-
-```
-Action 176724 player_crouch -1274.234619 -987.730347 -125.380936
-```
-
-
-### player_death
+**To Modify: Without XYZ coordinates (see #12), there is no information about the kill assister**
 
 We differenciated the player_death event in three "sub-events".
 - *player_death_k*
 - *player_death_a*
 - *player_death_d*
 
-All of those three have at least both the victim's position and the attacker's position, as follows:
-
-*Action Tick Type VictimPositionX VictimPositionY VictimPositionZ AttackerPositionX AttackerPositionY AttackerPositionZ*
+*Action Tick Type*
 
 If an assister was also involved in the kill, you will find their position to the end.
 
@@ -96,50 +85,50 @@ Action 147596 player_death_a 2150.851318 520.078491 160.031250 2223.748779 -283.
 
 ### item_pickup
 
-*Action Tick Type playerPositionX playerPositionY playerPositionZ weapon*
+*Action Tick Type weapon*
 
 **Output Example**
 
 ```
-Action 147828 item_pickup 2358.369629 921.952942 157.287231 ak47 
+Action 147828 item_pickup ak47 
 ```
 
 ### item_equip
 
 
-*Action Tick Type playerPositionX playerPositionY playerPositionZ weapon*
+*Action Tick Type weapon*
 
 **Output Example**
 
 ```
-Action 149056 item_equip 2449.139893 2010.219971 128.031250 knife 
+Action 149056 item_equip knife 
 ```
 
 ### item_purchase
 
 
-*Action Tick Type playerPositionX playerPositionY playerPositionZ weapon*
+*Action Tick Type weapon*
 
 No Output Example available as it never got logged.
 
 ### player_blind
 
-*Action Tick Type playerPositionX playerPositionY playerPositionZ blind_duration*
+*Action Tick Type blind_duration*
 
 **Output Example**
 
 ```
-Action 149056 player_blind 2449.139893 2010.219971 128.031250 3.030241
+Action 149056 player_blind 3.030241
 ```
 
 ### player_falldamage
 
-*Action Tick Type playerPositionX playerPositionY playerPositionZ damage*
+*Action Tick Type damage*
 
 **Output Example**
 
 ```
-Action 149056 player_blind 2449.139893 2010.219971 128.031250 6.994048 
+Action 149056 player_blind 6.994048 
 ```
 
 
