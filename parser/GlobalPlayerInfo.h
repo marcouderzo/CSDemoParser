@@ -20,6 +20,8 @@ extern float playerVelocityZ;
 
 extern float crouchStateYOffset;
 
+extern bool isConnected;
+
 
 // Tick count
 extern int currentTick;

@@ -57,6 +57,8 @@ float playerVelocityZ;
 
 float crouchStateYOffset;
 
+bool isConnected;
+
 int currentTick;
 
 //////////////////////////////////////
@@ -426,12 +428,12 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 					if ( bCSV )
 					{
 						//printf("beforeprintf1");
-						printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
+						//printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
 					}
 					else
 					{
 						//printf("beforeprintf2");
-						printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
+						//printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
 					}
 				}
 				PropEntry *pAngle0Prop = pEntity->FindProp( "m_angEyeAngles[0]" );
@@ -583,22 +585,22 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 					pDescriptor->name() != "smokegrenade_detonate" && //smokegrenade_detonate
 					pDescriptor->name() != "molotov_detonate" && //molotov_detonate
 					pDescriptor->name() != "decoy_detonate" && //decoy_detonate
-					pDescriptor->name() != "tagrenade_detonate" &&
+					pDescriptor->name() != "tagrenade_detonate" && //tagrenade_detonate
 					pDescriptor->name() != "bomb_beginplant" && //bomb_beginplant
 					pDescriptor->name() != "bomb_abortplant" && //bomb_abortplant
 					pDescriptor->name() != "bomb_begindefuse" && //bomb_begindefuse
 					pDescriptor->name() != "bomb_abortdefuse" && //bomb_abortdefuse
 					pDescriptor->name() != "bomb_planted" && //bomb_planted
 					pDescriptor->name() != "bomb_defused" && //bomb_defused
-					pDescriptor->name() != "bomb_pickup" &&
-					pDescriptor->name() != "bomb_dropped" &&
-					pDescriptor->name() != "defuser_dropped" &&
-					pDescriptor->name() != "defuser_pickup" &&
+					pDescriptor->name() != "bomb_pickup" && //bomb_pickup
+					pDescriptor->name() != "bomb_dropped" && //bomb_dropped
+					pDescriptor->name() != "defuser_dropped" && //defuser_dropped
+					pDescriptor->name() != "defuser_pickup" && //defuser_pickup
 					pDescriptor->name() != "round_mvp" && //round_mvp
 					pDescriptor->name() != "item_purchase" && //item_purchase
 					pDescriptor->name() != "player_death" && //player_death
-					pDescriptor->name() != "player_falldamage" &&
-					pDescriptor->name() != "player_blind" &&
+					pDescriptor->name() != "player_falldamage" && //player_falldamage
+					pDescriptor->name() != "player_blind" && //player_blind
 					pDescriptor->name() != "door_moving") //door_moving 
 				{	
 					return;
