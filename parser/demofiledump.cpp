@@ -941,6 +941,7 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 			{
 				userID = playerInfo.userID;
 				entityID = playerInfo.entityID;
+				isConnected = true;
 				//printf("Settati userID %d entityID %d \n", userID, entityID);
 			}
 
