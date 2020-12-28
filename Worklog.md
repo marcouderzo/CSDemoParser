@@ -127,16 +127,6 @@ Encapsulating the `DemoFileDump.DoDump()` call between freopen and fclose enable
 
 We made sure that the log file had the same name of the demo. All of this was done by figuring out that the parser tries to open the demo with `DemoFileDump.Open( argv[ nFileArgument ] )` (see line 130 of demoinfogo.cpp). Thus, we stored `argv[ nFileArgument ]` into a string variable and erased everything until the last occurence of '/', effectively removing the whole path to the file, and then we removed the file extension. Note that C++ uses backslashes as a line continuation character. The autoparse.py script already replaces them with '/', so you don't have to deal with them. If you decide to call the parser directly from the command line instead, make sure you only use forward slashes in your path.
 
-Of course demoinfogo parses the whole match and logs way too much information, the majority of which is not useful to us. As you can see in demoinfogo.cpp, the application is able to take in some optional arguments. 
-
-**Update: See Parser Modifications** Already, `-deathscsv`, `-stringtables`, `-datatables`,  are not necessary whatsoever. This discards a lot of data we don't need.
-
-The set of arguments of choice is: `-gameevents -extrainfo -nofootsteps -nowarmup -packetentities -netmessages`. We don't need footsteps, as they are events that have more to do with sound and surrounding awareness of a player rather than with the player himself. We also decided to skip match warmups, as they are not so much interesting to log. If they are something you want to include in the log, remove that argument.
-
-As you can see in the `/test` folder in this repository, we parsed test demos of matches we played in a private server. Every test match consists in single actions, like turning the camera right, moving right, combining the two, and so on. This way we could see which parameters changed and deduce what the values held in them meant. 
-
-We are working on plotting those parameters on a graph to help us in the learning process.
-
 **Player Data**
 
 From the `DT_CSPlayer` (Net?) Table we found some useful data about the player. In particular:
@@ -315,8 +305,6 @@ Field: 14, m_vecViewOffset[2] = 64.062561
 ```
 
 As you can see, the first chunck seems to be the descending part of the crouch action, from `64.062561` to `46.044968`. The second one is the ascending part, from `47.671555` back to `64.062561`. So we assume that the `64.062561` value represents the standing state, and `46.044968` represents the crouched state.
-
-We came up with a solution to simulate this game event in a seamless way. Check the "Modifying the Parser" section for more information.
 
 
 **Player Death**
@@ -971,7 +959,7 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 ```
 Then, it was time to modify `DecodeProp().`
 
-After modifiying it, we realized it printed the right fields, but of every player in the match. In order to fix it, we would have to pass an additional argument to `DecodeProp()`, potentially breaking the code somewhere else. Thus, we decided to play it safe and created a new function `Prop_t *DecodePropWithEntity()`, which is basically the same as the original one, but it also takes in an `EntityEntry`, used to check whether or not the Entity is actually the target player or someone else. (Note that the original DecodeProp() is now as it was.)
+After modifiying it, we realized it printed the right fields, but of every player in the match. In order to fix it, we would have to pass an additional argument to `DecodeProp()`, potentially breaking the code somewhere else. Therefore, we decided to play it safe and created a new function `Prop_t *DecodePropWithEntity()`, which is basically the same as the original one, but it also takes in an `EntityEntry`, used to check whether or not the Entity is actually the target player or someone else. (Note that the original DecodeProp() is now as it was originally.)
 
 ```
 Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFlattenedProp, uint32 uClass, int nFieldIndex, bool bQuiet, void *pEntity)
@@ -1054,7 +1042,7 @@ Let's look at the function in detail:
 
 We start checking if it's a `player_death` event, as it is handled differently. If that's the case, we prepare to handle it later. 
 
-Then we basically check the descriptor's name for the events we are interested in. If that's not an event we care about, we return. As you can see, the logic behind it is the same as before, but without the danger of IDs inconsistency.
+Then we basically check the descriptor's name for the events we are interested in. If that's not an event we care about, we return. As you can see, the mechanism behind it is the same as before, but without the danger of IDs inconsistency.
 
 Note that the grenade_thrown event is never triggered, not in our parser, nor in the original one. Strangely enough, it is present in the descriptors, but it is missing from this [list](http://wiki.sourcepython.com/developing/events/csgo.html) we used for double-checking.
 
@@ -1202,7 +1190,7 @@ If the event is a `player_death` event and is not relevant, we just return. Else
 
 ```
 
-The `ShowPlayerInfo()` function is called. Printing the player position is redundant, as it is already logged in Entity. Therefore we comment those printf() calls out
+The `ShowPlayerInfo()` function is called. Printing the player position is redundant, as it is already logged in Entity. Therefore we comment those printf() calls out too.
 
 ```
 bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, bool bCSV = false )
@@ -1232,6 +1220,40 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 
 ```
 When the function returns to `ParseGameEvent()`, we print additional information, depending on the event.
+
+```
+	//other code
+	
+	if (pDescriptor->name() == "weapon_fire" && Key.name().compare("weapon")==0)
+	{
+		printf("%s ", KeyValue.val_string().c_str());
+	}
+	if (pDescriptor->name() == "item_pickup" && Key.name().compare("item") == 0)
+	{
+		printf("%s ", KeyValue.val_string().c_str());
+	}
+	if (pDescriptor->name() == "item_equip" && Key.name().compare("item") == 0)
+	{
+		printf("%s ", KeyValue.val_string().c_str());
+	}
+
+	if (pDescriptor->name() == "item_purchase" && Key.name().compare("weapon") == 0)
+	{
+		printf("%s ", KeyValue.val_string().c_str());
+	}
+
+	if (pDescriptor->name() == "player_blind" && Key.name().compare("blind_duration") == 0)
+	{
+		printf("%f ", KeyValue.val_float());
+	}
+
+	if (pDescriptor->name() == "player_falldamage" && Key.name().compare("damage") == 0)
+	{
+		printf("%f ", KeyValue.val_float());
+	}
+	
+	//other code
+```
 
 ***DEPRECATED*: Creating a Custom Crouch Event**
 
@@ -1320,13 +1342,15 @@ As you can see, 46.044968 should be considered a full crouch event, but it isn't
 
 As the dataset will be used to train an Artificial Intelligence, we thought that dumping potentially wrong data in favour of more raw information was not worth it. We decided to comment out this last way of logging crouch events, in case you want to check it out.
 
-*Note: as already mentioned, this section is deprecated and no longer will be used in the final parser. Check the Entity section below for the current solution.*
+*Note: as already mentioned, this feature is deprecated and no longer will be used in the final parser. Check the Entity section below for the current implementation.*
 
 **Formatting the *Entity* Output as Required**
 
 Entities are not logged in complete bursts, dumping every table entry each tick. Indeed, demoinfogo deals with them with *Deltas*: this is to say that it only logs them when they change values.
 
-From [this research paper](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) from Charles University, Prague, we found out that "*Each entity in the game is represented by its own structure (e.g., a player has a structure which contains coordinates on the map, pitch, health, etc.). Delta changes basically forms an update transaction of these structures – i.e., a list of game objects andtheir properties which should be inserted, updated, or removed from the game. Delta changes are much more complex to process as they do not carry a complete information, but only a change from the previous state.*" Therefore, to process the state of the game completely, we firstly had to gather all the data, store them and refresh them when it changed, as implied in the paper itself.
+From [this research paper](https://www.researchgate.net/publication/318873037_Data_Preprocessing_of_eSport_Game_Records_-_Counter-Strike_Global_Offensive) from Charles University, Prague, we found out that "*Each entity in the game is represented by its own structure (e.g., a player has a structure which contains coordinates on the map, pitch, health, etc.). Delta changes basically form an update transaction of these structures – i.e., a list of game objects and their properties which should be inserted, updated, or removed from the game. Delta changes are much more complex to process as they do not carry a complete information, but only a change from the previous state.*" 
+
+Therefore, to process the state of the game completely, we firstly had to gather all the data, store them and refresh them when it changed, as implied in the paper itself.
 
 In order to format the output in the form of: 
 
@@ -1483,7 +1507,7 @@ case dem_packet:
 break;	
 ```
 
-This results in the parser not ever setting the global player variables,  causing no output in the log.
+This results in the parser never setting the global player variables, obviously causing no output in the log.
 
 In order to understand what was happening, we decided to follow the call stack of the parser, starting from `HandleDemoPacket()`. The latter calls `DumpDemoPacket()`, as follows:
 
@@ -1627,10 +1651,10 @@ As the match pool is very large, parsing every match manually is just not feasab
 You can read the documentation on how it works in detail [here](https://github.com/marcouderzo/CSDemoParser/blob/main/documentation/autoparse%20Script%20Documentation.md)
 
 
-## Dataset Validation Testing
+## Final Dataset Validation Testing
 
 ### validatedataset.py
 
-Testing and validating the dataset is always a good practice. We decided to write a simple but very effective script that does it.
+Testing and validating the set of data is always a good practice. We decided to write a simple but very effective script that does it.
 
 You can read the documentation on the tests we decided to run [here](https://github.com/marcouderzo/CSDemoParser/blob/main/documentation/validateoutput%20Script%20Documentation.md)
