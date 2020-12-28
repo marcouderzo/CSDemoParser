@@ -29,6 +29,12 @@ Students Involved in the Project:
 - [x] Clean Up Output
 - [x] Format Parser Output as Required
 
+**Downloading & Parsing**
+- [ ] Download All the Matches
+- [ ] Parse All the Matches
+
+**Validation and Testing**
+- [ ] Run Validation Script to Check for Errors
 
 ## Important note
 
@@ -181,7 +187,6 @@ The player events we agreed to keep are the following:
 - `weapon_fire`
 - `weapon_reload`
 - `player_jump`
-- `player_crouch` (Custom Event)
 - `player_death`
 - `weapon_zoom`
 - `weapon_zoom_rifle`
@@ -189,8 +194,8 @@ The player events we agreed to keep are the following:
 - `item_equip`
 - `item_purchase`
 - `ammo_pickup`
-- `bullet_impact` *
-- `silencer_detach` *
+- `bullet_impact`
+- `silencer_detach`
 - `bomb_planted`
 - `bomb_defused`
 - `bomb_beginplant`
@@ -202,7 +207,7 @@ The player events we agreed to keep are the following:
 - `bomb_pickup`
 - `defuser_pickup`
 - `round_mvp`
-- `grenade_thrown` *
+- `grenade_thrown`
 - `flashbang_detonate`
 - `hegrendade_detonate`
 - `smokegrenade_detonate`
@@ -1001,7 +1006,7 @@ Prop_t *DecodePropWithEntity(CBitRead &entityBitBuffer, FlattenedPropEntry *pFla
 In order to format the game events output as required:
 
 ```
-Action Tick Type playerPositionX playerPositionY playerPositionZ (....and other data depending on the particular event)
+Action Tick Type (....and other data depending on the particular event)
 ```
 
 we came up with different strategies. First of all we pin pointed how the parser deals with game events and where it does it.
@@ -1197,7 +1202,7 @@ If the event is a `player_death` event and is not relevant, we just return. Else
 
 ```
 
-The `ShowPlayerInfo()` function is called. We only let the parser print the player position.
+The `ShowPlayerInfo()` function is called. Printing the player position is redundant, as it is already logged in Entity. Therefore we comment those printf() calls out
 
 ```
 bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, bool bCSV = false )
@@ -1214,11 +1219,11 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 		{
 			if ( bCSV )
 			{
-				printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
+				//printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
 			}
 			else
 			{
-				printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
+				//printf( "%f %f %f ", pXYProp->m_pPropValue->m_value.m_vector.x, pXYProp->m_pPropValue->m_value.m_vector.y, pZProp->m_pPropValue->m_value.m_float );
 			}
 		}
 
@@ -1228,9 +1233,9 @@ bool ShowPlayerInfo( const char *pField, int nIndex, bool bShowDetails = true, b
 ```
 When the function returns to `ParseGameEvent()`, we print additional information, depending on the event.
 
-**OLD: Creating a Custom Crouch Event**
+***DEPRECATED*: Creating a Custom Crouch Event**
 
-*The following section is deprecated. After further investigation, we switched from handling the yOffset as a custom game event, to including it into Entity as a constantly-updating value. We are keeping the following explaination only for work-logging purposes. Check the Entity section for information on the current implementation.* 
+***PLEASE READ!** The following section is deprecated. After further investigation, we switched from handling the yOffset as a custom game event, to including it into Entity as a constantly-updating value. We are keeping the following explaination only for work-logging purposes. Check the Entity section for information on the current implementation.* 
 
 As there is no `crouch_event` in the event list, we came up with a way of simulating such game event (see what we discovered in the parser in the "Understanding the Parser" section).
 
@@ -1315,8 +1320,7 @@ As you can see, 46.044968 should be considered a full crouch event, but it isn't
 
 As the dataset will be used to train an Artificial Intelligence, we thought that dumping potentially wrong data in favour of more raw information was not worth it. We decided to comment out this last way of logging crouch events, in case you want to check it out.
 
-*Update: As this is deprecated, check the Entity section below.*
-
+*Note: as already mentioned, this section is deprecated and no longer will be used in the final parser. Check the Entity section below for the current solution.*
 
 **Formatting the *Entity* Output as Required**
 
