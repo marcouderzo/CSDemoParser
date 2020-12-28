@@ -819,7 +819,7 @@ player_falldamage
 }
 ```
 
-**Player Blid**
+**Player Blind**
 
 The `player_blind` event is fired when a player is blinded by a flashbang.
 
