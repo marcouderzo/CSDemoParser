@@ -154,7 +154,7 @@ At first glance, you would think that `m_nTickBase = 2567` holds the current tic
 ---- CNETMsg_Tick (12 bytes) -----------------
 tick: 2564
 ```
-As you can see, `m_nTickBase` is 3 ticks ahead of the tick dumped by the `CNETMsg_Tick` message, which is very odd. Being ticks a server-side feature, we decided to trust the CNET Message over the nTickBase from the PlayerTable. - We will make some tests to back up our decision,  though.
+As you can see, `m_nTickBase` is 3 ticks ahead of the tick dumped by the `CNETMsg_Tick` message, which is very odd. Being ticks a server-side feature, we decided to trust the CNET Message over the nTickBase from the PlayerTable.
 
 Fields 20-21 contain the angle of the player camera, i.e. where he is looking and aiming using the mouse. In detail, the mouse position is represented with a Cartesian plane, where `m_angEyeAngles[0]` is the Y coordinate, whereas `m_angEyeAngles[1]` is the X coordinate. 
 
@@ -909,6 +909,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 	//other code
 }
 ```
+
 **Handling Messages**
 
 The only useful message is the CNETMsgTick. Thus, we made the parser print the message only if its type was a "CNETMsg_Tick". This particular message was originally printed with `vprintf(fmt, vlist)`, and contained other unnecessary information about `host_computationTime`. Having to deal with a function with variable arguments, and being stuck with using a `va_list`, we switched to `vsprintf`, stored the message into a string, and then only kept the tick-related portion of it. We finally convert the string to an integer and store it in currentTick, which is an extern variable in `GlobalPlayerInfo.h`
@@ -957,6 +958,7 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 	//other code
 }
 ```
+
 Then, it was time to modify `DecodeProp().`
 
 After modifiying it, we realized it printed the right fields, but of every player in the match. In order to fix it, we would have to pass an additional argument to `DecodeProp()`, potentially breaking the code somewhere else. Therefore, we decided to play it safe and created a new function `Prop_t *DecodePropWithEntity()`, which is basically the same as the original one, but it also takes in an `EntityEntry`, used to check whether or not the Entity is actually the target player or someone else. (Note that the original DecodeProp() is now as it was originally.)
