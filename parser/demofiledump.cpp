@@ -57,7 +57,9 @@ float playerVelocityZ;
 
 float crouchStateYOffset;
 
-bool isConnected;
+bool isConnected=true;
+
+bool output;
 
 int currentTick;
 
@@ -303,6 +305,7 @@ bool HandlePlayerConnectDisconnectEvents( const CSVCMsg_GameEvent &msg, const CS
 	// need to handle player_connect and player_disconnect because this is the only place bots get added to our player info array
 	// actual players come in via string tables
 	bool bPlayerDisconnect = ( pDescriptor->name().compare( "player_disconnect" ) == 0 );
+
 	if ( pDescriptor->name().compare( "player_connect" ) == 0 || bPlayerDisconnect )
 	{
 		int numKeys = msg.keys().size();
@@ -311,6 +314,7 @@ bool HandlePlayerConnectDisconnectEvents( const CSVCMsg_GameEvent &msg, const CS
 		const char *name = NULL;
 		bool bBot = false;
 		const char *reason = NULL;
+
 		for ( int i = 0; i < numKeys; i++ )
 		{
 			const CSVCMsg_GameEventList::key_t& Key = pDescriptor->keys( i );
@@ -344,12 +348,19 @@ bool HandlePlayerConnectDisconnectEvents( const CSVCMsg_GameEvent &msg, const CS
 
 		if ( bPlayerDisconnect )
 		{
+
 			if ( g_bDumpGameEvents )
 			{
 				//printf( "Player %s (id:%d) disconnected. reason:%s\n", name, userid, reason ); 
 			}
 			// mark the player info slot as disconnected
 			player_info_t *pPlayerInfo = FindPlayerInfo( userid );
+
+			if (pPlayerInfo->xuid == targetPlayerSteamID)
+			{
+				isConnected = false;
+			}
+
 			if (pPlayerInfo)
 			{
 				strcpy_s( pPlayerInfo->name, "disconnected" );
@@ -383,6 +394,15 @@ bool HandlePlayerConnectDisconnectEvents( const CSVCMsg_GameEvent &msg, const CS
 			else {
 				*existing = newPlayer;
 			}
+
+
+			if (newPlayer.entityID == entityID)
+			{
+				userID = newPlayer.userID;
+				entityID = newPlayer.entityID;
+				isConnected = true;
+			}
+
 		}
 		return true;
 	}
@@ -650,11 +670,13 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 				}
 
 				if (!isEventInteresting && isPlayerDeath) return;
-				printf("Action %d ", currentTick);
+				if(isConnected)
+					printf("Action %d ", currentTick);
 
 				if ( g_bDumpGameEvents )
 				{
-					printf( "%s%s ", pDescriptor->name().c_str(), deathEventType.c_str()); // Event Name
+					if (isConnected)
+						printf( "%s%s ", pDescriptor->name().c_str(), deathEventType.c_str()); // Event Name
 				}
 				//printf(" eventid: ");
 				//printf("%ld", msg.eventid());
@@ -709,30 +731,37 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 					}
 					if (pDescriptor->name() == "weapon_fire" && Key.name().compare("weapon")==0)
 					{
-						printf("%s ", KeyValue.val_string().c_str());
+						if (isConnected)
+							printf("%s ", KeyValue.val_string().c_str());
 					}
 					if (pDescriptor->name() == "item_pickup" && Key.name().compare("item") == 0)
 					{
-						printf("%s ", KeyValue.val_string().c_str());
+						if (isConnected)
+							printf("%s ", KeyValue.val_string().c_str());
 					}
 					if (pDescriptor->name() == "item_equip" && Key.name().compare("item") == 0)
 					{
-						printf("%s ", KeyValue.val_string().c_str());
+						
+						if (isConnected)
+							printf("%s ", KeyValue.val_string().c_str());
 					}
 
 					if (pDescriptor->name() == "item_purchase" && Key.name().compare("weapon") == 0)
 					{
-						printf("%s ", KeyValue.val_string().c_str());
+						if (isConnected)
+							printf("%s ", KeyValue.val_string().c_str());
 					}
 
 					if (pDescriptor->name() == "player_blind" && Key.name().compare("blind_duration") == 0)
 					{
-						printf("%f ", KeyValue.val_float());
+						if (isConnected)
+							printf("%f ", KeyValue.val_float());
 					}
 
 					if (pDescriptor->name() == "player_falldamage" && Key.name().compare("damage") == 0)
 					{
-						printf("%f ", KeyValue.val_float());
+						if (isConnected)
+							printf("%f ", KeyValue.val_float());
 					}
 
 
@@ -747,7 +776,8 @@ void ParseGameEvent( const CSVCMsg_GameEvent &msg, const CSVCMsg_GameEventList::
 				}
 
 
-				printf("\n");
+				if (isConnected)
+					printf("\n");
 			}
 		}
 	}
@@ -911,7 +941,6 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 			{
 				userID = playerInfo.userID;
 				entityID = playerInfo.entityID;
-
 				//printf("Settati userID %d entityID %d \n", userID, entityID);
 			}
 
@@ -1312,14 +1341,16 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 	}
 	
 
-
 	if (userID == -1 && entityID == -1)
 	{
-		printf("Wrong SteamID");
-		exit(2); // SteamID passed to main is not correct. No User with such steamID in the match.
+		//output = false;
+		printf("output false\n");
+		//printf("Wrong SteamID");
+		//exit(2); // SteamID passed to main is not correct. No User with such steamID in the match.
 	}
 
-	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID)
+
+	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID && isConnected)
 	{
 		printf("Entity %d %f %f %f %f %f %f %f %f %f\n",currentTick,
 														mouseCoordX,
@@ -1828,6 +1859,8 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 					{
 						userID = playerInfo.userID;
 						entityID = playerInfo.entityID;
+						printf("set to true 3\n");
+						//output = true;
 						//printf("Found Target Player: %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
 					}
 				}
@@ -1838,6 +1871,8 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 					{
 						userID = playerInfo.userID;
 						entityID = playerInfo.entityID;
+						//output = true;
+						printf("set to true 2\n");
 						//printf("Found Target Player: %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
 					}
 				}

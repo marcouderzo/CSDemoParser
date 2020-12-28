@@ -22,6 +22,7 @@ extern float crouchStateYOffset;
 
 extern bool isConnected;
 
+extern bool output;
 
 // Tick count
 extern int currentTick;

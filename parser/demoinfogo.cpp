@@ -76,6 +76,11 @@ int __cdecl main( int argc, char *argv[] )
 		fclose(stdout); //keeping this?
 	}
 
+	if (entityID == -1 || userID == -1)
+	{
+		exit(2);
+	}
+
 	return 1;
 }
 
