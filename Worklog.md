@@ -792,7 +792,7 @@ The `defuser_pickup` event is fired when a player picks up a defuser.
 
 | Name      | Description                                       | Type
 |-----------|-------------------------------------------------  | -----
-userid	The userid of the player that picked up the defuser.	short
+userid	| The userid of the player that picked up the defuser.	short
 entityid |	 	| long
 
 No Output Example available.
