@@ -1639,6 +1639,75 @@ if (playerInfo.xuid == targetPlayerSteamID)
 ```
 After setting the `entityID` and `userID` variables, the parser could now retrieve them and check them out in the `if()` statements, thus letting the parser print out the information from `ReadNewEntity()` as it should.
 
+
+**Checking for Player Disconnections and Reconnections**
+
+We added a new variable in GlobalPlayerInfo.h, `bool isConnected` which is set to `true` by default. 
+
+In `bool HandlePlayerConnectDisconnectEvents()` we firstly check for the player_disconnect event to be triggered. If the disconnected player's xuid matches our target player's SteamID, we set our global `isConnected` variable to `false`.
+
+```
+const CSVCMsg_GameEventList::descriptor_t *GetGameEventDescriptor( const CSVCMsg_GameEvent &msg, CDemoFileDump& Demo )
+{
+	//other code
+	
+	if ( bPlayerDisconnect )
+	{
+		player_info_t *pPlayerInfo = FindPlayerInfo( userid );
+
+		if (pPlayerInfo->xuid == targetPlayerSteamID)
+		{
+			isConnected = false;
+		}
+		
+		//other code
+	}
+	
+	//function continues...
+
+```
+
+Then comes the tricky part: we need to check for the same player to reconnect to the game. Unfortunately, when a player connects, its SteamID is not available right away. The SteamID is set after this function is called, and at the current time the xuid would be `0`, so we can't rely on checking the SteamID as we have done until now. Sure, we could signal that some unknown player has connected using a flag, and check for the SteamID later; however, this not very practical and maynbe even error-prone. The player's userid in the demo also changes after the reconnection: if it was 25 at the start of the match, it would be now, for example, 26, or some other unpredictable value.
+
+What doesn't change about the player is the entityID. This is because the player has its own table, and the game keeps it even if you disconnect, in case you reconnect again. So the ID of the entity remains the same, and we are therefore able to check for the entityID of the player that reconnected.
+
+
+```
+	//...here
+
+	else
+	{
+		player_info_t newPlayer;
+		memset( &newPlayer, 0, sizeof(newPlayer) );
+		newPlayer.userID = userid;
+		strcpy_s( newPlayer.name, name );
+
+		newPlayer.entityID = index;
+		auto existing = FindPlayerByEntity(index);
+
+		// add entity if it doesn't exist, update if it does
+		if(!existing) {
+			s_PlayerInfos.push_back(newPlayer);
+		}
+		else {
+			*existing = newPlayer;
+		}
+
+
+		if (newPlayer.entityID == entityID)
+		{
+			userID = newPlayer.userID;
+			entityID = newPlayer.entityID;
+			isConnected = true;
+		}
+	}
+}	
+```
+
+
+Finally, by adding the `isConnected` boolean variable to the `if()` statements that regulate the `printf()` calls, we keep the parser from outputting if such variable is false.
+
+
 ## Parser Output Documentation
 
 The Parser Output is not very straight-forward to understand, expecially when it comes to game events' additional information. The complete documentation of the Parser's output format is [here](https://github.com/marcouderzo/CSDemoParser/blob/main/documentation/ParserFormat_Documentation.md). 
