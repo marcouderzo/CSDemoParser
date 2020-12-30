@@ -12,12 +12,10 @@ import json
 # #profileLink = "https://www.hltv.org/stats/players/matches/11893/zywoo"
 
 def delete():
-    global canc
     global pathOfDownload
-    if canc.lower() == 'si':
-        for entry in os.scandir(pathOfDownload):
-            if entry.is_file() and entry.path.endswith('.rar'):
-                os.remove(entry.path)
+    for entry in os.scandir(pathOfDownload):
+        if entry.is_file() and entry.path.endswith('.rar'):
+            os.remove(entry.path)
 
 
 def rename(path):
@@ -213,8 +211,6 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 
 path = 'C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe'
 pathOfDownload = 'C:/Users/samuk/Downloads/'
-
-canc = input("Vuoi cancellare i file .rar alla fine dello script?")#
 
 dizionario = {}
 
