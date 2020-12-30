@@ -7,11 +7,48 @@ import json
 
 # link: https://www.hltv.org/stats/players/matches/...
 
+
+
 # #profileLink = "https://www.hltv.org/stats/players/matches/11893/zywoo"
+
+def delete():
+    global canc
+    global pathOfDownload
+    if canc.lower() == 'si':
+        for entry in os.scandir(pathOfDownload):
+            if entry.is_file() and entry.path.endswith('.rar'):
+                os.remove(entry.path)
+
+
+def rename(path):
+    global currentPlayerName
+    global downloaded
+    for entry in os.scandir(path):
+        if entry.is_file() and entry.path.endswith('.dem') and currentPlayerName not in entry.path:
+            os.rename(entry, path + currentPlayerName + '_' + str(downloaded) )
+            print("Ci sono entrato finalmente {}".format(downloaded))
+            downloaded = downloaded + 1
+    delete()
+
+def unpack():
+    global pathOfDownload
+
+    print(pathOfDownload)
+    i = 0
+    for entry in os.scandir(pathOfDownload):
+        if entry.is_file() and entry.path.endswith('.rar'):
+            print(str(i))
+            pathToExtract = pathOfDownload + 'tmp/'
+            print(pathToExtract)
+            i = i + 1
+            Archive(entry.path).extractall(pathToExtract, auto_create_dir=True)
+
+    rename(pathToExtract)
 
 def download(path, innerLink):
 
     global downloaded
+
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -51,12 +88,11 @@ def download(path, innerLink):
 
     print("Download done")
 
-    downloaded = downloaded + 1
-
     downloadingDriver.close()
 
     finalDriver.close()
 
+    unpack()
 
 
 
@@ -64,11 +100,6 @@ def download(path, innerLink):
 
 
 def goToDownloadPage(path, link, nextLink):
-    """
-        Funzione che scarica il singolo replay
-        Apre una nuova finestra del browser e va al link passato come parametro. Poi cerca il link giusto tramite il
-        parametro nextLink. Una volta trovato va al link e scarica il replay
-    """
 
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_experimental_option("useAutomationExtension", False)
@@ -85,30 +116,16 @@ def goToDownloadPage(path, link, nextLink):
     for x in innerResult:
 
         innerLink = x.get_attribute("href")
-        # /matches/2335421/youngsters-vs-heretics-lootbet-season-3
-        if type(innerLink).__name__ != "NoneType" and innerLink.find("/matches/") > 0 and nextLink in innerLink:
-            print("Ci entro")
-            if "?" not in innerLink:
-
-                print("InnerLink {}".format(innerLink))
-                download(path, innerLink)
-                break
+        if x.get_attribute("class") == "match-page-link button":
+            print("InnerLink {}".format(innerLink))
+            download(path, innerLink)
+            break
 
     innerDriver.close()
 
-
-
-
-
-
 def takePlayerMatches(path, profileLink, playerNamePar):
-    """
-        Questa funzione prende il link del profilo di un giocatore (che viene passato dal chiamante) e scarica 100
-        partite del giocatore di cui gli viene passato il link del profilo.
-        Si avvale di un'altra funzione
-        è possibile che bisogni specificare i percorsi di Firefox e Chrome anche se non dovrebbe essere necessario
-     """
 
+    global pathOfDownload
     global downloaded
     downloaded = 0
     listOfMatch = []
@@ -122,22 +139,25 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 
     print("First driver set")
 
-    # driver.maximize_window()
-
-    table = driver.find_elements_by_class_name("stats-table")
-    print("Length of table {}".format(str(len(table))))
-    resultTd = table[0].find_elements_by_tag_name("td")
-    print("First td text {}".format(resultTd[0].text))
-
     prev = ''
     i = 0
 
+    table = ''
+    resultTd = ''
 
-    while downloaded < 3:
+    while downloaded < 100:
+
+        table = driver.find_elements_by_class_name("stats-table")
+        print("Length of table {}".format(str(len(table))))
+        resultTd = table[0].find_elements_by_tag_name("td")
+        print("First td text {}".format(resultTd[0].text))
+
         # aux conta gli elementi td. Interessano il primo, il secondo e il terzo di ogni riga
         # (i nomi dei team e la data della partita).
         # Ci sono 7 colonne nella tabella
+        print("downloaded {}".format(downloaded))
         aux = 7 * i
+        print(str(i))
         print(str(aux))
         # resultA contiene tutti i link figli del td corrente e che sono dei link. Questo si riduce a un solo elemento
         # per ogni td, però essento il risultato inserito in una lista bisogna comunque selezionare il primo elemento
@@ -168,11 +188,16 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 
         if nextLink != prev:
             goToDownloadPage(path, resultA.get_attribute("href"), nextLink)
-            print("Scaricato il {} file".format(str(downloaded) + "°"))
-            listOfMatch.append(playerNamePar + "_" + str(downloaded))
+            print("Scaricato il {} archivio".format(str(i) + "°"))
             prev = nextLink
+
+        driver.refresh()
+
+        print("Refreshed")
         i = i + 1
 
+    for entry in os.scandir(pathOfDownload + 'tmp/'):
+        listOfMatch.append(entry.path[ entry.path.rfind('/') + 1 : len(entry.path)])
 
 
     print(listOfMatch)
@@ -181,88 +206,16 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
 
 
 path = 'C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe'
+pathOfDownload = 'C:/Users/samuk/Downloads/'
 
-canc = input("Vuoi cancellare i file .rar alla fine dello script?")
+canc = input("Vuoi cancellare i file .rar alla fine dello script?")#
+
 dizionario = {}
 
 #Prendo tutti i link dal file Players.txt
@@ -271,14 +224,16 @@ f = open("Players.txt")
 playerName = []
 
 downloaded = 0
+currentPlayerName = ''
 
 for x in f:
     stringAux = str(x)
     print(stringAux)
     lastIndex = stringAux.rfind("/")
-    playerName.append(stringAux[lastIndex + 1 : ])
-    print(stringAux[lastIndex + 1 : ])
-    takePlayerMatches(path, str(x), playerName[len(playerName)-1])
+    currentPlayerName = stringAux[lastIndex + 1 : len(stringAux) - 1]
+    playerName.append(currentPlayerName)
+    print(currentPlayerName)
+    takePlayerMatches(path, str(x), currentPlayerName)
     print(playerName)
 
 f.close()
@@ -288,17 +243,3 @@ with open("MatchesDict.json", "w") as outfile:
     outfile.write(jsonDump)
 
 #Faccio l'unrar di tutti i file in un'apposita sottocartella
-pathOfScript = 'C:/Users/marco/Desktop/pyscript/dl'
-i = 0
-for entry in os.scandir(pathOfScript):
-    if entry.is_file() and entry.path.endswith('.rar'):
-        pathToExtract = path + '/tmp/'
-        os.rename(pathToExtract + entry.__name__, playerName[i / 100] + "_" +str (i % 100 + 1))
-        i = i + 1
-        Archive(entry.path).extractall(pathToExtract, auto_create_dir = True)
-
-# elimino i file .rar
-if canc == "Si" or canc == "si":
-    for entry in os.scandir(pathOfScript):
-        if entry.is_file() and entry.path.endswith('.rar'):
-            os.remove(entry.path)
