@@ -1,9 +1,11 @@
 from selenium import webdriver
+from pyunpack import Archive
 import re
 import os
 import time as t
-from pyunpack import Archive
 import json
+import shutil
+import patoolib
 
 # link: https://www.hltv.org/stats/players/matches/...
 
@@ -13,7 +15,7 @@ import json
 
 def delete():
     global pathOfDownload
-    for entry in os.scandir(pathOfDownload):
+    for entry in os.scandir(pathToMove):
         if entry.is_file() and entry.path.endswith('.rar'):
             os.remove(entry.path)
 
@@ -31,7 +33,7 @@ def rename(path):
     delete()
 
 def unpack():
-    pathofRar="D:/progetto"
+    pathofRar="D:/progetto/"
 
     print(pathofRar)
     i = 0
@@ -42,20 +44,30 @@ def unpack():
             print(pathToExtract)
             i = i + 1
             Archive(entry.path).extractall(pathToExtract, auto_create_dir=True)
-
     rename(pathToExtract)
 
-def download(path, innerLink):
 
+def move():
+    global pathOfDownload
+    global pathToMove
+
+    fileName = ''
+
+    for entry in os.scandir(pathOfDownload):
+        if entry.is_file() and entry.path.endswith('.rar'):
+            fileName = entry.path[entry.path.rfind('/') + 1:]
+            shutil.move(entry.path, pathToMove + fileName)
+
+    unpack()
+
+
+def download(path, innerLink):
     global downloaded
     global pathOfDownload
 
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    
-    #prefs = {"download.default_directory" : "D:/project"} # doesn't work. Starts downloading in right folder then fails.
-    #chrome_options.add_experimental_option("prefs",prefs)
 
     finalDriver = webdriver.Chrome(path, options=chrome_options)
     finalDriver.get(innerLink)
@@ -74,35 +86,32 @@ def download(path, innerLink):
 
     t.sleep(20)
 
-    dlname=""
-
+    dlname = ""
+    print("waited 20 seconds hard coded")
     for file in os.listdir(pathOfDownload):
+        print("there is a file: "+file)
         if file.endswith(".crdownload"):
+            print("recognizes there's a crdownload")
             dlname = file
 
     targetfile = pathOfDownload + dlname
     print(targetfile)
 
     hasDownloaded = False
-
+    print("before waiting")
     while not hasDownloaded:
         t.sleep(2)
         if not os.path.exists(targetfile):
             hasDownloaded = True
-
+    print("waited")
     print("Download done")
 
     downloadingDriver.close()
     finalDriver.close()
 
-    orig = "C:/Users/marco/Downloads"
-    dest = "D:/progetto"
-
-    for file in orig:
-        os.replace(file, file, orig, dest)
-
-    unpack()
-
+    print("beforemoving")
+    move()
+    print("hasmoved")
 
 
 
@@ -215,7 +224,8 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 
 
 path = 'C:/Users/marco/Desktop/chromedriver.exe'
-pathOfDownload = 'D:/progetto'
+pathOfDownload = 'C:/Users/marco/Downloads/'
+pathToMove = "D:/progetto/"
 
 listOfMatch = []
 
