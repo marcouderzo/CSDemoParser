@@ -53,6 +53,9 @@ def download(path, innerLink):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    
+    #prefs = {"download.default_directory" : "D:/project"} # doesn't work. Starts downloading in right folder then fails.
+    #chrome_options.add_experimental_option("prefs",prefs)
 
     finalDriver = webdriver.Chrome(path, options=chrome_options)
     finalDriver.get(innerLink)
@@ -91,6 +94,12 @@ def download(path, innerLink):
 
     downloadingDriver.close()
     finalDriver.close()
+
+    orig = "C:/Users/marco/Downloads"
+    dest = "D:/progetto"
+
+    for file in orig:
+        os.replace(file, file, orig, dest)
 
     unpack()
 
@@ -206,7 +215,7 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 
 
 path = 'C:/Users/marco/Desktop/chromedriver.exe'
-pathOfDownload = 'C:/Users/marco/Downloads/'
+pathOfDownload = 'D:/progetto'
 
 listOfMatch = []
 
