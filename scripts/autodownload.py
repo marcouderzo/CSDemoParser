@@ -143,7 +143,7 @@ def takePlayerMatches(path, profileLink, playerNamePar):
     prev = ''
     i = 0
 
-    while downloaded < 100:
+    while downloaded < 3:
 
         table = driver.find_elements_by_class_name("stats-table")
         print("Length of table {}".format(str(len(table))))
@@ -205,8 +205,8 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 ########################################################################################################################
 
 
-path = 'C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe'
-pathOfDownload = 'C:/Users/samuk/Downloads/'
+path = 'C:/Users/marco/Desktop/chromedriver.exe'
+pathOfDownload = 'C:/Users/marco/Downloads/'
 
 listOfMatch = []
 
