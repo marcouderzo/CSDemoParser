@@ -31,14 +31,14 @@ def rename(path):
     delete()
 
 def unpack():
-    global pathOfDownload
+    pathofRar="D:/progetto"
 
-    print(pathOfDownload)
+    print(pathofRar)
     i = 0
-    for entry in os.scandir(pathOfDownload):
+    for entry in os.scandir(pathofRar):
         if entry.is_file() and entry.path.endswith('.rar'):
             print(str(i))
-            pathToExtract = pathOfDownload + 'tmp/'
+            pathToExtract = pathofRar + 'tmp/'
             print(pathToExtract)
             i = i + 1
             Archive(entry.path).extractall(pathToExtract, auto_create_dir=True)
