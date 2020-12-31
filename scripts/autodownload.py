@@ -21,9 +21,11 @@ def delete():
 def rename(path):
     global currentPlayerName
     global downloaded
+    global listOfMatch
     for entry in os.scandir(path):
         if entry.is_file() and entry.path.endswith('.dem') and currentPlayerName not in entry.path:
-            os.rename(entry, path + currentPlayerName + '_' + str(downloaded) )
+            os.rename(entry, path + currentPlayerName + '_' + str(downloaded + 1))
+            listOfMatch.append(path+currentPlayerName + '_' + str((downloaded + 1)))
             print("Ci sono entrato finalmente {}".format(downloaded))
             downloaded = downloaded + 1
     delete()
@@ -46,6 +48,7 @@ def unpack():
 def download(path, innerLink):
 
     global downloaded
+    global pathOfDownload
 
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_experimental_option("useAutomationExtension", False)
@@ -70,11 +73,11 @@ def download(path, innerLink):
 
     dlname=""
 
-    for file in os.listdir("C:/Users/samuk/Downloads"):
+    for file in os.listdir(pathOfDownload):
         if file.endswith(".crdownload"):
             dlname = file
 
-    targetfile = 'C:/Users/samuk/Downloads/' + dlname
+    targetfile = pathOfDownload + dlname
     print(targetfile)
 
     hasDownloaded = False
@@ -87,7 +90,6 @@ def download(path, innerLink):
     print("Download done")
 
     downloadingDriver.close()
-
     finalDriver.close()
 
     unpack()
@@ -125,6 +127,7 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 
     global pathOfDownload
     global downloaded
+    global listOfMatch
     downloaded = 0
     listOfMatch = []
 
@@ -139,9 +142,6 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 
     prev = ''
     i = 0
-
-    table = ''
-    resultTd = ''
 
     while downloaded < 100:
 
@@ -194,10 +194,6 @@ def takePlayerMatches(path, profileLink, playerNamePar):
         print("Refreshed")
         i = i + 1
 
-    for entry in os.scandir(pathOfDownload + 'tmp/'):
-        listOfMatch.append(entry.path[ entry.path.rfind('/') + 1 : len(entry.path)])
-
-
     print(listOfMatch)
     driver.close()
     dizionario[playerNamePar] = listOfMatch
@@ -211,6 +207,8 @@ def takePlayerMatches(path, profileLink, playerNamePar):
 
 path = 'C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe'
 pathOfDownload = 'C:/Users/samuk/Downloads/'
+
+listOfMatch = []
 
 dizionario = {}
 
@@ -227,7 +225,7 @@ for x in f:
     print(stringAux)
     lastIndex = stringAux.rfind("/")
     currentPlayerName = stringAux[lastIndex + 1 : len(stringAux) - 1]
-    playerName.append(currentPlayerName)
+    playerName.append("Current player {}".format(currentPlayerName))
     print(currentPlayerName)
     takePlayerMatches(path, str(x), currentPlayerName)
     print(playerName)
