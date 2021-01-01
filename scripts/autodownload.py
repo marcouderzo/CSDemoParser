@@ -161,7 +161,7 @@ def takePlayerMatches(path, profileLink, playerNamePar):
     prev = ''
     i = 0
 
-    while downloaded < 3:
+    while downloaded < 100:
 
         table = driver.find_elements_by_class_name("stats-table")
         print("Length of table {}".format(str(len(table))))
