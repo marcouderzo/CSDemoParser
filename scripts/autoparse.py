@@ -1,7 +1,8 @@
 import os, subprocess
+import json
 
 # Paste your own demo folder
-demospath = "C:/Users/marco/Desktop/ParserTests/auto"
+demospath = "G:/Unipd/Triennale/TerzoAnno/Cybersecurity - principles and practices/Progetto/partite"
 
 
 SteamID_dict = {  'pashabiceps': [76561197973845818],
@@ -58,10 +59,10 @@ SteamID_dict = {  'pashabiceps': [76561197973845818],
              }
 
 
-Matches_dict = {  'pashabiceps': ['pashabiceps_1.dem' , 'pashabiceps_2.dem'],
-                  'freakazoid': ['freakazoid_1.dem', 'freakazoid_2.dem'],
-}
-
+file = open('MatchesDict.json', 'r')
+Matches_dict = json.load(file)
+# print(Matches_dict)
+file.close()
 
 #nel dizionario di giocatori con relative partite, per ogni giocatore parsa tutte le sue partite, cercando ad 
 #ogni parsing il nome del giocatore (comune ai due dizionari) e prova tutti gli steamid del giocatore 
@@ -75,12 +76,15 @@ os.chdir("..")
 os.chdir("parser")
 
 for player in Matches_dict.items(): #for each player
-    #print(player)
+    # print(player)
     for match in player[1]: #take every match of that player
+        # print(match)
         for file in os.listdir(demospath): #in the demospath folder
+
             if file.endswith(".dem") and file == match: #check for that match
                 print("Parsing " + file)
                 demofile = os.path.join(demospath, file).replace("\\", "/")
+                print(demofile)
                 success = False
                 for s_player in SteamID_dict.items(): #for each possible SteamID of that player, try parsing the match
                     if s_player[0] == player[0]:
