@@ -24,12 +24,20 @@ def rename(path):
     global currentPlayerName
     global downloaded
     global listOfMatch
+    global playerName
+
     for entry in os.scandir(path):
-        if entry.is_file() and entry.path.endswith('.dem') and currentPlayerName not in entry.path:
-            os.rename(entry, path + currentPlayerName + '_' + str(downloaded + 1))
-            listOfMatch.append(path+currentPlayerName + '_' + str((downloaded + 1)))
-            print("Ci sono entrato finalmente {}".format(downloaded))
-            downloaded = downloaded + 1
+        alreadyPresent = False
+        if entry.is_file() and entry.path.endswith('.dem'):
+            for x in playerName:
+                if x in entry.path:
+                    alreadyPresent = True
+
+            if alreadyPresent == False:
+                os.rename(entry, path + currentPlayerName + '_' + str(downloaded + 1) + '.dem')
+                listOfMatch.append(currentPlayerName + '_' + str((downloaded + 1)) + '.dem')
+                print("Ci sono entrato finalmente {}".format(downloaded))
+                downloaded = downloaded + 1
     delete()
 
 def unpack():
@@ -215,6 +223,9 @@ def takePlayerMatches(path, profileLink, playerNamePar):
     print(listOfMatch)
     driver.close()
     dizionario[playerNamePar] = listOfMatch
+    jsonDump = json.dumps(dizionario)
+    with open("MatchesDict.json", "a") as outfile:
+        outfile.write(jsonDump)
 
 
 
@@ -244,15 +255,11 @@ for x in f:
     print(stringAux)
     lastIndex = stringAux.rfind("/")
     currentPlayerName = stringAux[lastIndex + 1 : len(stringAux) - 1]
-    playerName.append("Current player {}".format(currentPlayerName))
-    print(currentPlayerName)
+    playerName.append(currentPlayerName)
+    print("Current player {}".format(currentPlayerName))
     takePlayerMatches(path, str(x), currentPlayerName)
     print(playerName)
 
 f.close()
-
-jsonDump = json.dumps(dizionario)
-with open("MatchesDict.json", "w") as outfile:
-    outfile.write(jsonDump)
 
 #Faccio l'unrar di tutti i file in un'apposita sottocartella
