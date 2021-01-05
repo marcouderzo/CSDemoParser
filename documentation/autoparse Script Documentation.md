@@ -21,7 +21,7 @@ The script uses two dictionaries:
 ### Iterating through the Matches and Calling demoinfogo
 
 For each player in the `MatchesDict` dictionary, the scripts iterates through the list of matches and searches the corresponding match in the demos folder. 
-Then, for each possible SteamID of the current player, it calls the parser as a subprocess:
+Then, for each possible SteamID of the current player, it calls the parser as a subprocess, until the parsing is successful:
 
 ```
  p = subprocess.run(["demoinfogo", SteamID , demofile])
