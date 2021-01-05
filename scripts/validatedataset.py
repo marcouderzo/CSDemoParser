@@ -6,7 +6,7 @@
 import os
 
 # Paste your own demo folder
-demospath = "C:/Users/marco/Desktop/ParserTests/auto/"
+demospath = "F:/progetto/log/"
 
 isOutputClean=True
 failedLogs=[]
@@ -14,18 +14,45 @@ badLines=[]
 
 print("Running Test 1: Checking for Clean Output...")
 
+
 for file in os.listdir(demospath):
+    hasEntites = False
+    hasActions = False
     if file.endswith(".txt"):
         file_read = open(demospath+file, 'r')
         lines_read = file_read.readlines() 
+        i = 0
         for line in lines_read:
+            i=i+1
+            if "Entity" in line:
+                hasEntities = True
+                continue
+
+            if "Action" in line:   
+                hasActions = True
+                continue
+
             if "Entity" not in line and "Action" not in line:
+                print(file + ": A line is not right!")
                 badLines.append(line)
                 isOutputClean=False
                 failedLogs.append(file)
                 break
 
+        if i == 0:
+            print(file + ": Empty File!")
+            failedLogs.append(file)
+        elif i < 100000:
+            print(file + ": Log has too few lines.")
+            failedLogs.append(file)
 
+        if not hasEntities or not hasActions and i != 0:
+            print(file + ": Missing Actions or Entities!")
+            failedLogs.append(file)
+        
+
+
+print("")
 print("Running Test 2: Checking for Doubled Matches...")
 
 isDatasetDuplicated = False
@@ -38,9 +65,15 @@ for file1 in os.listdir(demospath):
             if file2.endswith(".txt") and file2 != file1:
                 f2 = open(demospath+file1)
                 if f1.read() == f2.read():
+                    lines_read = f1.readlines()
+                    i = 0
+                    for line in lines_read:
+                        i=i+1
+                    if i == 0:
+                        continue    
                     duplicates.append(f1)
                     isDatasetDuplicated=False
-                    #print("Found a duplicate: " + file1 + " and " + file2) #in case you want to check the two filenames
+                    print(file1 + " and " + file2 + " : Found a duplicate")
 
 
 

@@ -2,7 +2,8 @@ import os, subprocess
 import json
 
 # Paste your own demo folder
-demospath = "G:/Unipd/Triennale/TerzoAnno/Cybersecurity - principles and practices/Progetto/partite"
+demospath = "F:/progetto/dem"
+logpath = "F:/progetto/log"
 
 
 SteamID_dict = {  'pashabiceps': [76561197973845818],
@@ -59,7 +60,7 @@ SteamID_dict = {  'pashabiceps': [76561197973845818],
              }
 
 
-file = open('MatchesDict.json', 'r')
+file = open('failed.json', 'r')
 Matches_dict = json.load(file)
 # print(Matches_dict)
 file.close()
@@ -84,13 +85,14 @@ for player in Matches_dict.items(): #for each player
             if file.endswith(".dem") and file == match: #check for that match
                 print("Parsing " + file)
                 demofile = os.path.join(demospath, file).replace("\\", "/")
-                print(demofile)
+                #print(demofile)
                 success = False
                 for s_player in SteamID_dict.items(): #for each possible SteamID of that player, try parsing the match
                     if s_player[0] == player[0]:
                         for intSteamID in s_player[1]:
 
                             SteamID = str(intSteamID)
+                            print("Calling Parser: demoinfogo " + ' ' + SteamID + ' ' + demofile)
                             p = subprocess.run(["demoinfogo", SteamID , demofile])
 
                             hasFailedWithSteamIDs=False
@@ -103,6 +105,27 @@ for player in Matches_dict.items(): #for each player
                                 print("Parsed Successfully.")
                                 success = True
                                 hasFailedWithSteamIDs=False
+                                break
+                            if(p.returncode == 3221226505):
+                                print("Overflow error. Erasing last line.")
+                                templog = file.replace(".dem", ".txt")
+                                logfile = logpath + '/' + templog
+                                with open(logfile, "r+", encoding = "utf-8") as lfile:
+                                    lfile.seek(0, os.SEEK_END)
+                                    pos = lfile.tell() - 1
+                                    while pos > 0 and lfile.read(1) != "\n":
+                                        pos -= 1
+                                        lfile.seek(pos, os.SEEK_SET)
+                                    if pos > 0:
+                                        lfile.seek(pos, os.SEEK_SET)
+                                        lfile.truncate()
+                                print("Erased last line.")
+                                line_count = 0
+                                for line in lfile:
+                                    line_count += 1
+                                if line_count < 100000:
+                                    print("Low line count. Please check the logfile lenght!")
+                                                
                                 break
                             else:
                                 print("Unexpected Exit Code: " + str(p.returncode))
@@ -122,5 +145,6 @@ print("--------REPORT--------")
 if (hasFailedAtLeastOnce):
     print("Could not parse these matches:")
     print(failedParsings)
+
 else:
     print("Done parsing match pool. No errors occurred.")
