@@ -37,50 +37,17 @@ Action 250360 weapon_fire 867.432922 2405.222412 144.230499 weapon_hegrenade
 
 ### player_death *
 
-**To Modify: Without XYZ coordinates (see #12), there is no information about the kill assister**
-
 We differenciated the player_death event in three "sub-events".
-- *player_death_k*
-- *player_death_a*
-- *player_death_d*
+- *player_death_k* : The target player killed someone.
+- *player_death_a* : The target player assisted a kill.
+- *player_death_d* : The target player died.
 
-*Action Tick Type*
+*Action Tick Type(_k/_a/_d)*
 
-If an assister was also involved in the kill, you will find their position to the end.
+**Output Example**
 
-*Action Tick Type VictimPositionX VictimPositionY VictimPositionZ AttackerPositionX AttackerPositionY AttackerPositionZ AssisterPositionX AssisterPositionY AssisterPositionZ*
-
-When looking at the output, you will need to be careful in picking the right set of coordinates.
-
-- *player_death_k* : The target player killed someone. *AttackerPositionX AttackerPositionY AttackerPositionZ* are the coordinates of our target player.
-- *player_death_a* : The target player assisted a kill. *AssisterPositionX AssisterPositionY AssisterPositionZ* are the coordinates of our target player
-- *player_death_d* : The target player died. *VictimPositionX VictimPositionY VictimPositionZ* are the coordinates of our target player.
-
-**Output Examples**
-
-Our Target Player *kills* someone. 
 ```
-Action 293485 player_death_k 19.783495 1378.299927 100.990913 581.881653 2115.028076 135.162598 
-```
-
-Our target player *kills* someone and is *assisted*.
-```
-Action 373847 player_death_k 512.931580 2595.294678 160.031250 656.311829 2641.969971 148.708939 656.311829 2641.969971 148.708939 
-```
-
-Our target player *is killed* by someone.
-```
-Action 387770 player_death_d 741.657166 2752.417480 129.301987 431.821808 2507.880127 160.031250 
-```
-
-Our target player *is killed* by someone, and someone else *assisted* the kill.
-```
-Action 409267 player_death_d 1499.356689 -61.885181 130.031250 2226.073730 200.545563 133.284622 2226.073730 200.545563 133.284622 
-```
-
-Our target player *assisted* a kill.
-```
-Action 147596 player_death_a 2150.851318 520.078491 160.031250 2223.748779 -283.663879 92.872452 2001.362671 1122.605347 156.803253 
+Action 293485 player_death_k 
 ```
 
 ### item_pickup
@@ -130,9 +97,3 @@ Action 149056 player_blind 3.030241
 ```
 Action 149056 player_blind 6.994048 
 ```
-
-
-
-
-
-
