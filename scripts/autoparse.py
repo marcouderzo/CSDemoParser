@@ -60,7 +60,7 @@ SteamID_dict = {  'pashabiceps': [76561197973845818],
              }
 
 
-file = open('failed.json', 'r')
+file = open('MatchesDict.json', 'r')
 Matches_dict = json.load(file)
 # print(Matches_dict)
 file.close()
@@ -70,8 +70,13 @@ file.close()
 
 
 
-failedParsings=[]
-hasFailedAtLeastOnce=False
+generalErroredParsings= []
+steamIDFailedParsings= []
+needCheckParsings = []
+tooBriefLogs = []
+exitCode3Parsings = []
+
+dumpReport = False
 
 os.chdir("..")
 os.chdir("parser")
@@ -92,25 +97,33 @@ for player in Matches_dict.items(): #for each player
                         for intSteamID in s_player[1]:
 
                             SteamID = str(intSteamID)
-                            print("Calling Parser: demoinfogo " + ' ' + SteamID + ' ' + demofile)
                             p = subprocess.run(["demoinfogo", SteamID , demofile])
 
                             hasFailedWithSteamIDs=False
                             hasExitedUnexpectedly=False
 
                             if(p.returncode == 2): #failed, for loop continues with next steamID, if present.
-                                print("No such SteamID in this match, retrying with next SteamID...")
+                                print("     -> No such SteamID in this match, retrying with next SteamID...")
                                 hasFailedWithSteamIDs=True
                             if(p.returncode == 1): #succeded, break the for loop and go on with next file
-                                print("Parsed Successfully.")
+                                print("     -> Parsed Successfully.")
                                 success = True
                                 hasFailedWithSteamIDs=False
                                 break
-                            if(p.returncode == 3221226505):
-                                print("Overflow error. Erasing last line.")
+                            if(p.returncode == 3): #fatal error at end of demo, dump is still successful
+                                print("     -> Parsed Successfully. (*)")
+                                exitCode3Parsings.append(file)
+                                success = True
+                                hasFailedWithSteamIDs=False
+                                break
+                            if(p.returncode == 3221226505): #stack overflow at end of demo, dump is still successful
+                                print("     -> Overflow error. Erasing last line.")
                                 templog = file.replace(".dem", ".txt")
                                 logfile = logpath + '/' + templog
                                 with open(logfile, "r+", encoding = "utf-8") as lfile:
+                                    line_count = 0
+                                    for line in lfile:
+                                        line_count += 1
                                     lfile.seek(0, os.SEEK_END)
                                     pos = lfile.tell() - 1
                                     while pos > 0 and lfile.read(1) != "\n":
@@ -119,32 +132,45 @@ for player in Matches_dict.items(): #for each player
                                     if pos > 0:
                                         lfile.seek(pos, os.SEEK_SET)
                                         lfile.truncate()
-                                print("Erased last line.")
-                                line_count = 0
-                                for line in lfile:
-                                    line_count += 1
+                                print("     -> Erased last line.")
                                 if line_count < 100000:
-                                    print("Low line count. Please check the logfile lenght!")
-                                                
+                                    print("     -> Low line count. Please check the logfile lenght!")
+                                    tooBriefLogs.append(lfile)
+                                else:
+                                    print("     -> Parsed Successfully. (*)")
+                                    needCheckParsings.append(logfile)
+                                    success = True
+                                    hasFailedWithSteamIDs=False                
                                 break
                             else:
-                                print("Unexpected Exit Code: " + str(p.returncode))
+                                print("     -> Unexpected Exit Code: " + str(p.returncode))
                                 hasExitedUnexpectedly=True
+                                break
 
-                if not success:
-                    failedParsings.append(file)
-                    if not success and hasFailedWithSteamIDs: #if failed with every SteamID in dictionary, save the match name for later report.
-                        print("Could not find the target player with any of the SteamIDs! Check the report later.")
-                        hasFailedAtLeastOnce=True
-                    if not success and hasExitedUnexpectedly: #if failed with every SteamID in dictionary, save the match name for later report.
-                        print("Could not parse this match (Unexpected exit code)! Check the report later.")
-                        hasFailedAtLeastOnce=True    
+                if not success and hasFailedWithSteamIDs: #if failed with every SteamID in dictionary, save the match name for later report.
+                    print("     -> Could not find the target player with any of the SteamIDs! Check the report later.")
+                    steamIDFailedParsings.append(file)
+                if not success and hasExitedUnexpectedly: #if failed with every SteamID in dictionary, save the match name for later report.
+                    print("     -> Could not parse this match (Unexpected Exit Code)! Check the report later.")
+                    generalErroredParsings.append(file)
                     
 
 print("--------REPORT--------")
-if (hasFailedAtLeastOnce):
-    print("Could not parse these matches:")
-    print(failedParsings)
+
+if generalErroredParsings:
+    print("Could not parse some matches. Reason: Unexpected Exit Code: ", generalErroredParsings)
+if steamIDFailedParsings:
+    print("Could not parse some matches. Reason: Unable to Find SteamID: ", steamIDFailedParsings)
+if tooBriefLogs:
+    print("Could not parse some matches. Reason: Log Seems Too Brief: ", tooBriefLogs)
 
 else:
     print("Done parsing match pool. No errors occurred.")
+
+print("")
+
+if needCheckParsings:
+    print("Stack Overflows - Handled Successfully in: ", needCheckParsings))
+if exitCode3Parsings:
+    print("Exit Code 3 - Handled Successfully in: ", exitCode3Parsings)  
+
