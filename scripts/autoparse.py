@@ -16,7 +16,7 @@ lineThreshold = 100000               # Minimum number of lines in the log.
 SteamID_dict = {  'pashabiceps': [76561197973845818],
              'flusha': [76561197991348083, 76561198117206736],
              'jw': [76561198031554200],
-             'krimz': [76561198262534196, 76561198031651584],
+             'krimz': [76561198031651584],
              'olofmeister': [76561197988627193],
              'karrigan': [76561197989430253],
              'device': [76561197987713664],
@@ -83,6 +83,8 @@ needCheckParsings = []
 tooBriefLogs = []
 exitCode3Parsings = []
 
+knownExitCodes = [1, 2, 3, 3221226505]
+
 os.chdir("..")
 os.chdir("parser")
 
@@ -110,6 +112,7 @@ for player in Matches_dict.items(): #for each player
                             if(p.returncode == 2): #failed, for loop continues with next steamID, if present.
                                 print("     -> No such SteamID in this match, retrying with next SteamID...")
                                 hasFailedWithSteamIDs=True
+                                continue
                             if(p.returncode == 1): #succeded, break the for loop and go on with next file
                                 print("     -> Parsed Successfully.")
                                 success = True
@@ -122,7 +125,7 @@ for player in Matches_dict.items(): #for each player
                                 hasFailedWithSteamIDs=False
                                 break
                             if(p.returncode == 3221226505): #stack overflow at end of demo, dump is still successful
-                                print("     -> Overflow error. Erasing last line.")
+                                print("     -> Overflow error.")
                                 templog = file.replace(".dem", ".txt")
                                 logfile = logpath + '/' + templog
                                 with open(logfile, "r+", encoding = "utf-8") as lfile:
@@ -139,15 +142,20 @@ for player in Matches_dict.items(): #for each player
                                         lfile.truncate()
                                 print("     -> Erased last line.")
                                 if line_count < lineThreshold:
-                                    print("     -> Low line count. Please check the logfile lenght!")
                                     tooBriefLogs.append(lfile)
+                                    if line_count == 0:
+                                        print("     -> Empty Log")
+                                    else:    
+                                        print("     -> Low line count. Please check the logfile lenght!")
+                                        
                                 else:
                                     print("     -> Parsed Successfully. (*StackOverflow)")
                                     needCheckParsings.append(logfile)
                                     success = True
                                     hasFailedWithSteamIDs=False                
                                 break
-                            else:
+                            
+                            if p.returncode not in knownExitCodes:
                                 print("     -> Unexpected Exit Code: " + str(p.returncode))
                                 hasExitedUnexpectedly=True
                                 break
