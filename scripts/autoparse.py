@@ -175,7 +175,7 @@ else:
 print("")
 
 if needCheckParsings:
-    print("Stack Overflows - Handled Successfully in: ", needCheckParsings))
+    print("Stack Overflows - Handled Successfully in: ", needCheckParsings)
 if exitCode3Parsings:
     print("Exit Code 3 - Handled Successfully in: ", exitCode3Parsings)  
 
