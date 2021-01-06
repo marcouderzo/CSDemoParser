@@ -1,5 +1,14 @@
 # autoparse.py Script Documentation
 
+
+## Setup
+
+- In demoinfogo, make sure you edit the output folder in `demoinfogo.cpp`. (e.g. `file = "F:/progetto/log/" + file + ".txt";`)
+- Edit `demospath` in the source code to match your own demo folder.
+- Edit `logpath` in the source code to match your own logs folder. (To be read from)
+- Make sure you have `MatchesDict.json` in the same folder of the script, else specify the path.
+- Edit `lineThreshold` to set the minimum number of lines the script expects logs to have, in case it checks it.
+
 ## How does it work?
 
 ### Normalizing the Path
@@ -27,15 +36,25 @@ Then, for each possible SteamID of the current player, it calls the parser as a 
  p = subprocess.run(["demoinfogo", SteamID , demofile])
 ```
 
-### Handling Errors
+### Handling Return Codes
 
-If any of the subprocesses return an exit code different than `1`, (default exit code of demoinfogo), then it means the parsing was not successful.
-If the exit code is `2`, then it means the parser could not find the passed SteamID in the match, so it retries with the next SteamID. If it fails with every SteamID, it will append that match to the list of the failed parsings. If some other exit code is returned, the script will treat is an unknown error and will consider the parsing failed.
+**Return Code 1**
 
-After finishing the parsing of all the match pool, you will find the failed parsings listed in the report.
+Default exit code, meaning the parsing process was successful.
 
+**Return Code 2**
 
-## Before you run the script
+If the exit code is `2`, then it means the parser could not find the passed SteamID in the match, so it retries with the next SteamID.
 
-- Edit `demospath` in the source code to match your own demo folder.
-- Make sure you have `MatchesDict.json` in the same folder of the script.
+**Return Code 3**
+
+A few demos here and there exit with code 3 (Fatal Error from the parser, probably due to some corruption at the end of the demo), though the parsing process is completed anyways. Even though we consider the parsing successful, we still play it safe and append it to a list for further inspection.
+
+**Return Code 3221226505**
+
+Some demos cause a Stack Overflow in the parser while dumping the very last packet of the demo. The parsing is still successful, but this error truncates the last line of the log. Therefore, we open the log file and erase the truncated line. We then check the line count in order to assess whether or not it is reasonable to assume the log is complete. If it is not, we append the file to a list of matches with low line count for further inspection.
+If all of this goes well, we consider the parsing successful. We still append the file to a list of matches that need a check.
+
+### Report
+
+At the end of the process, a Report is dumped.
