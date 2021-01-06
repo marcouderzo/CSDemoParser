@@ -1,9 +1,16 @@
 import os, subprocess
 import json
 
-# Paste your own demo folder
-demospath = "F:/progetto/dem"
-logpath = "F:/progetto/log"
+# -------Setup----------
+
+demospath = "F:/progetto/dem"        # Where are your demos
+logpath = "F:/progetto/log"          # Where are your logs
+
+jsonDict = "MatchesDict.json"        # JSON Dictionary of Matches to import
+
+lineThreshold = 100000               # Minimum number of lines in the log.
+
+# ---------------------
 
 
 SteamID_dict = {  'pashabiceps': [76561197973845818],
@@ -60,7 +67,7 @@ SteamID_dict = {  'pashabiceps': [76561197973845818],
              }
 
 
-file = open('MatchesDict.json', 'r')
+file = open(jsonDict, 'r')
 Matches_dict = json.load(file)
 # print(Matches_dict)
 file.close()
@@ -75,8 +82,6 @@ steamIDFailedParsings= []
 needCheckParsings = []
 tooBriefLogs = []
 exitCode3Parsings = []
-
-dumpReport = False
 
 os.chdir("..")
 os.chdir("parser")
@@ -111,7 +116,7 @@ for player in Matches_dict.items(): #for each player
                                 hasFailedWithSteamIDs=False
                                 break
                             if(p.returncode == 3): #fatal error at end of demo, dump is still successful
-                                print("     -> Parsed Successfully. (*)")
+                                print("     -> Parsed Successfully. (*ExitCode3)")
                                 exitCode3Parsings.append(file)
                                 success = True
                                 hasFailedWithSteamIDs=False
@@ -133,11 +138,11 @@ for player in Matches_dict.items(): #for each player
                                         lfile.seek(pos, os.SEEK_SET)
                                         lfile.truncate()
                                 print("     -> Erased last line.")
-                                if line_count < 100000:
+                                if line_count < lineThreshold:
                                     print("     -> Low line count. Please check the logfile lenght!")
                                     tooBriefLogs.append(lfile)
                                 else:
-                                    print("     -> Parsed Successfully. (*)")
+                                    print("     -> Parsed Successfully. (*StackOverflow)")
                                     needCheckParsings.append(logfile)
                                     success = True
                                     hasFailedWithSteamIDs=False                
