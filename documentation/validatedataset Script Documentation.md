@@ -8,23 +8,23 @@ This is a very simple script that runs two tests on the final dataset.
 
 For each log, this test checks for the following common defects we noticed while parse-testing:
 
-**Check 1: Missing Entity/Action in the whole log**
+- **Check 1: Missing Entity/Action in the whole log**
 
 Check if Entities and Actions are present at least once in the log.
 
-**Check 2: Contaminated Output**
+- **Check 2: Contaminated Output**
 
 For each line, check if there is either the word "Action" or "Entity".
 
-**Check 3: Zeroed Output**
+- **Check 3: Zeroed Output**
 
 Check if the log does not contain too many 0.000000 0.000000 0.000000 0.000000 in Entity occurencies.
 
-**Check 4: Empty Log**
+- **Check 4: Empty Log**
 
 Check if the line count is 0.
 
-**Check 5: Low Line Count**
+- **Check 5: Low Line Count**
 
 Check if the line count is too low.
 
