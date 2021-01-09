@@ -3,7 +3,7 @@ import json
 
 # -------Setup----------
 
-demospath = "F:/progetto/dem"        # Where are your demos
+demospath = "F:/progetto/dem_awaitingcheck"        # Where are your demos
 logpath = "F:/progetto/log"          # Where are your logs
 
 jsonDict = "MatchesDict.json"        # JSON Dictionary of Matches to import
@@ -21,13 +21,13 @@ SteamID_dict = {  'pashabiceps': [76561197973845818],
              'karrigan': [76561197989430253],
              'device': [76561197987713664],
              'gla1ve': [76561198010511021],
-             'xyp9x': [76561198116400733],
+             'xyp9x': [76561197990682262, 76561198116400733],
              'dupreeh': [76561198004854956],
              'electronic': [76561198044045107],
              'flamie': [76561198116523276],
-             's1mple': [76561198298306246, 76561198034202275],
+             's1mple': [76561198034202275, 76561198298306246],
              'shox': [76561198006920295],
-             'smithzz': [76561197962060457, 76561198267915276],
+             'smithzz': [76561197974587647, 76561197962060457, 76561198267915276],
              'kennys': [76561197987883012, 76561198406770456, 76561198364448565],
              'aleksib': [76561198013243326, 76561198073116389],
              'coldzera': [76561198039986599],
@@ -120,6 +120,18 @@ for player in Matches_dict.items(): #for each player
                                 break
                             if(p.returncode == 3): #fatal error at end of demo, dump is still successful
                                 print("     -> Parsed Successfully. (*ExitCode3)")
+                                templog = file.replace(".dem", ".txt")
+                                logfile = logpath + '/' + templog
+                                with open(logfile, "r+", encoding = "utf-8") as lfile:
+                                    line_count = 0
+                                    for line in lfile:
+                                        line_count += 1
+                                if line_count < lineThreshold:
+                                    tooBriefLogs.append(lfile)  
+                                    if line_count == 0:
+                                        print("     -> Empty Log")
+                                    else:    
+                                        print("     -> Low line count. Please check the logfile lenght!")     
                                 exitCode3Parsings.append(file)
                                 success = True
                                 hasFailedWithSteamIDs=False
