@@ -3,7 +3,7 @@ import json
 
 # -------Setup----------
 
-demospath = "F:/progetto/dem_awaitingcheck"        # Where are your demos
+demospath = "F:/progetto/dem"        # Where are your demos
 logpath = "F:/progetto/log"          # Where are your logs
 
 jsonDict = "MatchesDict.json"        # JSON Dictionary of Matches to import
@@ -28,7 +28,7 @@ SteamID_dict = {  'pashabiceps': [76561197973845818],
              's1mple': [76561198034202275, 76561198298306246],
              'shox': [76561198006920295],
              'smithzz': [76561197974587647, 76561197962060457, 76561198267915276],
-             'kennys': [76561197987883012, 76561198406770456, 76561198364448565],
+             'kennys': [76561198024905796, 76561197987883012, 76561198406770456, 76561198364448565],
              'aleksib': [76561198013243326, 76561198073116389],
              'coldzera': [76561198039986599],
              'fallen': [76561197960690195],
@@ -39,7 +39,7 @@ SteamID_dict = {  'pashabiceps': [76561197973845818],
              'guardian': [76561197972331023],
              'olivia': [76561198061745802],
              'floppy': [76561198306519263],
-             'moose': [76561198078144931, 76561198324395878],
+             'moose': [76561198324395878, 76561198078144931],
              'get-right': [76561197982036918],
              'k0nfig': [76561197979669175, 76561198069730996],
              'twist': [76561197980244859, 76561198147205437],
@@ -131,7 +131,7 @@ for player in Matches_dict.items(): #for each player
                                     if line_count == 0:
                                         print("     -> Empty Log")
                                     else:    
-                                        print("     -> Low line count. Please check the logfile lenght!")     
+                                        print("     -> Low line count. Please check the logfile length!")     
                                 exitCode3Parsings.append(file)
                                 success = True
                                 hasFailedWithSteamIDs=False
