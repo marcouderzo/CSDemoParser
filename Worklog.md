@@ -1728,4 +1728,4 @@ You can read the documentation on how it works in detail [here](https://github.c
 
 Testing and validating the set of data is always a good practice. We decided to write a simple but very effective script that does it.
 
-You can read the documentation on the tests we decided to run [here](https://github.com/marcouderzo/CSDemoParser/blob/main/documentation/validateoutput%20Script%20Documentation.md)
+You can read the documentation on the tests we decided to run [here](https://github.com/marcouderzo/CSDemoParser/blob/main/documentation/validatedataset%20Script%20Documentation.md)
