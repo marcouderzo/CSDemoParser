@@ -30,8 +30,8 @@ Students Involved in the Project:
 - [x] Format Parser Output as Required
 
 **Downloading & Parsing**
-- [ ] Download All the Matches
-- [ ] Parse All the Matches
+- [x] Download All the Matches
+- [x] Parse All the Matches
 
 **Validation and Testing**
 - [ ] Run Validation Script to Check for Errors
