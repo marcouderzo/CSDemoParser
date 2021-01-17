@@ -35,7 +35,7 @@ Note that the events not listed below follow the standard output definition.
 Action 250360 weapon_fire 867.432922 2405.222412 144.230499 weapon_hegrenade
 ```
 
-### player_death *
+### player_death
 
 We differenciated the player_death event in three "sub-events".
 - *player_death_k* : The target player killed someone.
