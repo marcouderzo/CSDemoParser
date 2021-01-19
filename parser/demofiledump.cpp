@@ -104,7 +104,7 @@ __declspec( noreturn ) void fatal_errorf( const char* fmt, ... )
     va_end( vlist );
 
     //fprintf( stderr, "\nERROR: %s\n", buf );
-    exit( -1 );
+    exit( 3 );
 }
 
 bool CDemoFileDump::Open( const char *filename )
@@ -356,11 +356,13 @@ bool HandlePlayerConnectDisconnectEvents( const CSVCMsg_GameEvent &msg, const CS
 			// mark the player info slot as disconnected
 			player_info_t *pPlayerInfo = FindPlayerInfo( userid );
 
-			if (pPlayerInfo->xuid == targetPlayerSteamID)
+			if (pPlayerInfo)
 			{
-				isConnected = false;
+				if (pPlayerInfo->xuid == targetPlayerSteamID)
+				{
+					isConnected = false;
+				}
 			}
-
 			if (pPlayerInfo)
 			{
 				strcpy_s( pPlayerInfo->name, "disconnected" );
@@ -866,7 +868,7 @@ void ParseStringTableUpdate( CBitRead &buf, int entries, int nMaxEntries, int us
 				if( size_t( index ) >= history.size() )
 				{
 					//printf("ParseStringTableUpdate: Invalid index %d, expected < %u\n", index, (unsigned)history.size());
-					exit(-1);
+					exit(3);
 				}
 				int bytestocopy = buf.ReadUBitLong( SUBSTRING_BITS );
 				strncpy_s( entry, history[ index ].string, bytestocopy + 1 );
@@ -1341,14 +1343,6 @@ bool ReadNewEntity( CBitRead &entityBitBuffer, EntityEntry *pEntity )
 		}
 	}
 	
-
-	if (userID == -1 && entityID == -1)
-	{
-		//output = false;
-		printf("output false\n");
-		//printf("Wrong SteamID");
-		//exit(2); // SteamID passed to main is not correct. No User with such steamID in the match.
-	}
 
 
 	if (pTable->net_table_name() == "DT_CSPlayer" && pEntity->m_nEntity == entityID && isConnected)
@@ -1860,7 +1854,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 					{
 						userID = playerInfo.userID;
 						entityID = playerInfo.entityID;
-						printf("set to true 3\n");
+						//printf("set to true 3\n");
 						//output = true;
 						//printf("Found Target Player: %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
 					}
@@ -1873,7 +1867,7 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 						userID = playerInfo.userID;
 						entityID = playerInfo.entityID;
 						//output = true;
-						printf("set to true 2\n");
+						//printf("set to true 2\n");
 						//printf("Found Target Player: %llu , %d, %d \n", targetPlayerSteamID, userID, entityID);
 					}
 				}
@@ -1882,8 +1876,6 @@ bool DumpStringTable( CBitRead &buf, bool bIsUserInfo )
 			{
 				if ( g_bDumpStringTables )
 				{
-					
-					//printf("boh");
 					//printf( " %d, %s, userdata[%d] \n", i, stringname, userDataSize );
 				}
 			}
