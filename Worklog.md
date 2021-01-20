@@ -34,7 +34,20 @@ Students Involved in the Project:
 - [x] Parse All the Matches
 
 **Validation and Testing**
-- [ ] Run Validation Script to Check for Errors
+- [x] Run Validation Script to Check for Errors
+
+## Dataset Organization Structure
+
+The dataset is organized in two folders: *dem* and *logs*. They contain, respectively, the .dem original demos and the .txt parsed demo logs.
+There is also a JSON file named `MatchesDictionary.json`, which contains all the matches of each player.
+
+### Naming Convention
+
+Both demos and parsed logs follow the same naming convention:
+
+*PlayerName* _ *DemoNumber*
+
+Example: `pashabiceps_17` .
 
 ## Important note
 
