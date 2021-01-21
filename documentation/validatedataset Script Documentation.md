@@ -46,4 +46,4 @@ Our original idea was to check each line of each file, but as the complexity of 
 
 ## Report
 
-When the whole dataset is validated, the script will dump in the console a report
+When the whole dataset is validated, the script will dump in the console a report of the validation process.
