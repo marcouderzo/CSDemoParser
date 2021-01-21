@@ -49,9 +49,16 @@ Both demos and parsed logs follow the same naming convention:
 
 Example: `pashabiceps_17` .
 
-## Important note
+This is very convenient for the parsing process, as there is a 1:1 match between the name of the demo and the name of the output log, which also makes checking and resolving anomalies very quickly.
+
+Note that naming files after the player's SteamID is not practical, nor desirable, as a single player might have multiple Steam Accounts. Match IDs are not public, thus naming the match after the player's SteamID and the Match ID is not possible either.
+
+In this particular case, naming the files after the Player's actual Username and an index ranging *0-100* is therefore the best solution to group up matches. 
+
+## Important Note
 
 If your pc has Avast Antivirus, please make sure to turn it off. The parser might not work properly if you leave it running.
+This may apply to whatever other software is installed on your machine which might try to block the execution of a subprocess (demoinfogo parser) from a Python Script.
 
 ## Project Requirements
 
