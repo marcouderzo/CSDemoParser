@@ -51,7 +51,7 @@ Example: `pashabiceps_17` .
 
 ## Important note
 
-If your pc has Avast Antivirus, make sure to turn it off. The parser will not work properly if you leave it running.
+If your pc has Avast Antivirus, please make sure to turn it off. The parser might not work properly if you leave it running.
 
 ## Project Requirements
 
