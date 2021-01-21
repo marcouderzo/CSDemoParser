@@ -38,8 +38,14 @@ Students Involved in the Project:
 
 ## Dataset Organization Structure
 
-The dataset is organized in two folders: *dem* and *log*. They contain, respectively, the .dem original demos and the .txt parsed demo logs.
-There is also a JSON file named `MatchesDictionary.json`, which contains all the matches of each player.
+The dataset is organized in two folders: 
+
+- *dem*
+- *log* 
+
+They contain, respectively, the .dem original demos and the .txt parsed demo logs.
+
+In the root folder, there is also a JSON file named `MatchesDictionary.json`, which contains all the matches of each player.
 
 ### Naming Convention
 
