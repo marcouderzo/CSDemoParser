@@ -55,7 +55,7 @@ Both demos and parsed logs follow the same naming convention:
 
 Example: `pashabiceps_17` .
 
-This is very convenient for the parsing process, as there is a 1:1 match between the name of the demo and the name of the output log, which also makes checking and resolving anomalies very quickly.
+This is very convenient for the parsing process, as there is a 1:1 match between the name of the demo and the name of the output log, which also makes checking and resolving anomalies a relatively quick and easy task.
 
 Note that naming files after the player's SteamID is not practical, nor desirable, as a single player might have multiple Steam Accounts. Match IDs are not public, thus naming the match after the player's SteamID and the Match ID is not possible either.
 
