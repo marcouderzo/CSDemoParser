@@ -42,4 +42,8 @@ For each log, the scripts checks every log size, to see if there are matches wit
 This is very important to check because hltv lists every match a player attends, but when we download a match, we actually download an archive of two or three matches (depending on the outcome: 2-0, 2-1).
 As this is not as straight-forward as we thought it would be, we decided to double check the whole dataset once we were done parsing.
 
-Our original idea was to check each line of each file, but as the complexity of the algorithm was O(n<sup>2</sup>), it would have taken more than three hundred years to complete. Therefore, we switched to only checking the file size in bytes. This method is perfectly valid and safe, because the chances of two *different* files being precisely the same size (in bytes) is extremely low.
+Our original idea was to check each line of each file, but as the complexity of the algorithm was O(n<sup>2</sup>), it would have taken more than three hundred years to complete. Therefore, we switched to only checking the file size in bytes. This method is still perfectly valid and safe, because the chances of two *different* files being precisely the same size (in bytes) are extremely low and therefore negligible.
+
+## Report
+
+When the whole dataset is validated, the script will dump in the console a report
