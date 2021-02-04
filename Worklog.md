@@ -155,7 +155,7 @@ We made sure that the log file had the same name of the demo. All of this was do
 
 **Player Data**
 
-From the `DT_CSPlayer` (Net?) Table we found some useful data about the player. In particular:
+From the `DT_CSPlayer` Table we found some useful data about the player. In particular:
 - MouseX, MouseY
 - PlayerPositionX, PlayerPositionY, PlayerPositionZ
 - PlayerVelocityX, PlayerVelocityZ
