@@ -229,7 +229,7 @@ The player events we agreed to keep are the following:
 - `smokegrenade_detonate`
 - `tagrenade_detonate`
 - `decoy_detonate`
-- `molotov_detonate
+- `molotov_detonate`
 - `player_falldamage`
 - `player_blind`
 - `door_moving`
