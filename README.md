@@ -1,4 +1,7 @@
 # CSDemoParser - Cybersecurity Project @ UniPD
+[![Generic badge](https://img.shields.io/badge/Grade-30L/30-brightgreen.svg)](https://shields.io/)
+[![Generic badge](https://img.shields.io/badge/Windows_Build-Passing-blue.svg)](https://shields.io/)
+
 CS:GO Demo Parser based on the official [demoinfogo](https://github.com/ValveSoftware/csgo-demoinfo) - Cybersecurity Project @ UniPD
 
 - [Marco Uderzo](https://github.com/marcouderzo)
