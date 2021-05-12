@@ -9,7 +9,7 @@ Students Involved in the Project:
 ## Checklist
 
 **Matches**
-- [x] CS:GO Demo Retrievement: Feasibility Study and Decisions
+- [x] CS:GO Demo Retrieval: Feasibility Study and Decisions
 
 **Scripts**
 - [x] Create the Download Script
